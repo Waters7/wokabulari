@@ -36,11 +36,11 @@ Acuan: SPEC 3.2
 
 ## Fase 3 — Sesi, Kode Kehadiran, Materi, Izin
 Acuan: SPEC 3.3, 3.4, 3.5, 3.11
-- [ ] Jadwal sesi (termasuk berulang), mulai/selesai sesi
-- [ ] Kode + QR, mode proyektor, monitor realtime, penandaan manual & otomatis
-- [ ] Input kode / pindai QR peserta + rate limit
-- [ ] Materi per sesi, bank materi, log akses, cache offline
-- [ ] Izin/sakit kelas + sinkron ke status kehadiran
+- [x] Jadwal sesi (termasuk berulang), mulai/selesai sesi
+- [x] Kode + QR, mode proyektor, monitor realtime, penandaan manual & otomatis
+- [x] Input kode / pindai QR peserta + rate limit
+- [x] Materi per sesi, bank materi, log akses, cache offline
+- [x] Izin/sakit kelas + sinkron ke status kehadiran
 
 ## Fase 4 — Penilaian Sesi & Periodik
 Acuan: SPEC 3.6, 3.9, 3.10
@@ -156,3 +156,10 @@ Acuan: DOCKER.md bagian C–D
 - Riwayat absen bulanan peserta dengan persentase kehadiran.
 - Event `DailyAttendanceRecorded` (dipakai gamifikasi).
 - Test: 76 lulus.
+
+### Fase 3 — 25 Okt 2026
+- Sesi (tunggal & berulang), mulai/selesai sesi, kode 6 karakter tanpa karakter ambigu + QR, perpanjang/ganti/tutup kode, mode proyektor, monitor polling 5 detik, penandaan manual & alpa otomatis saat sesi selesai (kecuali izin disetujui), scheduler `app:close-expired-codes` tiap menit.
+- Input kode / pindai QR (html5-qrcode) dengan rate limit 5×/menit dan log percobaan gagal.
+- Materi per sesi + bank materi (salin ke sesi), pratinjau PDF/audio/video/YouTube, unduh lewat signed URL, log akses, cache offline service worker.
+- Izin/sakit kelas dengan lampiran; persetujuan mengisi status di absen harian & sesi; notifikasi (database/email/WhatsApp driver `log`).
+- Cast `DateOnly` untuk semua kolom DATE. Test: 96 lulus.

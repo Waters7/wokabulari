@@ -35,4 +35,11 @@ return [
         ],
     ],
 
+    // Gateway WhatsApp: log (lokal) | http (gateway pihak ketiga)
+    'whatsapp' => [
+        'driver' => env('WHATSAPP_DRIVER', 'log'),
+        'url' => env('WHATSAPP_API_URL'),
+        'key' => env('WHATSAPP_API_KEY'),
+    ],
+
 ];

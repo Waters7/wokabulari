@@ -98,7 +98,7 @@ new #[Title('Asrama & Kamar')] class extends Component {
                     <div><dt class="text-hutan/60 dark:text-santan/60">Absen malam</dt><dd class="font-semibold">{{ jam($dormitory->check_window_start) }}–{{ jam($dormitory->check_window_end) }}</dd></div>
                     <div><dt class="text-hutan/60 dark:text-santan/60">Jam malam</dt><dd class="font-semibold">{{ jam($dormitory->curfew_time) }}</dd></div>
                 </dl>
-                <flux:button class="mt-3 w-full" size="sm" icon="arrow-right" icon:trailing :href="route('master.dormitories.show', $dormitory)" wire:navigate>Kamar & penghuni</flux:button>
+                <flux:button class="mt-3 w-full" size="sm" icon:trailing="arrow-right" :href="route('master.dormitories.show', $dormitory)" wire:navigate>Kamar & penghuni</flux:button>
             </x-card>
         @empty
             <x-empty-state class="sm:col-span-2" icon="home-modern" title="Belum ada asrama" />

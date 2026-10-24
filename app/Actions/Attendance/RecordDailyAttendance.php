@@ -8,7 +8,7 @@ use App\Models\DailyAttendance;
 use App\Models\User;
 use App\Services\FaceMatcher;
 use App\Services\ImageService;
-use Illuminate\Support\Carbon;
+use Carbon\CarbonInterface;
 use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
 use Throwable;
@@ -28,7 +28,7 @@ class RecordDailyAttendance
     /**
      * @param  array{descriptor?: list<float>|null, selfie?: string|null, latitude?: float|null, longitude?: float|null, accuracy?: float|null, device?: string|null}  $payload
      */
-    public function handle(User $user, array $payload, ?Carbon $now = null): DailyAttendance
+    public function handle(User $user, array $payload, ?CarbonInterface $now = null): DailyAttendance
     {
         $now ??= now();
 

@@ -3,13 +3,13 @@
 namespace App\Models;
 
 use App\Enums\Gender;
+use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Support\Carbon;
 use Spatie\Activitylog\Models\Concerns\LogsActivity;
 use Spatie\Activitylog\Support\LogOptions;
 
@@ -56,7 +56,7 @@ class Dormitory extends Model
     }
 
     /** Jendela absen malam pada tanggal tertentu (WITA). */
-    public function checkWindow(?Carbon $date = null): array
+    public function checkWindow(?CarbonInterface $date = null): array
     {
         $date = ($date ?? now())->copy()->startOfDay();
 
@@ -66,7 +66,7 @@ class Dormitory extends Model
         ];
     }
 
-    public function curfewAt(?Carbon $date = null): Carbon
+    public function curfewAt(?CarbonInterface $date = null): CarbonInterface
     {
         return ($date ?? now())->copy()->startOfDay()->setTimeFromTimeString($this->curfew_time);
     }

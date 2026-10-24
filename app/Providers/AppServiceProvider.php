@@ -5,6 +5,9 @@ namespace App\Providers;
 use App\Enums\Role;
 use App\Models\User;
 use App\Services\SettingService;
+use App\Services\WhatsApp\HttpWhatsAppGateway;
+use App\Services\WhatsApp\LogWhatsAppGateway;
+use App\Services\WhatsApp\WhatsAppGateway;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Carbon;
@@ -19,6 +22,11 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->singleton(SettingService::class);
+
+        $this->app->singleton(WhatsAppGateway::class, fn () => match (config('services.whatsapp.driver')) {
+            'http' => new HttpWhatsAppGateway((string) config('services.whatsapp.url'), (string) config('services.whatsapp.key')),
+            default => new LogWhatsAppGateway,
+        });
     }
 
     public function boot(): void

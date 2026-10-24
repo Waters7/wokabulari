@@ -6,6 +6,7 @@ import faceCapture from './components/face-capture.js';
 const modules = {
     map: () => import('./modules/map.js'),
     face: () => import('./modules/face.js'),
+    qr: () => import('./modules/qr-scanner.js'),
 };
 
 window.Wokabulari = {
@@ -92,6 +93,36 @@ document.addEventListener('alpine:init', () => {
                 this.$wire.set(latModel, Number(latitude.toFixed(7)), false);
                 this.$wire.set(lngModel, Number(longitude.toFixed(7)), false);
             });
+        },
+    }));
+
+    // Pemindai QR: hasil pindaian diteruskan ke callback (mis. isi kode sesi / token izin keluar).
+    window.Alpine.data('qrScanner', (onResult) => ({
+        scanning: false,
+        error: null,
+        handle: null,
+        async start() {
+            this.error = null;
+            this.scanning = true;
+            await this.$nextTick();
+            try {
+                const { startScanner } = await window.Wokabulari.load('qr');
+                this.handle = await startScanner(this.$refs.reader.id, async (text) => {
+                    await this.stop();
+                    onResult.call(this, text);
+                });
+            } catch (e) {
+                this.scanning = false;
+                this.error = 'Kamera tidak dapat dibuka. Izinkan akses kamera atau ketik kode secara manual.';
+            }
+        },
+        async stop() {
+            await this.handle?.stop();
+            this.handle = null;
+            this.scanning = false;
+        },
+        destroy() {
+            this.handle?.stop();
         },
     }));
 

@@ -6,6 +6,7 @@ use App\Enums\AttendanceStatus;
 use App\Events\DailyAttendanceRecorded;
 use App\Models\DailyAttendance;
 use App\Models\User;
+use Carbon\CarbonInterface;
 use Illuminate\Support\Carbon;
 use InvalidArgumentException;
 
@@ -14,7 +15,7 @@ use InvalidArgumentException;
  */
 class ApproveDailyAttendance
 {
-    public function handle(User $approver, User $participant, Carbon|string $date, AttendanceStatus $status, string $note): DailyAttendance
+    public function handle(User $approver, User $participant, CarbonInterface|string $date, AttendanceStatus $status, string $note): DailyAttendance
     {
         if (trim($note) === '') {
             throw new InvalidArgumentException('Alasan wajib diisi.');

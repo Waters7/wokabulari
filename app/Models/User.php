@@ -100,6 +100,21 @@ class User extends Authenticatable
         return $this->hasOne(DormRoomAssignment::class)->whereNull('check_out_date')->latestOfMany('check_in_date');
     }
 
+    public function dailyAttendances(): HasMany
+    {
+        return $this->hasMany(DailyAttendance::class);
+    }
+
+    public function sessionAttendances(): HasMany
+    {
+        return $this->hasMany(SessionAttendance::class);
+    }
+
+    public function leaveRequests(): HasMany
+    {
+        return $this->hasMany(LeaveRequest::class);
+    }
+
     // ---- Role & unit
 
     public function primaryRole(): ?Role

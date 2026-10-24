@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Casts\DateOnly;
 use App\Enums\Gender;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -26,7 +27,7 @@ class ParticipantProfile extends Model
     {
         return [
             'gender' => Gender::class,
-            'birth_date' => 'date',
+            'birth_date' => DateOnly::class,
             'medical_history' => 'encrypted',
             'face_descriptor' => 'encrypted:array',
             'face_enrolled_at' => 'datetime',

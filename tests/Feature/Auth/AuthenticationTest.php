@@ -1,81 +1,65 @@
 <?php
 
-namespace Tests\Feature\Auth;
-
 use App\Models\User;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Laravel\Fortify\Features;
-use Tests\TestCase;
 
-class AuthenticationTest extends TestCase
-{
-    use RefreshDatabase;
+test('halaman login tampil dengan identitas Wokabulari', function () {
+    $this->get(route('login'))
+        ->assertOk()
+        ->assertSee('Masuk ke Wokabulari')
+        ->assertSee('images/logos/poltekkes.png', false);
+});
 
-    public function test_login_screen_can_be_rendered(): void
-    {
-        $response = $this->get(route('login'));
+test('login dengan email', function () {
+    $user = User::factory()->programAdmin()->create(['email' => 'admin@contoh.test']);
 
-        $response->assertOk();
-    }
+    $this->post(route('login.store'), ['login' => 'admin@contoh.test', 'password' => 'password'])
+        ->assertSessionHasNoErrors()
+        ->assertRedirect(route('dashboard', absolute: false));
 
-    public function test_users_can_authenticate_using_the_login_screen(): void
-    {
-        $user = User::factory()->create();
+    $this->assertAuthenticatedAs($user);
+    expect($user->fresh()->last_login_at)->not->toBeNull();
+});
 
-        $response = $this->post(route('login.store'), [
-            'email' => $user->email,
-            'password' => 'password',
-        ]);
+test('login dengan NIS/NIP', function () {
+    $user = User::factory()->teacher()->create(['username' => '198001012005011001']);
 
-        $response
-            ->assertSessionHasNoErrors()
-            ->assertRedirect(route('dashboard', absolute: false));
+    $this->post(route('login.store'), ['login' => '198001012005011001', 'password' => 'password'])
+        ->assertSessionHasNoErrors();
 
-        $this->assertAuthenticated();
-    }
+    $this->assertAuthenticatedAs($user);
+});
 
-    public function test_users_can_not_authenticate_with_invalid_password(): void
-    {
-        $user = User::factory()->create();
+test('login dengan nomor HP dalam format 08…', function () {
+    $user = User::factory()->participant()->create(['phone' => '6285824691907']);
 
-        $response = $this->post(route('login.store'), [
-            'email' => $user->email,
-            'password' => 'wrong-password',
-        ]);
+    $this->post(route('login.store'), ['login' => '0858-2469-1907', 'password' => 'password'])
+        ->assertSessionHasNoErrors();
 
-        $response->assertSessionHasErrorsIn('email');
+    $this->assertAuthenticatedAs($user);
+});
 
-        $this->assertGuest();
-    }
+test('kata sandi salah ditolak', function () {
+    $user = User::factory()->create();
 
-    public function test_users_with_two_factor_enabled_are_redirected_to_two_factor_challenge(): void
-    {
-        $this->skipUnlessFortifyHas(Features::twoFactorAuthentication());
+    $this->post(route('login.store'), ['login' => $user->email, 'password' => 'salah'])
+        ->assertSessionHasErrors('login');
 
-        Features::twoFactorAuthentication([
-            'confirm' => true,
-            'confirmPassword' => true,
-        ]);
+    $this->assertGuest();
+});
 
-        $user = User::factory()->withTwoFactor()->create();
+test('akun nonaktif tidak bisa login', function () {
+    $user = User::factory()->inactive()->create();
 
-        $response = $this->post(route('login.store'), [
-            'email' => $user->email,
-            'password' => 'password',
-        ]);
+    $this->post(route('login.store'), ['login' => $user->email, 'password' => 'password'])
+        ->assertSessionHasErrors('login');
 
-        $response->assertRedirect(route('two-factor.login'));
-        $this->assertGuest();
-    }
+    $this->assertGuest();
+});
 
-    public function test_users_can_logout(): void
-    {
-        $user = User::factory()->create();
+test('pengguna bisa keluar', function () {
+    $this->actingAs(User::factory()->create())
+        ->post(route('logout'))
+        ->assertRedirect(route('home'));
 
-        $response = $this->actingAs($user)->post(route('logout'));
-
-        $response->assertRedirect(route('home'));
-
-        $this->assertGuest();
-    }
-}
+    $this->assertGuest();
+});

@@ -2,49 +2,49 @@
 
 namespace App\Providers;
 
+use App\Enums\Role;
+use App\Models\User;
+use App\Services\SettingService;
 use Carbon\CarbonImmutable;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
 
 class AppServiceProvider extends ServiceProvider
 {
-    /**
-     * Register any application services.
-     */
     public function register(): void
     {
-        //
+        $this->app->singleton(SettingService::class);
     }
 
-    /**
-     * Bootstrap any application services.
-     */
     public function boot(): void
     {
         $this->configureDefaults();
+        $this->configureAuthorization();
     }
 
-    /**
-     * Configure default behaviors for production-ready applications.
-     */
     protected function configureDefaults(): void
     {
         Date::use(CarbonImmutable::class);
+        Carbon::setLocale('id');
+        CarbonImmutable::setLocale('id');
 
-        DB::prohibitDestructiveCommands(
-            app()->isProduction(),
-        );
+        DB::prohibitDestructiveCommands(app()->isProduction());
 
         Password::defaults(fn (): ?Password => app()->isProduction()
-            ? Password::min(12)
-                ->mixedCase()
-                ->letters()
-                ->numbers()
-                ->symbols()
-                ->uncompromised()
+            ? Password::min(8)->letters()->numbers()
             : null,
         );
+    }
+
+    protected function configureAuthorization(): void
+    {
+        // Super admin mendapat semua akses.
+        Gate::before(function (User $user) {
+            return $user->hasRole(Role::SuperAdmin->value) ? true : null;
+        });
     }
 }

@@ -1,0 +1,65 @@
+# Lingkungan pengembangan (localhost). Lihat docs/DOCKER.md bagian B.
+x-app: &app
+  build:
+    context: .
+    dockerfile: docker/app/Dockerfile
+    target: dev
+    args: { USER_ID: "${UID:-1000}", GROUP_ID: "${GID:-1000}" }
+  image: wokabulari-app:dev
+  env_file: .env
+  volumes: [".:/var/www/html"]
+  depends_on:
+    db: { condition: service_healthy }
+    redis: { condition: service_started }
+
+services:
+  app:
+    <<: *app
+    ports: ["8080:8080"]
+  queue:
+    <<: *app
+    command: ["php", "/var/www/html/artisan", "queue:work", "--queue=notifications,exports,default", "--tries=3"]
+    stop_signal: SIGTERM
+    healthcheck: { disable: true }
+  scheduler:
+    <<: *app
+    command: ["php", "/var/www/html/artisan", "schedule:work"]
+    stop_signal: SIGTERM
+    healthcheck: { disable: true }
+  db:
+    image: mysql:8.4
+    command: ["--default-time-zone=+08:00"]
+    environment:
+      MYSQL_DATABASE: wokabulari
+      MYSQL_USER: wokabulari
+      MYSQL_PASSWORD: secret
+      MYSQL_ROOT_PASSWORD: rootsecret
+    ports: ["33060:3306"]
+    volumes: ["db-data:/var/lib/mysql"]
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 5s
+      retries: 20
+  redis:
+    image: redis:7-alpine
+  vite:
+    image: node:22-alpine
+    working_dir: /app
+    volumes: [".:/app"]
+    command: sh -c "npm install && npm run dev -- --host 0.0.0.0"
+    ports: ["5173:5173"]
+  mailpit:
+    image: axllent/mailpit
+    ports: ["8025:8025"]
+  phpmyadmin:
+    image: phpmyadmin
+    profiles: ["tools"]
+    environment: { PMA_HOST: db }
+    ports: ["8081:80"]
+  tunnel:
+    image: cloudflare/cloudflared
+    profiles: ["tunnel"]
+    command: tunnel --no-autoupdate --url http://app:8080
+
+volumes:
+  db-data:

@@ -3,15 +3,16 @@
 ])
 
 @if($sidebar)
-    <flux:sidebar.brand :name="config('app.name', 'Laravel')" {{ $attributes }}>
-        <x-slot name="logo" class="flex aspect-square size-8 items-center justify-center rounded-md bg-accent-content text-accent-foreground">
-            <x-app-logo-icon class="size-5 fill-current text-white dark:text-black" />
+    <flux:sidebar.brand name="Wokabulari" {{ $attributes->class('font-display') }}>
+        <x-slot name="logo" class="flex aspect-square size-9 items-center justify-center">
+            <x-app-logo-icon class="size-9" />
         </x-slot>
     </flux:sidebar.brand>
 @else
-    <flux:brand :name="config('app.name', 'Laravel')" {{ $attributes }}>
-        <x-slot name="logo" class="flex aspect-square size-8 items-center justify-center rounded-md bg-accent-content text-accent-foreground">
-            <x-app-logo-icon class="size-5 fill-current text-white dark:text-black" />
-        </x-slot>
-    </flux:brand>
+    <a {{ $attributes->class('flex items-center gap-2') }}>
+        <x-app-logo-icon class="size-8" />
+        <span class="font-display text-xl font-extrabold leading-none tracking-tight">
+            <span class="text-woka dark:text-woka-light">Woka</span><span class="text-hutan dark:text-santan">bulari</span>
+        </span>
+    </a>
 @endif

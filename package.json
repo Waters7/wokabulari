@@ -4,7 +4,8 @@
     "type": "module",
     "scripts": {
         "build": "vp build",
-        "dev": "vp dev"
+        "dev": "vp dev",
+        "postinstall": "node scripts/copy-face-models.mjs"
     },
     "dependencies": {
         "@tailwindcss/vite": "^4.1.11",

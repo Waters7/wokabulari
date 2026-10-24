@@ -1,74 +1,114 @@
 <?php
 
-use App\Concerns\ProfileValidationRules;
+use App\Support\Phone;
 use Flux\Flux;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Session;
-use Livewire\Attributes\Computed;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 use Livewire\Attributes\Title;
 use Livewire\Component;
+use Livewire\WithFileUploads;
 
-new #[Title('Profile settings')] class extends Component {
-    use ProfileValidationRules;
+new #[Title('Profil')] class extends Component {
+    use WithFileUploads;
 
     public string $name = '';
-    public string $email = '';
 
-    /**
-     * Mount the component.
-     */
+    public ?string $email = '';
+
+    public ?string $phone = '';
+
+    public bool $leaderboard_anonymous = false;
+
+    public $photo = null;
+
     public function mount(): void
     {
-        $this->name = Auth::user()->name;
-        $this->email = Auth::user()->email;
+        $user = Auth::user();
+        $this->name = $user->name;
+        $this->email = $user->email;
+        $this->phone = $user->phone ? Phone::display($user->phone) : '';
+        $this->leaderboard_anonymous = $user->leaderboard_anonymous;
     }
 
-    /**
-     * Update the profile information for the currently authenticated user.
-     */
-    public function updateProfileInformation(): void
+    public function save(): void
     {
         $user = Auth::user();
+        $phone = Phone::normalize($this->phone);
 
-        $validated = $this->validate($this->profileRules($user->id));
+        $validated = $this->validate([
+            'name' => $user->isParticipant() ? ['nullable'] : ['required', 'string', 'max:150'],
+            'email' => ['nullable', 'email', 'max:150', Rule::unique('users', 'email')->ignore($user->id)],
+            'phone' => ['nullable', 'string', 'max:20'],
+            'photo' => ['nullable', 'image', 'max:2048'],
+            'leaderboard_anonymous' => ['boolean'],
+        ]);
 
-        $user->fill($validated);
+        if ($phone && \App\Models\User::query()->where('phone', $phone)->whereKeyNot($user->id)->exists()) {
+            $this->addError('phone', 'Nomor HP sudah dipakai akun lain.');
 
-        if ($user->isDirty('email')) {
-            $user->email_verified_at = null;
+            return;
+        }
+
+        // Nama peserta dikelola admin program agar sesuai data resmi.
+        if (! $user->isParticipant()) {
+            $user->name = $validated['name'];
+        }
+
+        $user->email = $validated['email'] ? Str::lower($validated['email']) : null;
+        $user->phone = $phone;
+        $user->leaderboard_anonymous = $validated['leaderboard_anonymous'];
+
+        if ($this->photo) {
+            if ($user->photo_path) {
+                Storage::disk('public')->delete($user->photo_path);
+            }
+            $user->photo_path = $this->photo->storeAs('avatars', Str::uuid().'.'.$this->photo->extension(), 'public');
+            $this->photo = null;
         }
 
         $user->save();
 
-        Flux::toast(variant: 'success', text: __('Profile updated.'));
+        Flux::toast(variant: 'success', text: 'Profil tersimpan. Mantap!');
     }
-
 }; ?>
 
 <section class="w-full">
     @include('partials.settings-heading')
 
-    <flux:heading level="2" class="sr-only">{{ __('Profile settings') }}</flux:heading>
-
-    <x-pages::settings.layout :heading="__('Profile')" :subheading="__('Update your name and email address')">
-        <form wire:submit="updateProfileInformation" class="my-6 w-full space-y-6">
-            <flux:input wire:model="name" :label="__('Name')" type="text" required autofocus autocomplete="name" />
-
-            <div>
-                <flux:input wire:model="email" :label="__('Email')" type="email" required autocomplete="email" />
-
-            </div>
-
+    <x-pages::settings.layout heading="Profil" subheading="Perbarui kontak dan foto profil ngana.">
+        <form wire:submit="save" class="my-6 w-full space-y-5">
             <div class="flex items-center gap-4">
-                <div class="flex items-center justify-end">
-                    <flux:button variant="primary" type="submit" class="w-full" data-test="update-profile-button">
-                        {{ __('Save') }}
-                    </flux:button>
+                <flux:avatar size="xl" :name="auth()->user()->name" :initials="auth()->user()->initials()"
+                             :src="$photo ? $photo->temporaryUrl() : auth()->user()->photo_url" />
+                <div>
+                    <flux:input type="file" wire:model="photo" accept="image/*" label="Foto profil" />
+                    <flux:error name="photo" />
                 </div>
-
             </div>
-        </form>
 
-            <livewire:pages::settings.delete-user-form />
+            @if (auth()->user()->isParticipant())
+                <flux:input label="Nama" :value="$name" disabled description="Nama dikelola admin program sesuai data resmi." />
+            @else
+                <flux:input wire:model="name" label="Nama" required autocomplete="name" />
+            @endif
+
+            @if (auth()->user()->username)
+                <flux:input label="NIS/NIP" :value="auth()->user()->username" disabled />
+            @endif
+
+            <flux:input wire:model="phone" label="Nomor HP (WhatsApp)" type="tel" inputmode="tel" autocomplete="tel"
+                        description="Dipakai untuk login dan notifikasi WhatsApp." />
+
+            <flux:input wire:model="email" label="Email" type="email" autocomplete="email" />
+
+            @if (auth()->user()->isParticipant())
+                <flux:switch wire:model="leaderboard_anonymous" label="Sembunyikan nama di peringkat"
+                             description="Nama tampil sebagai inisial di leaderboard." />
+            @endif
+
+            <flux:button variant="primary" type="submit">Simpan</flux:button>
+        </form>
     </x-pages::settings.layout>
 </section>

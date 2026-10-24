@@ -8,12 +8,12 @@ Status: `[ ]` belum · `[x]` selesai
 
 ## Fase 0 — Fondasi & Docker
 Acuan: CLAUDE.md, DOCKER.md bagian A–B, SPEC 1
-- [ ] Proyek Laravel 13 + starter kit Livewire, Pest
-- [ ] `docker/app/Dockerfile`, `compose.yaml`, `Makefile`, `.env.example`, `.dockerignore`
-- [ ] Tailwind v4 dengan token warna & huruf Wokabulari
-- [ ] Layout mobile (bottom nav) dan desktop (sidebar), komponen Blade dasar (button, card, badge, modal, toast, empty state)
-- [ ] Logo & ikon dari `docs/brand/` dipasang; manifest PWA + service worker dasar + halaman offline
-- [ ] Lokalisasi Bahasa Indonesia, zona waktu WITA, helper format tanggal
+- [x] Proyek Laravel 13 + starter kit Livewire, Pest
+- [x] `docker/app/Dockerfile`, `compose.yaml`, `Makefile`, `.env.example`, `.dockerignore`
+- [x] Tailwind v4 dengan token warna & huruf Wokabulari
+- [x] Layout mobile (bottom nav) dan desktop (sidebar), komponen Blade dasar (button, card, badge, modal, toast, empty state)
+- [x] Logo & ikon dari `docs/brand/` dipasang; manifest PWA + service worker dasar + halaman offline
+- [x] Lokalisasi Bahasa Indonesia, zona waktu WITA, helper format tanggal
 - [ ] Halaman `/up` sehat; `make install` berjalan dari nol
 - **Selesai jika:** `make build && make up && make install` berhasil di mesin bersih dan halaman login tampil dengan identitas Wokabulari.
 
@@ -127,3 +127,14 @@ Acuan: DOCKER.md bagian C–D
 
 ## Catatan Progres
 (Tulis ringkasan tiap fase di sini setelah selesai.)
+
+### Fase 0 — 24 Okt 2026
+- Laravel 13 + Livewire 4 + Flux dari starter kit resmi (auth dipangkas: login + lupa sandi). Pest 4 dengan seed role otomatis.
+- Docker: `docker/app/Dockerfile` (base/dev/vendor/assets/prod), `compose.yaml`, `Makefile`, `.dockerignore`, `scripts/copy-face-models.mjs`.
+- Tema Tailwind v4 (kunyit, woka, woka-light, hutan, rica, santan), font Baloo 2 + Plus Jakarta Sans di-host lewat Vite.
+- Layout: sidebar desktop + drawer HP, bottom nav untuk peserta/wali/tim kerja, komponen `x-card`, `x-stat`, `x-status-badge`, `x-empty-state`, `x-confirm-button`, `x-page-header`.
+- Halaman login dengan logo Wokabulari + logo Poltekkes Kemenkes Manado & BP3MI (slot berkas `public/images/logos/bp3mi.png`).
+- PWA: manifest, service worker (cache aset, materi, halaman offline).
+- Bahasa Indonesia (`lang/id`), zona waktu WITA, helper `tanggal()`, `tanggal_panjang()`, `jam()`.
+- Login No. HP/email/NIS-NIP, wajib ganti kata sandi saat login pertama, persetujuan data pribadi.
+- Catatan: `make build/up/install` belum diuji karena Docker belum terpasang di mesin pengembang; test dijalankan dengan `php artisan test` (24 lulus). Tampilan login dicek di lebar 360px (terang & gelap).

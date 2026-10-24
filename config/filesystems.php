@@ -33,7 +33,7 @@ return [
         'local' => [
             'driver' => 'local',
             'root' => storage_path('app/private'),
-            'serve' => true,
+            'serve' => false,
             'throw' => false,
             'report' => false,
         ],
@@ -45,6 +45,23 @@ return [
             'visibility' => 'public',
             'throw' => false,
             'report' => false,
+        ],
+
+        // File privat (selfie, tanda tangan, audio, lampiran). Diakses lewat signed URL berumur pendek.
+        'private' => [
+            'driver' => 'local',
+            'root' => storage_path('app/private'),
+            'url' => rtrim((string) env('APP_URL', 'http://localhost'), '/').'/berkas',
+            'visibility' => 'private',
+            'serve' => true,
+            'throw' => false,
+            'report' => false,
+        ],
+
+        'backups' => [
+            'driver' => 'local',
+            'root' => storage_path('app/backups'),
+            'throw' => false,
         ],
 
         's3' => [

@@ -2,14 +2,40 @@
 @import '../../vendor/livewire/flux/dist/flux.css';
 
 @source '../views';
+@source '../../app/Enums';
+@source '../../app/Support';
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
-@source '../../vendor/livewire/flux-pro/stubs/**/*.blade.php';
 @source '../../vendor/livewire/flux/stubs/**/*.blade.php';
 
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
-    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+    --font-sans: var(--font-jakarta), 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji';
+    --font-display: var(--font-baloo), 'Baloo 2', var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
+    --font-cjk: 'Noto Sans SC', 'Noto Sans JP', var(--font-jakarta), sans-serif;
+
+    /* Palet Wokabulari (SPEC 1.2) */
+    --color-kunyit: #f2a81d;
+    --color-kunyit-50: #fef6e3;
+    --color-kunyit-100: #fdeac2;
+    --color-kunyit-700: #8a5a00;
+    --color-woka: #2e7d4f;
+    --color-woka-50: #ebf5ef;
+    --color-woka-100: #d3ebdd;
+    --color-woka-200: #a9d6bb;
+    --color-woka-700: #22603c;
+    --color-woka-800: #1a4a2e;
+    --color-woka-light: #5db57b;
+    --color-hutan: #123b2d;
+    --color-hutan-800: #0f3326;
+    --color-hutan-900: #0b2a20;
+    --color-hutan-950: #071d16;
+    --color-rica: #c8312a;
+    --color-rica-50: #fcecea;
+    --color-rica-100: #f8d3d0;
+    --color-rica-700: #a1251f;
+    --color-santan: #fffbf2;
+    --color-santan-200: #f5ecd7;
 
     --color-zinc-50: #fafafa;
     --color-zinc-100: #f5f5f5;
@@ -23,27 +49,47 @@
     --color-zinc-900: #171717;
     --color-zinc-950: #0a0a0a;
 
-    --color-accent: var(--color-neutral-800);
-    --color-accent-content: var(--color-neutral-800);
+    --color-accent: var(--color-woka);
+    --color-accent-content: var(--color-woka);
     --color-accent-foreground: var(--color-white);
 }
 
 @layer theme {
     .dark {
-        --color-accent: var(--color-white);
-        --color-accent-content: var(--color-white);
-        --color-accent-foreground: var(--color-neutral-800);
+        --color-accent: var(--color-woka-light);
+        --color-accent-content: var(--color-woka-light);
+        --color-accent-foreground: var(--color-hutan);
     }
 }
 
 @layer base {
-
     *,
     ::after,
     ::before,
     ::backdrop,
     ::file-selector-button {
         border-color: var(--color-gray-200, currentColor);
+    }
+
+    html {
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    h1, h2, h3, .font-display {
+        font-family: var(--font-display);
+    }
+
+    [x-cloak] {
+        display: none !important;
+    }
+
+    :lang(zh), :lang(ja), .text-cjk {
+        font-family: var(--font-cjk);
+    }
+
+    ruby rt {
+        font-size: 0.6em;
+        color: var(--color-woka);
     }
 }
 
@@ -52,7 +98,7 @@
 }
 
 [data-flux-label] {
-    @apply  !mb-0 !leading-tight;
+    @apply !mb-0 !leading-tight;
 }
 
 input:focus[data-flux-control],
@@ -61,6 +107,64 @@ select:focus[data-flux-control] {
     @apply outline-hidden ring-2 ring-accent ring-offset-2 ring-offset-accent-foreground;
 }
 
-/* \[:where(&)\]:size-4 {
-    @apply size-4;
-} */
+/* Target sentuh minimal 44px di perangkat sentuh (SPEC 1.4) */
+@media (pointer: coarse) {
+    button[data-flux-button]:not([class*='size-']),
+    a[data-flux-button]:not([class*='size-']),
+    input[data-flux-control]:not([type='checkbox']):not([type='radio']),
+    select[data-flux-control] {
+        min-height: 44px;
+    }
+}
+
+/* Ruang untuk bottom navigation + area aman iPhone */
+.pb-safe {
+    padding-bottom: calc(env(safe-area-inset-bottom) + 0.5rem);
+}
+
+.has-bottom-nav {
+    padding-bottom: calc(env(safe-area-inset-bottom) + 5rem);
+}
+
+@media (min-width: 1024px) {
+    .has-bottom-nav {
+        padding-bottom: 0;
+    }
+}
+
+/* Tabel lebar diberi scroll horizontal di dalam kotak */
+.table-scroll {
+    @apply w-full overflow-x-auto rounded-xl border border-zinc-200 bg-white dark:border-hutan-800 dark:bg-hutan-900;
+}
+
+.table-scroll table {
+    @apply w-full min-w-max text-sm;
+}
+
+.table-scroll th {
+    @apply bg-santan px-3 py-2 text-start text-xs font-semibold uppercase tracking-wide text-hutan/70 dark:bg-hutan-800 dark:text-santan/70;
+}
+
+.table-scroll td {
+    @apply border-t border-zinc-100 px-3 py-2 align-middle dark:border-hutan-800;
+}
+
+/* Animasi kecil untuk streak */
+@keyframes flame {
+    0%, 100% { transform: scale(1) rotate(-3deg); }
+    50% { transform: scale(1.12) rotate(3deg); }
+}
+
+.animate-flame {
+    animation: flame 1.4s ease-in-out infinite;
+    display: inline-block;
+}
+
+@keyframes pop-in {
+    from { transform: scale(0.8); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+.animate-pop-in {
+    animation: pop-in 0.35s ease-out both;
+}

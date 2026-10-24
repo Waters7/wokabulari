@@ -19,13 +19,13 @@ Acuan: CLAUDE.md, DOCKER.md bagian A–B, SPEC 1
 
 ## Fase 1 — Role, Master Data, Pengaturan
 Acuan: SPEC 2, 3.1, 4.1
-- [ ] Role & permission (spatie), login email/NIS/NIP, `app:create-admin`
-- [ ] Persetujuan data pribadi saat login pertama
-- [ ] CRUD angkatan, bahasa, kelas, lokasi (peta Leaflet), asrama, kamar, vendor
-- [ ] Peserta: CRUD, import Excel + template, profil, pendaftaran wajah referensi (3 sampel)
-- [ ] Unit tim kerja, pengaturan sistem (tabel `settings`)
-- [ ] `ProductionSeeder` (data dasar) dan `DemoSeeder` (data contoh, SPEC 8) — DemoSeeder dilengkapi bertahap tiap fase
-- [ ] Audit log aktif
+- [x] Role & permission (spatie), login email/NIS/NIP, `app:create-admin`
+- [x] Persetujuan data pribadi saat login pertama
+- [x] CRUD angkatan, bahasa, kelas, lokasi (peta Leaflet), asrama, kamar, vendor
+- [x] Peserta: CRUD, import Excel + template, profil, pendaftaran wajah referensi (3 sampel)
+- [x] Unit tim kerja, pengaturan sistem (tabel `settings`)
+- [x] `ProductionSeeder` (data dasar) dan `DemoSeeder` (data contoh, SPEC 8) — DemoSeeder dilengkapi bertahap tiap fase
+- [x] Audit log aktif
 
 ## Fase 2 — Absen Harian (Wajah + Lokasi)
 Acuan: SPEC 3.2
@@ -138,3 +138,13 @@ Acuan: DOCKER.md bagian C–D
 - Bahasa Indonesia (`lang/id`), zona waktu WITA, helper `tanggal()`, `tanggal_panjang()`, `jam()`.
 - Login No. HP/email/NIS-NIP, wajib ganti kata sandi saat login pertama, persetujuan data pribadi.
 - Catatan: `make build/up/install` belum diuji karena Docker belum terpasang di mesin pengembang; test dijalankan dengan `php artisan test` (24 lulus). Tampilan login dicek di lebar 360px (terang & gelap).
+
+### Fase 1 — 24 Okt 2026
+- Role & permission granular (`config/wokabulari.php`), permission tim kerja per unit, super admin lewat `Gate::before`, pimpinan read-only.
+- Login No. HP/email/NIS-NIP, `app:create-admin`, `app:import-participants`, wajib ganti sandi awal, persetujuan data pribadi.
+- CRUD: angkatan, bahasa, lokasi (peta Leaflet/OSM + radius), kelas + anggota kelas, peserta (+ import Excel/CSV + template, reset sandi), pengguna & unit tim kerja, asrama + kamar + penempatan penghuni, vendor.
+- Pengaturan sistem (tabel `settings` + cache), matriks role & hak akses, log audit (spatie/activitylog).
+- Pendaftaran wajah referensi: kamera + liveness (kedip/menoleh) + 3 sampel descriptor → rata-rata terenkripsi di server.
+- ProductionSeeder (role, bahasa) & DemoSeeder (akun SPEC 8, 4 kelas × 8 peserta, lokasi, 2 asrama, 2 vendor).
+- Test: 64 lulus. Alur login pertama dicek di 360px.
+- Belum: import Excel khusus penempatan kamar (penempatan masih manual per kamar).

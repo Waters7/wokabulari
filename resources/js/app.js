@@ -1,7 +1,12 @@
 // Wokabulari — skrip dasar. Modul berat (kamera, QR, grafik, peta) dimuat saat dibutuhkan.
 
 // Daftar modul lazy: Wokabulari.load('nama') mengembalikan modul hasil import().
-const modules = {};
+import faceCapture from './components/face-capture.js';
+
+const modules = {
+    map: () => import('./modules/map.js'),
+    face: () => import('./modules/face.js'),
+};
 
 window.Wokabulari = {
     async load(name) {
@@ -14,6 +19,8 @@ window.Wokabulari = {
 };
 
 document.addEventListener('alpine:init', () => {
+    window.Alpine.data('faceCapture', faceCapture);
+
     // Hitung mundur ke waktu tertentu (ISO string). Dipakai di kode sesi, quiz, dan tenggat.
     window.Alpine.data('countdown', (target, onDone = null) => ({
         remaining: 0,
@@ -53,6 +60,50 @@ document.addEventListener('alpine:init', () => {
         },
         filled(n) {
             return (this.hover || this.value) >= n;
+        },
+    }));
+
+    // Peta pemilih titik lokasi; nilai lat/lng ditulis ke properti Livewire.
+    window.Alpine.data('mapPicker', ({ lat, lng, radius, latModel, lngModel, editable = true }) => ({
+        picker: null,
+        async init() {
+            const { createPicker } = await window.Wokabulari.load('map');
+            this.picker = createPicker(this.$refs.map, {
+                lat,
+                lng,
+                radius,
+                editable,
+                onChange: (newLat, newLng) => {
+                    this.$wire.set(latModel, newLat, false);
+                    this.$wire.set(lngModel, newLng, false);
+                },
+            });
+        },
+        destroy() {
+            this.picker?.destroy();
+        },
+        setRadius(value) {
+            this.picker?.setRadius(value);
+        },
+        useMyLocation() {
+            navigator.geolocation?.getCurrentPosition((pos) => {
+                const { latitude, longitude } = pos.coords;
+                this.picker?.setLatLng(latitude, longitude);
+                this.$wire.set(latModel, Number(latitude.toFixed(7)), false);
+                this.$wire.set(lngModel, Number(longitude.toFixed(7)), false);
+            });
+        },
+    }));
+
+    // Peta baca-saja.
+    window.Alpine.data('mapViewer', (points) => ({
+        map: null,
+        async init() {
+            const { createViewer } = await window.Wokabulari.load('map');
+            this.map = createViewer(this.$refs.map, points);
+        },
+        destroy() {
+            this.map?.remove();
         },
     }));
 

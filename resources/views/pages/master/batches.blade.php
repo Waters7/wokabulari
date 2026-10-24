@@ -37,9 +37,9 @@ new #[Title('Angkatan')] class extends Component {
         return ['name' => 'nama angkatan', 'attendance_target' => 'target kehadiran', 'passing_score' => 'nilai minimal lulus'];
     }
 
-    protected function beforeDelete(Model $model): void
+    protected function deleteBlockedReason(Model $model): ?string
     {
-        abort_if($model->classrooms()->exists(), 422, 'Angkatan masih memiliki kelas.');
+        return $model->classrooms()->exists() ? 'Angkatan masih memiliki kelas.' : null;
     }
 
     public function with(): array

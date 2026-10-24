@@ -86,7 +86,13 @@ trait WithCrudModal
     {
         $model = $this->findModel($id);
         $this->authorize('delete', $model);
-        $this->beforeDelete($model);
+
+        if ($reason = $this->deleteBlockedReason($model)) {
+            Flux::toast(variant: 'danger', text: $reason);
+
+            return;
+        }
+
         $model->delete();
 
         Flux::toast(variant: 'success', text: 'Data dihapus.');
@@ -100,6 +106,8 @@ trait WithCrudModal
      */
     protected function validateForm(): array
     {
+        $this->resetErrorBag();
+
         $validator = Validator::make($this->form, $this->formRules(), [], $this->labels());
 
         if ($validator->fails()) {
@@ -147,8 +155,9 @@ trait WithCrudModal
         $model->fill($data)->save();
     }
 
-    protected function beforeDelete(Model $model): void
+    /** Pesan bila data tidak boleh dihapus (mis. masih dipakai), atau null. */
+    protected function deleteBlockedReason(Model $model): ?string
     {
-        //
+        return null;
     }
 }

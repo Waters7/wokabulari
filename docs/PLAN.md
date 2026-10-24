@@ -29,10 +29,10 @@ Acuan: SPEC 2, 3.1, 4.1
 
 ## Fase 2 — Absen Harian (Wajah + Lokasi)
 Acuan: SPEC 3.2
-- [ ] Halaman kamera + liveness + pengambilan descriptor (face-api)
-- [ ] Pencocokan wajah & geofence di server, status hadir/terlambat/ditolak
-- [ ] Persetujuan manual oleh admin/pengajar
-- [ ] Riwayat absen peserta
+- [x] Halaman kamera + liveness + pengambilan descriptor (face-api)
+- [x] Pencocokan wajah & geofence di server, status hadir/terlambat/ditolak
+- [x] Persetujuan manual oleh admin/pengajar
+- [x] Riwayat absen peserta
 
 ## Fase 3 — Sesi, Kode Kehadiran, Materi, Izin
 Acuan: SPEC 3.3, 3.4, 3.5, 3.11
@@ -148,3 +148,11 @@ Acuan: DOCKER.md bagian C–D
 - ProductionSeeder (role, bahasa) & DemoSeeder (akun SPEC 8, 4 kelas × 8 peserta, lokasi, 2 asrama, 2 vendor).
 - Test: 64 lulus. Alur login pertama dicek di 360px.
 - Belum: import Excel khusus penempatan kamar (penempatan masih manual per kamar).
+
+### Fase 2 — 25 Okt 2026
+- Absen harian: kamera depan + liveness acak (kedip / menoleh kiri / kanan), descriptor face-api, selfie JPEG terkompresi ke disk privat, GPS akurasi tinggi.
+- Server: jendela buka absen, akurasi GPS maks., geofence Haversine terhadap lokasi kelas, pencocokan wajah Euclidean vs referensi terenkripsi, status hadir/terlambat/ditolak + alasan; percobaan ulang memperbarui baris yang sama (unik per hari).
+- Kelola absen (pengajar/admin): ringkasan, filter belum absen/ditolak/terlambat, lihat selfie lewat signed URL, tandai manual dengan alasan (tercatat di log audit).
+- Riwayat absen bulanan peserta dengan persentase kehadiran.
+- Event `DailyAttendanceRecorded` (dipakai gamifikasi).
+- Test: 76 lulus.

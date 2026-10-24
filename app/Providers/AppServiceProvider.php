@@ -6,6 +6,7 @@ use App\Enums\Role;
 use App\Models\User;
 use App\Services\SettingService;
 use Carbon\CarbonImmutable;
+use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
@@ -23,6 +24,7 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->configureDefaults();
+        $this->configureQueryMacros();
         $this->configureAuthorization();
     }
 
@@ -38,6 +40,15 @@ class AppServiceProvider extends ServiceProvider
             ? Password::min(8)->letters()->numbers()
             : null,
         );
+    }
+
+    protected function configureQueryMacros(): void
+    {
+        // Rentang tanggal yang aman untuk kolom DATE di MySQL maupun SQLite.
+        Builder::macro('whereDateBetween', function (string $column, $from, $to) {
+            /** @var Builder $this */
+            return $this->whereDate($column, '>=', $from)->whereDate($column, '<=', $to);
+        });
     }
 
     protected function configureAuthorization(): void

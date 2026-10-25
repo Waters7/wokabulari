@@ -9,3 +9,5 @@ use Illuminate\Support\Facades\Schedule;
 */
 
 Schedule::command('app:close-expired-codes')->everyMinute()->withoutOverlapping();
+Schedule::command('app:assignment-reminders 2h')->everyThirtyMinutes()->withoutOverlapping();
+Schedule::command('app:assignment-reminders day')->dailyAt('18:00');

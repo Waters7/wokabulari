@@ -51,10 +51,10 @@ Acuan: SPEC 3.6, 3.9, 3.10
 
 ## Fase 5 — Tugas / PR
 Acuan: SPEC 3.7
-- [ ] Buat tugas, lampiran, jenis pengumpulan
-- [ ] Pengumpulan dari HP (foto, file, audio), terlambat & revisi
-- [ ] Penilaian cepat + voice note, integrasi ke komponen sesi
-- [ ] Pengingat tenggat
+- [x] Buat tugas, lampiran, jenis pengumpulan
+- [x] Pengumpulan dari HP (foto, file, audio), terlambat & revisi
+- [x] Penilaian cepat + voice note, integrasi ke komponen sesi
+- [x] Pengingat tenggat
 
 ## Fase 6 — Quiz, Pretest, Posttest, Tryout
 Acuan: SPEC 3.8
@@ -171,3 +171,11 @@ Acuan: DOCKER.md bagian C–D
 - Penilaian mingguan/bulanan: kartu per peserta (nyaman di HP), saran nilai dari komponen sesi pada periode itu, rata-rata & predikat otomatis, draf → terbit + notifikasi, kembalikan ke draf.
 - Halaman Nilai & Masukan peserta: penilaian terakhir, grafik radar & garis per aspek (Chart.js), timeline catatan + penilaian dengan badge baru, nilai per sesi.
 - Test: 115 lulus. Dicek di 360px: panel penilaian, autosave sel, penilaian periodik, halaman nilai peserta.
+
+### Fase 5 — 26 Okt 2026
+- Tugas per kelas (opsional ditautkan ke sesi): instruksi, lampiran, jenis pengumpulan (teks/berkas/foto/audio/campuran), aspek, tenggat, skor maks., izinkan terlambat + potongan %, izinkan kumpul ulang; draf → terbit + notifikasi.
+- Peserta: tab Belum dikerjakan / Mendekati tenggat (<48 jam) / Selesai; kumpul dari HP (foto kamera dikompres, berkas, rekaman suara MediaRecorder), status terlambat, revisi.
+- Pengajar: mode penilaian cepat (geser/prev-next), nilai akhir otomatis dipotong bila terlambat, komentar teks + voice note, minta revisi.
+- Nilai tugas yang ditautkan sesi masuk komponen sesi (skala 0–100, terkunci); tugas tanpa sesi ikut saran penilaian periodik.
+- Pengingat H-1 (18.00) dan 2 jam sebelum tenggat (tiap 30 menit) hanya ke yang belum mengumpulkan, tanpa dobel.
+- Test: 125 lulus. Dicek di 360px: daftar & detail tugas peserta.

@@ -130,6 +130,11 @@ class User extends Authenticatable
         return $this->hasMany(Assessment::class);
     }
 
+    public function assignmentSubmissions(): HasMany
+    {
+        return $this->hasMany(AssignmentSubmission::class);
+    }
+
     // ---- Role & unit
 
     public function primaryRole(): ?Role

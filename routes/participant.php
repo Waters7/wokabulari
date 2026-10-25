@@ -15,6 +15,8 @@ Route::middleware('role:participant')->group(function () {
     Route::livewire('materi', 'pages::participant.materials')->name('materials.index');
     Route::livewire('izin', 'pages::participant.leave')->name('leave.index');
     Route::livewire('nilai', 'pages::participant.grades')->name('grades.index');
+    Route::livewire('tugas', 'pages::participant.assignments')->name('assignments.index');
+    Route::livewire('tugas/{assignment}', 'pages::participant.assignment-show')->name('assignments.show');
 });
 
 // Materi bisa dibuka peserta dan pengajar (otorisasi di policy)

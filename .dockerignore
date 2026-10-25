@@ -23,3 +23,6 @@ database/data/*
 deploy
 scripts/deploy.sh
 scripts/backup.sh
+# Kunci rahasia HaKI & paket unggah tidak boleh masuk image
+.rahasia
+deploy-paket

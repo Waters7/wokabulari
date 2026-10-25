@@ -197,6 +197,14 @@ Mengambil kode terbaru, build ulang, menjalankan migrasi, membersihkan cache, da
 
 Kembali ke versi sebelumnya: `git checkout <commit-atau-tag> && ./scripts/deploy.sh` (migrasi database tidak dibalik otomatis — buat cadangan sebelum update besar).
 
+Cek versi & keabsahan HaKI setelah update (versi juga tampil di bawah halaman login, riwayat di `docs/CHANGELOG.md`):
+
+```bash
+docker compose -f compose.prod.yaml exec app php artisan app:haki
+```
+
+Kunci rahasia HaKI **tidak** diperlukan di server; simpan hanya di perangkat pemegang hak cipta.
+
 Setelah mengubah `.env`: `docker compose -f compose.prod.yaml up -d && docker compose -f compose.prod.yaml exec app php artisan optimize`.
 
 ---

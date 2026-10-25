@@ -50,3 +50,6 @@ yarn-error.log
 # Data peserta asli (data pribadi) tidak boleh masuk repo publik
 /database/data/*.csv
 !/database/data/contoh-peserta.csv
+# Kunci rahasia HaKI (app:haki-sign) — milik pemegang hak cipta, jangan pernah di-commit
+/.rahasia
+HAKI-KUNCI-RAHASIA*

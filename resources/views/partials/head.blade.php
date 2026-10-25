@@ -9,6 +9,8 @@
 <meta name="description" content="Wokabulari — Kelas Bahasa SMK Go Global · Poltekkes Kemenkes Manado" />
 <meta name="theme-color" content="#007D71" />
 <meta name="application-name" content="Wokabulari" />
+<meta name="copyright" content="{{ \App\Support\Haki::notice() }}" />
+<meta name="wokabulari-haki" content="{{ \App\Support\Haki::fingerprint() }}" data-version="{{ config('wokabulari.version') }}" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-title" content="Wokabulari" />
 <meta name="apple-mobile-web-app-status-bar-style" content="default" />

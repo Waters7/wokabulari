@@ -1,0 +1,31 @@
+WOKABULARI — Aplikasi Kelas Bahasa Program SMK Go Global
+Hak Cipta (c) 2026 Poltekkes Kemenkes Manado. Seluruh hak dilindungi.
+
+Pencipta        : Waters7 (pengembang)
+Pemegang hak    : Poltekkes Kemenkes Manado
+Jenis ciptaan   : Program Komputer
+
+Program komputer ini beserta kode sumber, tampilan, logo, dan dokumentasinya
+dilindungi Undang-Undang Nomor 28 Tahun 2014 tentang Hak Cipta.
+
+Kode sumber dapat dilihat publik, tetapi BUKAN perangkat lunak sumber terbuka.
+Tanpa izin tertulis dari pemegang hak cipta, dilarang:
+  1. menggandakan, memasang, atau menjalankan aplikasi ini untuk instansi/pihak lain;
+  2. mengubah, menerjemahkan, atau membuat karya turunan;
+  3. menjual, menyewakan, atau mendistribusikan ulang, baik utuh maupun sebagian;
+  4. menghapus atau mengubah pernyataan hak cipta dan sidik HaKI yang tertanam.
+
+Pernyataan hak cipta ditanam di kode (app/Support/Haki.php), ditandatangani
+secara digital (Ed25519) dan disertai segel terenkripsi. Keabsahannya dapat
+diperiksa dengan `php artisan app:haki`; kepemilikan dibuktikan oleh pemegang
+kunci rahasia dengan `php artisan app:haki --berkas=<berkas kunci>`.
+
+Komponen pihak ketiga (Laravel, Livewire, Flux, Tailwind CSS, dan paket lain
+di composer.json / package.json) tetap tunduk pada lisensi masing-masing.
+
+---
+
+Copyright (c) 2026 Poltekkes Kemenkes Manado. All rights reserved.
+Author: Waters7. This source code is published for transparency only and is
+NOT open source. No permission is granted to copy, modify, deploy, or
+redistribute it without prior written consent of the copyright holder.

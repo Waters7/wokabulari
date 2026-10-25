@@ -54,7 +54,9 @@
                     <x-partner-logos class="mt-8 lg:hidden" compact />
 
                     <p class="mt-6 text-center text-xs text-hutan/60 dark:text-santan/50">
-                        &copy; {{ now()->year }} Wokabulari · Program SMK Go Global
+                        <span class="font-semibold">Wokabulari versi {{ config('wokabulari.version') }}</span><br>
+                        &copy; {{ \App\Support\Haki::STATEMENT['tahun'] }} Poltekkes Kemenkes Manado · Program SMK Go Global<br>
+                        <span class="text-[10px] tracking-wide" data-test="haki">Hak cipta dilindungi · Sidik HaKI {{ \App\Support\Haki::fingerprint() }}</span>
                     </p>
                 </div>
             </main>

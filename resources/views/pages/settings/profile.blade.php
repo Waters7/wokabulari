@@ -1,16 +1,16 @@
 <?php
 
 use App\Actions\Participants\SaveGuardianContact;
+use App\Actions\Users\UpdateLoginEmail;
 use App\Enums\GuardianRelationship;
 use App\Http\Requests\GuardianContactRequest;
+use App\Http\Requests\LoginEmailRequest;
 use App\Services\ImageService;
 use App\Support\Phone;
 use Flux\Flux;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Str;
-use Illuminate\Validation\Rule;
 use Livewire\Attributes\Title;
 use Livewire\Component;
 use Livewire\WithFileUploads;
@@ -48,21 +48,34 @@ new #[Title('Profil')] class extends Component {
         $this->guardian_phone = $profile?->guardian_phone ? Phone::display($profile->guardian_phone) : '';
     }
 
-    public function save(ImageService $images, SaveGuardianContact $guardianContact): void
+    public function save(ImageService $images, SaveGuardianContact $guardianContact, UpdateLoginEmail $loginEmail): void
     {
         $user = Auth::user();
         $phone = Phone::normalize($this->phone);
+        $canEditEmail = $user->can('updateLoginEmail', $user);
+
+        if ($canEditEmail) {
+            $this->email = LoginEmailRequest::normalize($this->email);
+        }
 
         $validated = $this->validate([
             'name' => $user->isParticipant() ? ['nullable'] : ['required', 'string', 'max:150'],
-            'email' => ['nullable', 'email', 'max:150', Rule::unique('users', 'email')->ignore($user->id)],
             'phone' => ['nullable', 'string', 'max:20'],
             'photo' => ['nullable', 'image', 'max:10240'],
             'leaderboard_anonymous' => ['boolean'],
-        ]);
+            ...($canEditEmail ? LoginEmailRequest::rulesFor($user) : []),
+        ], LoginEmailRequest::messagesFor());
 
         if ($phone && \App\Models\User::query()->where('phone', $phone)->whereKeyNot($user->id)->exists()) {
             $this->addError('phone', 'Nomor HP sudah dipakai akun lain.');
+
+            return;
+        }
+
+        $email = $canEditEmail ? ($validated['email'] ?? null) : $user->email;
+
+        if (! $phone && blank($email) && blank($user->username)) {
+            $this->addError('phone', 'Isi No. HP atau email supaya ngana tetap bisa login.');
 
             return;
         }
@@ -72,7 +85,6 @@ new #[Title('Profil')] class extends Component {
             $user->name = $validated['name'];
         }
 
-        $user->email = $validated['email'] ? Str::lower($validated['email']) : null;
         $user->phone = $phone;
         $user->leaderboard_anonymous = $validated['leaderboard_anonymous'];
 
@@ -102,6 +114,11 @@ new #[Title('Profil')] class extends Component {
         }
 
         $user->save();
+
+        if ($canEditEmail) {
+            $loginEmail->handle($user, $email);
+            $this->email = $user->email;
+        }
 
         Flux::toast(variant: 'success', text: 'Profil tersimpan. Mantap!');
     }
@@ -137,7 +154,12 @@ new #[Title('Profil')] class extends Component {
             <flux:input wire:model="phone" label="Nomor HP (WhatsApp)" type="tel" inputmode="tel" autocomplete="tel"
                         description="Dipakai untuk login dan notifikasi WhatsApp." />
 
-            <flux:input wire:model="email" label="Email" type="email" autocomplete="email" />
+            @can('updateLoginEmail', auth()->user())
+                <flux:input wire:model="email" label="Email" type="email" autocomplete="email" placeholder="nama@contoh.com"
+                            description="Opsional. Setelah diisi, ngana bisa login pakai email atau No. HP." />
+            @else
+                <flux:input label="Email" :value="$email ?: '–'" disabled description="Email akun admin dikelola lewat server." />
+            @endcan
 
             @if (auth()->user()->isParticipant())
                 <fieldset class="space-y-4 rounded-2xl border border-woka-100 p-4 dark:border-hutan-800">

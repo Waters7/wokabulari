@@ -43,6 +43,12 @@ class UserPolicy
         return ! $user->is($target) && $this->update($user, $target);
     }
 
+    /** Pengguna mengisi email login sendiri; email super admin dikelola lewat server. */
+    public function updateLoginEmail(User $user, User $target): bool
+    {
+        return $user->is($target) && ! $target->isSuperAdmin();
+    }
+
     /** Reset/kelola wajah referensi peserta. */
     public function manageFace(User $user, User $target): bool
     {

@@ -1,6 +1,8 @@
 <?php
 
+use App\Actions\Users\UpdateLoginEmail;
 use App\Concerns\PasswordValidationRules;
+use App\Http\Requests\LoginEmailRequest;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Livewire\Attributes\Layout;
@@ -14,18 +16,26 @@ new #[Layout('layouts::auth')] #[Title('Ganti kata sandi')] class extends Compon
 
     public string $password_confirmation = '';
 
+    public ?string $email = '';
+
     public function mount(): void
     {
         if (! Auth::user()->must_change_password) {
             $this->redirectRoute('dashboard', navigate: true);
+
+            return;
         }
+
+        $this->email = Auth::user()->email;
     }
 
-    public function save(): void
+    public function save(UpdateLoginEmail $loginEmail): void
     {
         $user = Auth::user();
+        $canEditEmail = $user->can('updateLoginEmail', $user);
+        $this->email = LoginEmailRequest::normalize($this->email);
 
-        $this->validate([
+        $validated = $this->validate([
             'password' => [
                 ...$this->passwordRules(),
                 // Tidak boleh sama dengan kata sandi lama/awal
@@ -35,12 +45,18 @@ new #[Layout('layouts::auth')] #[Title('Ganti kata sandi')] class extends Compon
                     }
                 },
             ],
-        ]);
+            ...($canEditEmail ? LoginEmailRequest::rulesFor($user) : []),
+        ], LoginEmailRequest::messagesFor());
 
         $user->forceFill([
             'password' => $this->password,
             'must_change_password' => false,
         ])->save();
+
+        // Email opsional untuk login selain No. HP; dikosongkan tidak menghapus email yang sudah ada.
+        if ($canEditEmail && filled($validated['email'] ?? null)) {
+            $loginEmail->handle($user, $validated['email']);
+        }
 
         activity('pengguna')->causedBy($user)->performedOn($user)->log('Mengganti kata sandi awal');
 
@@ -63,6 +79,11 @@ new #[Layout('layouts::auth')] #[Title('Ganti kata sandi')] class extends Compon
                     description="Minimal 8 karakter. Jangan pakai tanggal lahir atau nomor HP." />
 
         <flux:input wire:model="password_confirmation" label="Ulangi kata sandi baru" type="password" required autocomplete="new-password" viewable />
+
+        @can('updateLoginEmail', auth()->user())
+            <flux:input wire:model="email" label="Email (opsional)" type="email" autocomplete="email" placeholder="nama@contoh.com"
+                        description="Isi supaya bisa login pakai email atau No. HP." />
+        @endcan
 
         <flux:button variant="primary" type="submit" class="w-full">Simpan kata sandi</flux:button>
     </form>

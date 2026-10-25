@@ -3,6 +3,12 @@
 Versi ditampilkan di halaman login dan menu aplikasi (`config/wokabulari.php` → `version`).
 Aturan penomoran: **patch** (1.0.x) perbaikan, **minor** (1.x.0) fitur baru, **major** (x.0.0) perubahan besar.
 
+## 1.1.0 — 25 Oktober 2026
+
+- Semua pengguna kecuali super admin bisa mengisi email sendiri (di Profil atau saat login pertama), lalu login memakai email atau No. HP.
+- Email disimpan huruf kecil dan harus unik; No. HP dan email tidak boleh dikosongkan bersamaan.
+- Email super admin hanya diatur lewat server.
+
 ## 1.0.0 — 25 Oktober 2026
 
 Rilis pertama di https://wokabulari.poltekkes-manado.ac.id.

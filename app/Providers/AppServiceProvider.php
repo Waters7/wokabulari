@@ -61,8 +61,12 @@ class AppServiceProvider extends ServiceProvider
 
     protected function configureAuthorization(): void
     {
-        // Super admin mendapat semua akses.
-        Gate::before(function (User $user) {
+        // Super admin mendapat semua akses, kecuali kemampuan yang sengaja dibatasi untuknya.
+        Gate::before(function (User $user, string $ability) {
+            if ($ability === 'updateLoginEmail') {
+                return null;
+            }
+
             return $user->hasRole(Role::SuperAdmin->value) ? true : null;
         });
     }

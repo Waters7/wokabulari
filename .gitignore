@@ -45,6 +45,8 @@ yarn-error.log
 !.env.production.example
 !.env.db.example
 /storage/app/backups
+# Paket unggah ke server (berisi .env produksi & rahasia) — jangan pernah di-commit
+/deploy-paket
 # Data peserta asli (data pribadi) tidak boleh masuk repo publik
 /database/data/*.csv
 !/database/data/contoh-peserta.csv

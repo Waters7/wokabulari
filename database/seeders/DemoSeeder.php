@@ -23,6 +23,11 @@ use Illuminate\Support\Facades\Hash;
  */
 class DemoSeeder extends Seeder
 {
+    protected const PHASE_SEEDERS = [
+        'LearningDemoSeeder', 'AssessmentDemoSeeder', 'AssignmentDemoSeeder', 'QuizDemoSeeder',
+        'MealDemoSeeder', 'DormDemoSeeder', 'GuardianDemoSeeder', 'GamificationDemoSeeder', 'ProgramDemoSeeder',
+    ];
+
     protected string $password;
 
     public function run(): void
@@ -110,9 +115,11 @@ class DemoSeeder extends Seeder
             Vendor::query()->updateOrCreate(['name' => $vendor], ['contact_person' => 'Ibu '.explode(' ', $vendor)[1], 'phone' => '6281355500'.(str_contains($vendor, 'Rica') ? '01' : '02'), 'address' => 'Manado', 'is_active' => true]);
         }
 
-        // Seeder data contoh fase berikutnya (dijalankan bila sudah ada).
-        foreach (glob(database_path('seeders/Demo/*.php')) ?: [] as $file) {
-            $this->call('Database\\Seeders\\Demo\\'.basename($file, '.php'));
+        // Seeder data contoh fase berikutnya, berurutan (dijalankan bila sudah ada).
+        foreach (self::PHASE_SEEDERS as $seeder) {
+            if (class_exists($class = 'Database\\Seeders\\Demo\\'.$seeder)) {
+                $this->call($class);
+            }
         }
     }
 

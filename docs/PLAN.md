@@ -44,10 +44,10 @@ Acuan: SPEC 3.3, 3.4, 3.5, 3.11
 
 ## Fase 4 — Penilaian Sesi & Periodik
 Acuan: SPEC 3.6, 3.9, 3.10
-- [ ] Komponen penilaian + template, input skor massal, nilai tertimbang
-- [ ] Catatan per sesi (opsi boleh dilihat wali)
-- [ ] Penilaian mingguan/bulanan dengan saran nilai, draft/terbit
-- [ ] Halaman nilai peserta + grafik
+- [x] Komponen penilaian + template, input skor massal, nilai tertimbang
+- [x] Catatan per sesi (opsi boleh dilihat wali)
+- [x] Penilaian mingguan/bulanan dengan saran nilai, draft/terbit
+- [x] Halaman nilai peserta + grafik
 
 ## Fase 5 — Tugas / PR
 Acuan: SPEC 3.7
@@ -163,3 +163,11 @@ Acuan: DOCKER.md bagian C–D
 - Materi per sesi + bank materi (salin ke sesi), pratinjau PDF/audio/video/YouTube, unduh lewat signed URL, log akses, cache offline service worker.
 - Izin/sakit kelas dengan lampiran; persetujuan mengisi status di absen harian & sesi; notifikasi (database/email/WhatsApp driver `log`).
 - Cast `DateOnly` untuk semua kolom DATE. Test: 96 lulus.
+
+### Fase 4 — 26 Okt 2026
+- Komponen penilaian per sesi (aspek, bobot, skor maks.) + template milik pengajar; komponen dari quiz/tugas (source quiz/assignment) diisi otomatis & terkunci.
+- Tabel skor peserta × komponen: simpan otomatis per sel tanpa render ulang, navigasi Enter/↑/↓, nilai akhir tertimbang 0–100 diperbarui langsung.
+- Catatan perkembangan per sesi (aspek, boleh dilihat wali, status dibaca).
+- Penilaian mingguan/bulanan: kartu per peserta (nyaman di HP), saran nilai dari komponen sesi pada periode itu, rata-rata & predikat otomatis, draf → terbit + notifikasi, kembalikan ke draf.
+- Halaman Nilai & Masukan peserta: penilaian terakhir, grafik radar & garis per aspek (Chart.js), timeline catatan + penilaian dengan badge baru, nilai per sesi.
+- Test: 115 lulus. Dicek di 360px: panel penilaian, autosave sel, penilaian periodik, halaman nilai peserta.

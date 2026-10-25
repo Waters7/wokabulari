@@ -94,7 +94,7 @@ new #[Title('Detail sesi')] class extends Component {
     <div class="mb-4 flex gap-1 overflow-x-auto rounded-xl bg-white p-1 ring-1 ring-woka-100 dark:bg-hutan-900 dark:ring-hutan-800" role="tablist">
         @foreach ($tabs as $key => $label)
             <button type="button" role="tab" wire:click="$set('tab', '{{ $key }}')" aria-selected="{{ $tab === $key ? 'true' : 'false' }}"
-                    @class(['min-h-11 flex-1 whitespace-nowrap rounded-lg px-4 text-sm font-semibold transition', 'bg-woka text-white' => $tab === $key, 'text-hutan/70 hover:bg-woka-50 dark:text-santan/70 dark:hover:bg-hutan-800' => $tab !== $key])>
+                    @class(['min-h-11 flex-1 whitespace-nowrap rounded-lg px-2.5 text-sm font-semibold transition sm:px-4', 'bg-woka text-white' => $tab === $key, 'text-hutan/70 hover:bg-woka-50 dark:text-santan/70 dark:hover:bg-hutan-800' => $tab !== $key])>
                 {{ $label }}
             </button>
         @endforeach

@@ -65,6 +65,16 @@ class LearningSession extends Model
         return $this->hasMany(SessionAttendance::class);
     }
 
+    public function components(): HasMany
+    {
+        return $this->hasMany(SessionAssessmentComponent::class)->orderBy('id');
+    }
+
+    public function notes(): HasMany
+    {
+        return $this->hasMany(SessionNote::class)->latest();
+    }
+
     public function materials(): HasMany
     {
         return $this->hasMany(SessionMaterial::class)->orderBy('sort_order')->orderBy('id');

@@ -14,6 +14,7 @@ Route::middleware('role:participant')->group(function () {
     Route::livewire('kode-sesi', 'pages::participant.session-code')->name('sessions.code');
     Route::livewire('materi', 'pages::participant.materials')->name('materials.index');
     Route::livewire('izin', 'pages::participant.leave')->name('leave.index');
+    Route::livewire('nilai', 'pages::participant.grades')->name('grades.index');
 });
 
 // Materi bisa dibuka peserta dan pengajar (otorisasi di policy)

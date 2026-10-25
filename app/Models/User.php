@@ -115,6 +115,21 @@ class User extends Authenticatable
         return $this->hasMany(LeaveRequest::class);
     }
 
+    public function sessionScores(): HasMany
+    {
+        return $this->hasMany(SessionScore::class);
+    }
+
+    public function sessionNotes(): HasMany
+    {
+        return $this->hasMany(SessionNote::class);
+    }
+
+    public function assessments(): HasMany
+    {
+        return $this->hasMany(Assessment::class);
+    }
+
     // ---- Role & unit
 
     public function primaryRole(): ?Role

@@ -8,6 +8,7 @@ Route::prefix('mengajar')->name('teach.')->group(function () {
     Route::livewire('sesi/{session}', 'pages::teach.session-show')->name('sessions.show');
     Route::livewire('sesi/{session}/proyektor', 'pages::teach.session-projector')->name('sessions.projector');
     Route::livewire('bank-materi', 'pages::teach.materials-bank')->name('materials.bank')->middleware('can:material.manage');
+    Route::livewire('penilaian', 'pages::teach.assessments')->name('assessments.index')->middleware('can:assessment.manage');
 });
 
 // Pendampingan (pengajar & admin program)

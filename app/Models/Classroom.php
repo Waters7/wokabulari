@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\Activitylog\Models\Concerns\LogsActivity;
 use Spatie\Activitylog\Support\LogOptions;
@@ -45,6 +46,11 @@ class Classroom extends Model
     public function participants(): BelongsToMany
     {
         return $this->belongsToMany(User::class)->withPivot('joined_at')->withTimestamps();
+    }
+
+    public function sessions(): HasMany
+    {
+        return $this->hasMany(LearningSession::class)->orderBy('date')->orderBy('start_time');
     }
 
     public function scopeActive(Builder $query): void

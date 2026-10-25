@@ -38,6 +38,12 @@ class LearningSessionPolicy
         return $this->update($user, $session) && $session->status === SessionStatus::Scheduled;
     }
 
+    /** Input komponen, skor, dan catatan sesi. */
+    public function assess(User $user, LearningSession $session): bool
+    {
+        return $user->can('assessment.manage') && $this->teaches($user, $session);
+    }
+
     protected function teaches(User $user, LearningSession $session): bool
     {
         return $session->teacher_id === $user->id || $session->classroom?->teacher_id === $user->id;

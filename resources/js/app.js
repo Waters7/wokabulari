@@ -7,6 +7,7 @@ const modules = {
     map: () => import('./modules/map.js'),
     face: () => import('./modules/face.js'),
     qr: () => import('./modules/qr-scanner.js'),
+    charts: () => import('./modules/charts.js'),
 };
 
 window.Wokabulari = {
@@ -123,6 +124,18 @@ document.addEventListener('alpine:init', () => {
         },
         destroy() {
             this.handle?.stop();
+        },
+    }));
+
+    // Grafik Chart.js: <div x-data="chart({type, data})"><canvas x-ref="canvas"></canvas></div>
+    window.Alpine.data('chart', (config) => ({
+        instance: null,
+        async init() {
+            const { createChart } = await window.Wokabulari.load('charts');
+            this.instance = createChart(this.$refs.canvas, config);
+        },
+        destroy() {
+            this.instance?.destroy();
         },
     }));
 

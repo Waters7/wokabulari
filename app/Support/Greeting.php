@@ -18,7 +18,9 @@ class Greeting
             default => 'Selamat malam',
         };
 
-        $first = $name ? strtok($name, ' ') : null;
+        // "Bapak Yosef Lumowa" → "Bapak Yosef" (sapaan ikut nama depan).
+        $words = $name ? preg_split('/\s+/', trim($name)) : [];
+        $first = $words ? (in_array(strtolower($words[0]), ['bapak', 'ibu', 'pak', 'bu', 'bpk'], true) && isset($words[1]) ? $words[0].' '.$words[1] : $words[0]) : null;
 
         return $first ? "{$time}, {$first}!" : "{$time}!";
     }

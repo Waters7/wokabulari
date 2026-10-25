@@ -79,10 +79,10 @@ Acuan: SPEC 3.15–3.18
 
 ## Fase 9 — Portal Wali
 Acuan: SPEC 3.19
-- [ ] Undangan & verifikasi wali, login
-- [ ] Tampilan anak (kehadiran, nilai, tugas, izin, sakit, poin)
-- [ ] Persetujuan wali untuk izin keluar
-- [ ] Notifikasi ke wali
+- [x] Undangan & verifikasi wali, login
+- [x] Tampilan anak (kehadiran, nilai, tugas, izin, sakit, poin) — poin menyusul Fase 10
+- [x] Persetujuan wali untuk izin keluar
+- [x] Notifikasi ke wali
 
 ## Fase 10 — Gamifikasi
 Acuan: SPEC 3.20
@@ -209,3 +209,11 @@ Acuan: DOCKER.md bagian C–D
 - Scheduler: pengingat belum absen asrama ke pengelola (tiap 15 menit, hanya bila daftar berubah) & ke wali setelah jam malam (sekali per malam), tutup absen malam 00.05.
 - Perbaikan: varian mode gelap untuk teks redup di semua halaman.
 - Test: 177 lulus. Dicek di 360px: absen asrama, izin keluar, lapor sakit (peserta); absen malam, izin keluar, pindai QR, keluhan, inventaris, laporan sakit & detail (petugas).
+
+### Fase 9 — 25 Okt 2026
+- Undangan wali oleh admin (kode + tautan, dikirim via WhatsApp/email bila diisi) atau kode yang dibagikan peserta dari menu Wali Saya; halaman publik Daftar akun wali (tautan di halaman login) dengan rate limit; wali yang sudah punya akun menautkan anak lain lewat Hubungkan Anak.
+- Verifikasi hubungan oleh admin program di menu Wali (menunggu/terverifikasi/undangan, batalkan undangan); undangan admin + nomor HP sama langsung terverifikasi.
+- Portal wali (mobile): beranda kartu anak + status hari ini, Ringkasan Anak (kelas/asrama hari ini, kehadiran 30 hari, tugas terkumpul, izin keluar, laporan sakit, kontak asrama), kalender kehadiran kelas & asrama berwarna, nilai periodik & catatan yang boleh dilihat wali + pretest–posttest, persetujuan izin keluar. Pemilih anak bila lebih dari satu.
+- Privasi: wali hanya melihat anak terverifikasi (selain itu 403), tanpa selfie, data peserta lain, atau rating anonim.
+- Notifikasi ke wali: anak alpa di sesi, belum absen asrama setelah jam malam, izin keluar (perlu persetujuan, disetujui/ditolak, terlambat, sudah kembali), laporan sakit, nilai bulanan terbit.
+- Test: 188 lulus. Dicek di 360px: beranda wali, ringkasan anak, kehadiran, nilai, persetujuan, daftar wali, halaman admin Wali (termasuk buat undangan).

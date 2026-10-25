@@ -4,6 +4,7 @@ namespace App\Actions\Sessions;
 
 use App\Enums\AttendanceStatus;
 use App\Enums\SessionStatus;
+use App\Events\ParticipantMarkedAbsent;
 use App\Models\LearningSession;
 use App\Models\LeaveRequest;
 use App\Models\SessionAttendance;
@@ -17,7 +18,9 @@ class EndSession
 {
     public function handle(LearningSession $session, User $by): int
     {
-        return DB::transaction(function () use ($session, $by) {
+        $absent = [];
+
+        $count = DB::transaction(function () use ($session, $by, &$absent) {
             $session->codes()->where('is_active', true)->update(['is_active' => false]);
             $session->update([
                 'status' => SessionStatus::Completed,
@@ -40,9 +43,20 @@ class EndSession
                     'marked_by' => $by->id,
                     'note' => $leave ? 'Izin disetujui: '.$leave->reason : 'Otomatis: tidak input kode sampai sesi selesai',
                 ]);
+
+                if (! $leave) {
+                    $absent[] = $userId;
+                }
             }
 
             return $missing->count();
         });
+
+        // Kabari wali setelah data tersimpan.
+        foreach (User::query()->whereKey($absent)->get() as $participant) {
+            event(new ParticipantMarkedAbsent($participant, $session));
+        }
+
+        return $count;
     }
 }

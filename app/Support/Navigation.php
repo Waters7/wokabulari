@@ -51,7 +51,7 @@ class Navigation
 
         $routes = match ($role) {
             Role::Participant => ['dashboard', 'attendance.daily', 'participant.class', 'participant.dorm'],
-            Role::Guardian => ['dashboard', 'guardian.attendance', 'guardian.approvals', 'notifications.index'],
+            Role::Guardian => ['dashboard', 'guardian.child', 'guardian.attendance', 'guardian.approvals'],
             Role::Staff => array_merge(['dashboard'], $this->staffBottomRoutes($user)),
             default => [],
         };
@@ -175,8 +175,10 @@ class Navigation
                 ['label' => 'Peringkat', 'icon' => 'trophy', 'route' => 'leaderboard', 'roles' => [Role::Participant, Role::Teacher, Role::ProgramAdmin, Role::Leader, Role::SuperAdmin]],
                 ['label' => 'Poin & Lencana', 'icon' => 'sparkles', 'route' => 'points.index', 'roles' => $participant],
                 ['label' => 'Sertifikat', 'icon' => 'academic-cap', 'route' => 'certificates.mine', 'roles' => $participant],
+                ['label' => 'Wali Saya', 'icon' => 'user-group', 'route' => 'participant.guardians', 'roles' => $participant],
             ],
             'Anak Saya' => [
+                ['label' => 'Ringkasan Anak', 'short' => 'Anak', 'icon' => 'user', 'route' => 'guardian.child', 'roles' => [Role::Guardian]],
                 ['label' => 'Kehadiran', 'icon' => 'calendar-days', 'route' => 'guardian.attendance', 'roles' => [Role::Guardian]],
                 ['label' => 'Nilai & Catatan', 'icon' => 'chart-bar', 'route' => 'guardian.grades', 'roles' => [Role::Guardian]],
                 ['label' => 'Persetujuan Izin', 'short' => 'Izin', 'icon' => 'check-badge', 'route' => 'guardian.approvals', 'roles' => [Role::Guardian]],

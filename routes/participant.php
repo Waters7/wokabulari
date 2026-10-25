@@ -25,6 +25,7 @@ Route::middleware('role:participant')->group(function () {
     Route::livewire('asrama/absen', 'pages::dorm.attendance')->name('dorm.attendance');
     Route::livewire('asrama/izin-keluar', 'pages::dorm.exits')->name('dorm.exit.index');
     Route::livewire('asrama/keluhan', 'pages::dorm.requests')->name('dorm.requests.index');
+    Route::livewire('profil/wali', 'pages::participant.guardians')->name('participant.guardians');
     Route::livewire('lapor-sakit', 'pages::health.report')->name('health.report');
 });
 

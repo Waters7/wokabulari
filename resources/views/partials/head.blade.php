@@ -21,5 +21,14 @@
 @fonts
 
 @vite(['resources/css/app.css', 'resources/js/app.js'])
+<script>
+    // Tampilan bawaan terang. Pilihan gelap/sistem dari Pengaturan → Tampilan tetap dihormati
+    // (Flux menghapus kunci saat "sistem" dipilih, jadi pilihan pengguna ditandai terpisah).
+    try {
+        if (! localStorage.getItem('flux.appearance') && ! localStorage.getItem('wokabulari.appearance-chosen')) {
+            localStorage.setItem('flux.appearance', 'light');
+        }
+    } catch (e) {}
+</script>
 @fluxAppearance
 @stack('head')

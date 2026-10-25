@@ -40,3 +40,7 @@ Route::livewire('notifikasi', 'pages::notifications')->name('notifications.index
 // Peringkat: peserta, pengajar, admin program, pimpinan (otorisasi di halaman)
 Route::livewire('peringkat', 'pages::leaderboard')->name('leaderboard');
 Route::get('peringkat/piagam', CharterController::class)->name('leaderboard.charter');
+
+// Pengumuman: dibaca semua pengguna; dikelola tim kerja, pengajar, pengelola asrama, admin program
+Route::livewire('pengumuman', 'pages::announcements.index')->name('announcements.index');
+Route::livewire('kelola/pengumuman', 'pages::manage.announcements')->name('manage.announcements')->middleware('can:announcement.manage');

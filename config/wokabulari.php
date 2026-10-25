@@ -106,7 +106,7 @@ return [
         'teacher' => [
             'participant.view', 'attendance.approve', 'session.manage', 'material.manage',
             'assessment.manage', 'assignment.manage', 'quiz.manage',
-            'leave.approve', 'word.manage', 'rating.view-teacher',
+            'leave.approve', 'word.manage', 'rating.view-teacher', 'announcement.manage',
         ],
         'staff' => [],
         'participant' => [],
@@ -117,8 +117,8 @@ return [
     | Permission tambahan untuk tim kerja sesuai unit (staff_units).
     */
     'unit_permissions' => [
-        'consumption' => ['meal.manage', 'meal.monitor', 'meal.proxy', 'vendor.manage', 'rating.view-vendor', 'report.view', 'report.export'],
+        'consumption' => ['meal.manage', 'meal.monitor', 'meal.proxy', 'vendor.manage', 'rating.view-vendor', 'report.view', 'report.export', 'announcement.manage'],
         'dormitory' => ['attendance.confirm-dorm', 'dorm-exit.approve', 'dorm-request.handle', 'dorm-inventory.manage', 'health.view-detail', 'health.handle', 'report.view', 'report.export', 'report.health-detail', 'announcement.manage'],
-        'health' => ['health.view-detail', 'health.handle', 'report.view', 'report.health-detail'],
+        'health' => ['health.view-detail', 'health.handle', 'report.view', 'report.health-detail', 'announcement.manage'],
     ],
 ];

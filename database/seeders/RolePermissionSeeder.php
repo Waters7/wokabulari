@@ -3,6 +3,8 @@
 namespace Database\Seeders;
 
 use App\Enums\Role;
+use App\Models\User;
+use App\Services\StaffUnitService;
 use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role as RoleModel;
@@ -27,6 +29,11 @@ class RolePermissionSeeder extends Seeder
 
             $model->syncPermissions($permissions);
         }
+
+        // Selaraskan ulang permission langsung tim kerja bila daftar permission unit berubah.
+        User::query()->whereHas('staffUnits')->with('staffUnits')->each(function (User $user) {
+            app(StaffUnitService::class)->sync($user, $user->staffUnits->pluck('unit')->all());
+        });
 
         app(PermissionRegistrar::class)->forgetCachedPermissions();
     }

@@ -49,4 +49,6 @@ new #[Title('Beranda')] class extends Component {
         @default
             @includeIf('dashboard.admin')
     @endswitch
+
+    @include('dashboard.announcements')
 </div>

@@ -92,7 +92,7 @@ Acuan: SPEC 3.20
 ## Fase 11 — Evaluasi, Pengumuman, Notifikasi, Sertifikat
 Acuan: SPEC 3.21, 3.22, 3.25
 - [ ] Form builder evaluasi + mode anonim + hasil
-- [ ] Pengumuman bersasaran, pusat notifikasi, channel WhatsApp (interface + driver log)
+- [x] Pengumuman bersasaran, pusat notifikasi, channel WhatsApp (interface + driver log)
 - [ ] Word of the Day
 - [ ] Sertifikat PDF + QR verifikasi publik
 
@@ -227,3 +227,11 @@ Acuan: DOCKER.md bagian C–D
 - Halaman Poin & Lencana (riwayat transparan, pilihan sembunyikan nama), admin Gamifikasi, kartu level & lencana anak di portal wali.
 - `app:gamification-backfill` untuk menghitung dari data lama (idempoten).
 - Test: 202 lulus. Dicek di 360px: beranda peserta, poin & lencana, peringkat, admin gamifikasi, portal wali; piagam PDF dicek.
+
+### Fase 11 (sebagian) — 25 Okt 2026
+- Pengumuman bersasaran (semua, kelas, asrama, peran) dengan sumber yang dibedakan: Tim Kerja (toska), Pengajar (limau), Asrama (ungu) — ikon, garis warna, filter per sumber, jumlah belum dibaca per sumber.
+- Kelola pengumuman: pengajar hanya ke kelasnya, unit asrama ke asrama, admin program & tim kerja ke semua sasaran; tandai penting, kirim juga via WhatsApp, terbit sekarang/terjadwal/draf; notifikasi sekali ke sasaran (termasuk wali dari kelas/asrama sasaran).
+- Tanda sudah dibaca (buka dari notifikasi langsung terbuka & tertandai), "Tandai semua dibaca", kartu Pengumuman terbaru di beranda semua peran.
+- Pusat notifikasi & channel WhatsApp (interface + driver log) sudah tersedia sejak fase sebelumnya.
+- Palet warna mengikuti identitas Kemenkes & logo BP3MI resmi di halaman login.
+- Test: 210 lulus. Dicek di 360px: daftar pengumuman (filter, buka, tanda dibaca), form pengajar, beranda.

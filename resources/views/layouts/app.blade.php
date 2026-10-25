@@ -12,6 +12,7 @@
         @include('partials.head')
     </head>
     <body class="min-h-screen bg-santan text-hutan antialiased dark:bg-hutan-950 dark:text-santan">
+        <div aria-hidden="true" class="fixed inset-x-0 top-0 z-50 h-1 bg-kemenkes-stripe"></div>
         <flux:sidebar sticky collapsible="mobile" class="border-e border-woka-100 bg-white dark:border-hutan-800 dark:bg-hutan-900">
             <flux:sidebar.header>
                 <x-app-logo :sidebar="true" href="{{ route('dashboard') }}" wire:navigate />

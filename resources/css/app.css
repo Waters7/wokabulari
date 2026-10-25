@@ -185,3 +185,30 @@ select:focus[data-flux-control] {
         animation: none;
     }
 }
+
+/* Gradasi & garis identitas Kemenkes (toska, langit, daun, limau) */
+@utility bg-kemenkes {
+    background-image: linear-gradient(135deg, var(--color-toska) 0%, var(--color-langit) 100%);
+}
+
+@utility bg-kemenkes-daun {
+    background-image: linear-gradient(135deg, var(--color-daun) 0%, var(--color-toska) 100%);
+}
+
+@utility bg-kemenkes-stripe {
+    background-image: linear-gradient(90deg, var(--color-toska) 0%, var(--color-langit) 35%, var(--color-daun) 70%, var(--color-limau) 100%);
+}
+
+/* Menu aktif di sidebar memakai toska (bukan abu-abu bawaan Flux) */
+[data-flux-sidebar-item][data-current] {
+    background-color: var(--color-woka-50) !important;
+    border-color: var(--color-woka-100) !important;
+    color: var(--color-woka) !important;
+    box-shadow: inset 3px 0 0 var(--color-toska);
+}
+
+.dark [data-flux-sidebar-item][data-current] {
+    background-color: color-mix(in oklab, var(--color-toska) 18%, transparent) !important;
+    border-color: transparent !important;
+    color: var(--color-toska) !important;
+}

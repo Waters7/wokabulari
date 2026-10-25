@@ -5,34 +5,35 @@
         @include('partials.head')
     </head>
     <body class="min-h-svh bg-santan text-hutan antialiased dark:bg-hutan-950 dark:text-santan">
+        <div aria-hidden="true" class="fixed inset-x-0 top-0 z-50 h-1 bg-kemenkes-stripe"></div>
         <div class="grid min-h-svh lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
             {{-- Panel identitas (desktop) --}}
-            <aside class="relative hidden overflow-hidden bg-hutan p-10 text-santan lg:flex lg:flex-col lg:justify-between xl:p-14">
-                <div aria-hidden="true" class="pointer-events-none absolute -end-10 -top-10 select-none font-display text-[12rem] font-extrabold leading-none text-white/[0.04]">
+            <aside class="relative hidden overflow-hidden bg-kemenkes p-10 text-hutan lg:flex lg:flex-col lg:justify-between xl:p-14">
+                <div aria-hidden="true" class="pointer-events-none absolute -end-10 -top-10 select-none font-display text-[12rem] font-extrabold leading-none text-white/20">
                     A中あÄ
                 </div>
 
                 <a href="{{ route('home') }}" class="relative">
-                    <img src="{{ asset('images/brand/logo-horizontal-dark.svg') }}" alt="Wokabulari" class="h-auto w-72">
+                    <img src="{{ asset('images/brand/logo-horizontal.svg') }}" alt="Wokabulari" class="h-auto w-72">
                 </a>
 
                 <div class="relative max-w-md">
                     <p class="font-display text-5xl font-extrabold leading-[1.05]">
                         Kaya Kosakata,<br>
-                        <span class="text-kunyit">Torang Go Global!</span>
+                        <span class="text-white [text-shadow:0_2px_6px_rgb(11_59_56/0.45)]">Torang Go Global!</span>
                     </p>
-                    <p class="mt-4 text-lg text-santan/80">
+                    <p class="mt-4 text-lg font-medium text-hutan/85">
                         Kelas Bahasa SMK Go Global · Poltekkes Kemenkes Manado
                     </p>
                     <ul class="mt-8 flex flex-wrap gap-2 text-sm font-semibold">
-                        <li class="rounded-full bg-white/10 px-3 py-1.5">English</li>
-                        <li class="rounded-full bg-white/10 px-3 py-1.5" lang="zh">中文</li>
-                        <li class="rounded-full bg-white/10 px-3 py-1.5" lang="ja">日本語</li>
-                        <li class="rounded-full bg-white/10 px-3 py-1.5">Deutsch</li>
+                        <li class="rounded-full bg-white/40 px-3 py-1.5">English</li>
+                        <li class="rounded-full bg-white/40 px-3 py-1.5" lang="zh">中文</li>
+                        <li class="rounded-full bg-white/40 px-3 py-1.5" lang="ja">日本語</li>
+                        <li class="rounded-full bg-white/40 px-3 py-1.5">Deutsch</li>
                     </ul>
                 </div>
 
-                <x-partner-logos class="relative [&>p]:text-santan/70" />
+                <x-partner-logos class="relative [&>p]:text-hutan/80" />
             </aside>
 
             {{-- Formulir --}}

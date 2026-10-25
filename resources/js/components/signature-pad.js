@@ -9,7 +9,7 @@ export default function signaturePad({ action, args = [] }) {
         async init() {
             const { default: SignaturePad } = await import('signature_pad');
             const canvas = this.$refs.canvas;
-            this.pad = new SignaturePad(canvas, { penColor: '#123B2D', minWidth: 0.8, maxWidth: 2.6, backgroundColor: 'rgba(0,0,0,0)' });
+            this.pad = new SignaturePad(canvas, { penColor: '#0B3B38', minWidth: 0.8, maxWidth: 2.6, backgroundColor: 'rgba(0,0,0,0)' });
             this.pad.addEventListener('endStroke', () => (this.empty = this.pad.isEmpty()));
             this.resize();
             // Kanvas di dalam modal baru punya ukuran setelah modal tampil: ukur ulang saat lebarnya berubah.

@@ -43,7 +43,7 @@
                             <img src="{{ asset('images/brand/logo-horizontal.svg') }}" alt="Wokabulari" class="mx-auto h-auto w-56 dark:hidden">
                             <img src="{{ asset('images/brand/logo-horizontal-dark.svg') }}" alt="Wokabulari" class="mx-auto hidden h-auto w-56 dark:block">
                         </a>
-                        <p class="mt-2 font-display text-lg font-bold text-rica dark:text-kunyit">Kaya Kosakata, Torang Go Global!</p>
+                        <p class="mt-2 font-display text-lg font-bold text-woka dark:text-kunyit">Kaya Kosakata, Torang Go Global!</p>
                     </div>
 
                     <div class="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-woka-100 sm:p-8 dark:bg-hutan-900 dark:ring-hutan-800">

@@ -17,7 +17,7 @@ class QrCodeService
     public function svg(string $content, int $size = 240, int $margin = 1): string
     {
         $renderer = new ImageRenderer(
-            new RendererStyle($size, $margin, null, null, Fill::uniformColor(new Rgb(255, 255, 255), new Rgb(18, 59, 45))),
+            new RendererStyle($size, $margin, null, null, Fill::uniformColor(new Rgb(255, 255, 255), new Rgb(11, 59, 56))),
             new SvgImageBackEnd,
         );
 

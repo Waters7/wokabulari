@@ -3,14 +3,14 @@ import { Chart, registerables } from 'chart.js';
 
 Chart.register(...registerables);
 
-export const palette = ['#2E7D4F', '#F2A81D', '#C8312A', '#5DB57B', '#123B2D', '#2563EB', '#9333EA', '#0D9488'];
+export const palette = ['#007D71', '#C2CC0F', '#1ABBCB', '#43BA7D', '#C8312A', '#0B3B38', '#2563EB', '#9333EA'];
 
 function isDark() {
     return document.documentElement.classList.contains('dark');
 }
 
 export function createChart(canvas, config) {
-    const text = isDark() ? '#FFFBF2' : '#123B2D';
+    const text = isDark() ? '#F5FBFA' : '#0B3B38';
     const grid = isDark() ? 'rgba(255,251,242,0.12)' : 'rgba(18,59,45,0.08)';
 
     Chart.defaults.font.family = getComputedStyle(document.body).fontFamily;

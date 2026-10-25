@@ -15,9 +15,9 @@ export function createPicker(el, { lat, lng, radius, editable = true, onChange =
     const map = L.map(el, { scrollWheelZoom: false }).setView([lat, lng], 17);
     L.tileLayer(TILE_URL, { maxZoom: 19, attribution: ATTRIBUTION }).addTo(map);
 
-    const style = { color: '#2E7D4F', fillColor: '#5DB57B', fillOpacity: 0.2, weight: 2 };
+    const style = { color: '#007D71', fillColor: '#04B8A6', fillOpacity: 0.2, weight: 2 };
     const circle = L.circle([lat, lng], { ...style, radius }).addTo(map);
-    const marker = L.circleMarker([lat, lng], { radius: 8, color: '#123B2D', fillColor: '#F2A81D', fillOpacity: 1, weight: 2 }).addTo(map);
+    const marker = L.circleMarker([lat, lng], { radius: 8, color: '#0B3B38', fillColor: '#D5E022', fillOpacity: 1, weight: 2 }).addTo(map);
 
     const move = (newLat, newLng) => {
         marker.setLatLng([newLat, newLng]);
@@ -65,11 +65,11 @@ export function createViewer(el, points) {
 
     const bounds = [];
     for (const point of points) {
-        const color = point.color ?? '#2E7D4F';
+        const color = point.color ?? '#007D71';
         if (point.radius) {
             L.circle([point.lat, point.lng], { radius: point.radius, color, fillOpacity: 0.15, weight: 2 }).addTo(map);
         }
-        const marker = L.circleMarker([point.lat, point.lng], { radius: 7, color: '#123B2D', fillColor: color, fillOpacity: 1, weight: 2 }).addTo(map);
+        const marker = L.circleMarker([point.lat, point.lng], { radius: 7, color: '#0B3B38', fillColor: color, fillOpacity: 1, weight: 2 }).addTo(map);
         if (point.label) {
             marker.bindTooltip(point.label);
         }

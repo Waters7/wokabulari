@@ -5,21 +5,21 @@
     <title>Piagam Apresiasi</title>
     <style>
         @page { margin: 0; }
-        body { margin: 0; font-family: 'DejaVu Sans', sans-serif; color: #123b2d; }
+        body { margin: 0; font-family: 'DejaVu Sans', sans-serif; color: #0b3b38; }
         /* A4 lanskap pada 96 dpi ≈ 1122 × 793 px; ukuran eksplisit karena dompdf tidak meregangkan top+bottom. */
-        .frame { position: absolute; top: 20px; left: 20px; width: 1068px; height: 738px; border: 6px solid #2e7d4f; }
-        .inner { position: absolute; top: 36px; left: 36px; width: 944px; height: 652px; border: 2px solid #f2a81d; padding: 30px 50px; text-align: center; }
+        .frame { position: absolute; top: 20px; left: 20px; width: 1068px; height: 738px; border: 6px solid #007d71; }
+        .inner { position: absolute; top: 36px; left: 36px; width: 944px; height: 652px; border: 2px solid #d5e022; padding: 30px 50px; text-align: center; }
         .logos img { height: 52px; margin: 0 14px; }
         .brand { height: 40px; margin-top: 6px; }
-        h1 { font-size: 40px; letter-spacing: 6px; margin: 18px 0 4px; color: #2e7d4f; }
-        .sub { font-size: 15px; letter-spacing: 2px; color: #8a5a00; text-transform: uppercase; }
+        h1 { font-size: 40px; letter-spacing: 6px; margin: 18px 0 4px; color: #007d71; }
+        .sub { font-size: 15px; letter-spacing: 2px; color: #5f6600; text-transform: uppercase; }
         .given { margin-top: 22px; font-size: 14px; }
-        .name { font-size: 34px; font-weight: bold; margin: 10px 0 4px; border-bottom: 2px solid #f2a81d; display: inline-block; padding: 0 30px 6px; }
+        .name { font-size: 34px; font-weight: bold; margin: 10px 0 4px; border-bottom: 2px solid #d5e022; display: inline-block; padding: 0 30px 6px; }
         .reason { font-size: 14px; line-height: 1.6; margin: 14px auto 0; width: 80%; }
-        .points { display: inline-block; margin-top: 12px; padding: 6px 18px; background: #f2a81d; color: #123b2d; font-weight: bold; border-radius: 20px; font-size: 14px; }
+        .points { display: inline-block; margin-top: 12px; padding: 6px 18px; background: #d5e022; color: #0b3b38; font-weight: bold; border-radius: 20px; font-size: 14px; }
         .sign { position: absolute; bottom: 30px; right: 60px; text-align: center; font-size: 13px; }
-        .sign .line { margin-top: 60px; border-top: 1px solid #123b2d; width: 220px; padding-top: 4px; }
-        .tagline { position: absolute; bottom: 34px; left: 60px; font-size: 12px; color: #2e7d4f; font-style: italic; }
+        .sign .line { margin-top: 60px; border-top: 1px solid #0b3b38; width: 220px; padding-top: 4px; }
+        .tagline { position: absolute; bottom: 34px; left: 60px; font-size: 12px; color: #007d71; font-style: italic; }
     </style>
 </head>
 <body>

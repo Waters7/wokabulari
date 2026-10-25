@@ -14,28 +14,38 @@
     --font-display: var(--font-baloo), 'Baloo 2', var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
     --font-cjk: 'Noto Sans SC', 'Noto Sans JP', var(--font-jakarta), sans-serif;
 
-    /* Palet Wokabulari (SPEC 1.2) */
-    --color-kunyit: #f2a81d;
-    --color-kunyit-50: #fef6e3;
-    --color-kunyit-100: #fdeac2;
-    --color-kunyit-700: #8a5a00;
-    --color-woka: #2e7d4f;
-    --color-woka-50: #ebf5ef;
-    --color-woka-100: #d3ebdd;
-    --color-woka-200: #a9d6bb;
-    --color-woka-700: #22603c;
-    --color-woka-800: #1a4a2e;
-    --color-woka-light: #5db57b;
-    --color-hutan: #123b2d;
-    --color-hutan-800: #0f3326;
-    --color-hutan-900: #0b2a20;
-    --color-hutan-950: #071d16;
+    /*
+     * Palet mengikuti pedoman identitas Kemenkes untuk UPT Poltekkes (DECISIONS #37).
+     * Warna resmi: toska C75 Y45 (#04B8A6), limau C20 Y100 (#D5E022), langit C74 Y21 (#1ABBCB), daun C69 Y68 (#43BA7D).
+     * Nama token lama dipertahankan: woka = teal utama (versi lebih gelap agar teks putih tetap terbaca, AA),
+     * woka-light = toska resmi, kunyit = limau, hutan = teal sangat gelap, santan = latar terang.
+     */
+    --color-toska: #04b8a6;
+    --color-limau: #d5e022;
+    --color-langit: #1abbcb;
+    --color-daun: #43ba7d;
+
+    --color-kunyit: #d5e022;
+    --color-kunyit-50: #f8fadb;
+    --color-kunyit-100: #eef3ae;
+    --color-kunyit-700: #5f6600;
+    --color-woka: #007d71;
+    --color-woka-50: #e6f7f5;
+    --color-woka-100: #c5eee9;
+    --color-woka-200: #8fdcd3;
+    --color-woka-700: #00665c;
+    --color-woka-800: #00524a;
+    --color-woka-light: #04b8a6;
+    --color-hutan: #0b3b38;
+    --color-hutan-800: #0a332f;
+    --color-hutan-900: #082a27;
+    --color-hutan-950: #051d1b;
     --color-rica: #c8312a;
     --color-rica-50: #fcecea;
     --color-rica-100: #f8d3d0;
     --color-rica-700: #a1251f;
-    --color-santan: #fffbf2;
-    --color-santan-200: #f5ecd7;
+    --color-santan: #f5fbfa;
+    --color-santan-200: #e2f2ef;
 
     --color-zinc-50: #fafafa;
     --color-zinc-100: #f5f5f5;

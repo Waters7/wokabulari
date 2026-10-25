@@ -75,7 +75,7 @@ new #[Title('Lokasi')] class extends Component {
 
     @if ($locations->isNotEmpty())
         <x-card :padding="false" class="mb-4 overflow-hidden">
-            <div x-data="mapViewer(@js($locations->map(fn ($l) => ['lat' => $l->latitude, 'lng' => $l->longitude, 'radius' => $l->radius_m, 'label' => $l->name, 'color' => $l->type === LocationType::Classroom ? '#2E7D4F' : '#2563eb'])->values()))"
+            <div x-data="mapViewer(@js($locations->map(fn ($l) => ['lat' => $l->latitude, 'lng' => $l->longitude, 'radius' => $l->radius_m, 'label' => $l->name, 'color' => $l->type === LocationType::Classroom ? '#007D71' : '#2563eb'])->values()))"
                  wire:ignore>
                 <div x-ref="map" class="h-64 w-full sm:h-80"></div>
             </div>

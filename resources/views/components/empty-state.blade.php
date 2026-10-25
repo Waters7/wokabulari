@@ -11,7 +11,7 @@
             <path d="M30 14c0-4 4-4 4-8M42 14c0-4 4-4 4-8" stroke="currentColor" stroke-width="3" stroke-linecap="round" opacity=".5"/>
             <rect x="8" y="22" width="64" height="6" rx="3" fill="currentColor" opacity=".35"/>
             <path d="M12 28h56c0 16-12.5 28-28 28S12 44 12 28Z" fill="currentColor" opacity=".8"/>
-            <path d="M22 36c10 4 26 4 36 0" stroke="#fffbf2" stroke-width="3" stroke-linecap="round" opacity=".7"/>
+            <path d="M22 36c10 4 26 4 36 0" stroke="#f5fbfa" stroke-width="3" stroke-linecap="round" opacity=".7"/>
         </svg>
     @endif
     <p class="font-display text-lg font-bold text-hutan dark:text-santan">{{ $title }}</p>

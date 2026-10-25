@@ -5,6 +5,7 @@ namespace App\Actions\Dorm;
 use App\Enums\ExitPermitStatus;
 use App\Enums\ExitPermitType;
 use App\Enums\StaffUnit;
+use App\Events\ExitPermitReturnedLate;
 use App\Models\DormExitPermit;
 use App\Models\LearningSession;
 use App\Models\User;
@@ -212,6 +213,7 @@ class ManageExitPermits
         foreach ($late as $permit) {
             $permit->update(['status' => ExitPermitStatus::LateReturn, 'was_late' => true, 'late_notified_at' => now()]);
             Notification::send($this->managers()->merge($permit->user->guardians()->get()), new ExitPermitNotification($permit, 'late'));
+            event(new ExitPermitReturnedLate($permit));
         }
 
         return $late->count();

@@ -20,6 +20,11 @@ Route::prefix('master')->name('master.')->group(function () {
     Route::livewire('vendor', 'pages::master.vendors')->name('vendors')->middleware('can:vendor.manage');
 });
 
+// Kegiatan program
+Route::prefix('kelola')->name('manage.')->group(function () {
+    Route::livewire('gamifikasi', 'pages::manage.gamification')->name('gamification')->middleware('can:gamification.manage');
+});
+
 // Sistem (super admin)
 Route::prefix('sistem')->name('system.')->group(function () {
     Route::livewire('pengaturan', 'pages::system.settings')->name('settings')->middleware('can:setting.manage');

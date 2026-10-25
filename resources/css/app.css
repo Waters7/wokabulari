@@ -168,3 +168,10 @@ select:focus[data-flux-control] {
 .animate-pop-in {
     animation: pop-in 0.35s ease-out both;
 }
+
+@media (prefers-reduced-motion: reduce) {
+    .animate-flame,
+    .animate-pop-in {
+        animation: none;
+    }
+}

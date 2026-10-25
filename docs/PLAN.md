@@ -80,14 +80,14 @@ Acuan: SPEC 3.15–3.18
 ## Fase 9 — Portal Wali
 Acuan: SPEC 3.19
 - [x] Undangan & verifikasi wali, login
-- [x] Tampilan anak (kehadiran, nilai, tugas, izin, sakit, poin) — poin menyusul Fase 10
+- [x] Tampilan anak (kehadiran, nilai, tugas, izin, sakit, poin)
 - [x] Persetujuan wali untuk izin keluar
 - [x] Notifikasi ke wali
 
 ## Fase 10 — Gamifikasi
 Acuan: SPEC 3.20
-- [ ] Aturan poin, transaksi poin idempoten, level, lencana, streak
-- [ ] Leaderboard, peserta terbaik minggu ini, piagam apresiasi
+- [x] Aturan poin, transaksi poin idempoten, level, lencana, streak
+- [x] Leaderboard, peserta terbaik minggu ini, piagam apresiasi
 
 ## Fase 11 — Evaluasi, Pengumuman, Notifikasi, Sertifikat
 Acuan: SPEC 3.21, 3.22, 3.25
@@ -217,3 +217,13 @@ Acuan: DOCKER.md bagian C–D
 - Privasi: wali hanya melihat anak terverifikasi (selain itu 403), tanpa selfie, data peserta lain, atau rating anonim.
 - Notifikasi ke wali: anak alpa di sesi, belum absen asrama setelah jam malam, izin keluar (perlu persetujuan, disetujui/ditolak, terlambat, sudah kembali), laporan sakit, nilai bulanan terbit.
 - Test: 188 lulus. Dicek di 360px: beranda wali, ringkasan anak, kehadiran, nilai, persetujuan, daftar wali, halaman admin Wali (termasuk buat undangan).
+
+### Fase 10 — 25 Okt 2026
+- Aturan poin (`gamification_rules`) dapat diatur admin: poin, batas per hari, aktif/nonaktif; pengurang poin alpa & terlambat kembali nonaktif bawaan.
+- `point_transactions` idempoten (unique user+event+referensi) lewat Event & Listener: absen harian tepat waktu, input kode sesi, absen asrama mandiri terkonfirmasi, tugas tepat waktu, nilai tugas ≥ 85, quiz (skor% ÷ 5 maks. 20 + bonus sempurna), rating mingguan; penyesuaian manual admin tercatat.
+- Level bumbu woku (Kemangi → Serai → Jahe → Kunyit → Woku Komplit) + notifikasi naik level; 10 lencana berbasis kriteria JSON (poin, streak, jumlah event, aspek penilaian, juara mingguan) + notifikasi.
+- Streak harian (hari tanpa sesi tidak memutus) dengan animasi api di beranda; `app:update-streaks` 00.05.
+- Peringkat mingguan/minggu lalu/total per kelas & antarkelas (rata-rata), nama tersembunyi tampil inisial; Peserta Terbaik Minggu Ini di beranda; piagam apresiasi PDF; lencana Bintang Pekan Ini tiap Senin 06.00.
+- Halaman Poin & Lencana (riwayat transparan, pilihan sembunyikan nama), admin Gamifikasi, kartu level & lencana anak di portal wali.
+- `app:gamification-backfill` untuk menghitung dari data lama (idempoten).
+- Test: 202 lulus. Dicek di 360px: beranda peserta, poin & lencana, peringkat, admin gamifikasi, portal wali; piagam PDF dicek.

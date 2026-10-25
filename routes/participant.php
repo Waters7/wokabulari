@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\CharterController;
 use App\Http\Controllers\MaterialFileController;
 use Illuminate\Support\Facades\Route;
 
@@ -25,6 +26,7 @@ Route::middleware('role:participant')->group(function () {
     Route::livewire('asrama/absen', 'pages::dorm.attendance')->name('dorm.attendance');
     Route::livewire('asrama/izin-keluar', 'pages::dorm.exits')->name('dorm.exit.index');
     Route::livewire('asrama/keluhan', 'pages::dorm.requests')->name('dorm.requests.index');
+    Route::livewire('poin', 'pages::participant.points')->name('points.index');
     Route::livewire('profil/wali', 'pages::participant.guardians')->name('participant.guardians');
     Route::livewire('lapor-sakit', 'pages::health.report')->name('health.report');
 });
@@ -34,3 +36,7 @@ Route::livewire('materi/{material}', 'pages::participant.material-show')->name('
 Route::get('materi/{material}/berkas', MaterialFileController::class)->name('materials.file')->middleware('signed');
 
 Route::livewire('notifikasi', 'pages::notifications')->name('notifications.index');
+
+// Peringkat: peserta, pengajar, admin program, pimpinan (otorisasi di halaman)
+Route::livewire('peringkat', 'pages::leaderboard')->name('leaderboard');
+Route::get('peringkat/piagam', CharterController::class)->name('leaderboard.charter');

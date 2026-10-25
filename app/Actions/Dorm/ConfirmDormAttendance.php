@@ -3,6 +3,7 @@
 namespace App\Actions\Dorm;
 
 use App\Enums\DormAttendanceStatus;
+use App\Events\DormAttendanceConfirmed;
 use App\Models\DormAttendance;
 use App\Models\User;
 use Carbon\CarbonImmutable;
@@ -40,6 +41,10 @@ class ConfirmDormAttendance
             'note' => filled($note) ? trim($note) : $attendance->note,
         ])->save();
 
+        if ($status === DormAttendanceStatus::Confirmed) {
+            event(new DormAttendanceConfirmed($attendance));
+        }
+
         return $attendance;
     }
 
@@ -54,11 +59,10 @@ class ConfirmDormAttendance
             ->whereKey($attendanceIds)
             ->where('status', DormAttendanceStatus::PendingConfirmation)
             ->get()
-            ->each(fn (DormAttendance $attendance) => $attendance->update([
-                'status' => DormAttendanceStatus::Confirmed,
-                'confirmed_by' => $by->id,
-                'confirmed_at' => now(),
-            ]))
+            ->each(function (DormAttendance $attendance) use ($by) {
+                $attendance->update(['status' => DormAttendanceStatus::Confirmed, 'confirmed_by' => $by->id, 'confirmed_at' => now()]);
+                event(new DormAttendanceConfirmed($attendance));
+            })
             ->count());
     }
 

@@ -155,6 +155,21 @@ class User extends Authenticatable
         return $this->hasMany(HealthReport::class);
     }
 
+    public function pointTransactions(): HasMany
+    {
+        return $this->hasMany(PointTransaction::class);
+    }
+
+    public function badges(): BelongsToMany
+    {
+        return $this->belongsToMany(Badge::class)->withPivot('earned_at')->withTimestamps();
+    }
+
+    public function streak(): HasOne
+    {
+        return $this->hasOne(Streak::class);
+    }
+
     /** Wali peserta (semua hubungan, termasuk yang belum diverifikasi). */
     public function allGuardians(): BelongsToMany
     {

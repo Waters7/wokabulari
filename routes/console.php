@@ -17,3 +17,5 @@ Schedule::command('app:check-late-returns')->everyFifteenMinutes()->withoutOverl
 Schedule::command('app:dorm-attendance-alerts')->everyFifteenMinutes()->between('19:00', '23:59')->withoutOverlapping();
 Schedule::command('app:health-check-reminders')->hourly();
 Schedule::command('app:close-dorm-night')->dailyAt('00:05');
+Schedule::command('app:update-streaks')->dailyAt('00:05');
+Schedule::command('app:weekly-champions')->mondays()->at('06:00');

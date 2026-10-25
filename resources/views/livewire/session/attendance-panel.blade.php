@@ -133,7 +133,7 @@ new class extends Component {
                         </div>
                     @endif
                 @else
-                    <flux:icon.lock-closed class="mx-auto size-10 text-hutan/40" />
+                    <flux:icon.lock-closed class="mx-auto size-10 text-hutan/40 dark:text-santan/40" />
                     <p class="mt-2 font-semibold">Belum ada kode aktif</p>
                     <p class="text-sm text-hutan/60 dark:text-santan/60">Kode kedaluwarsa atau ditutup.</p>
                     @if ($canManage)
@@ -179,7 +179,7 @@ new class extends Component {
                             @if ($record)
                                 <x-status-badge :status="$record->status" />
                                 @if ($record->note)
-                                    <span class="block max-w-52 truncate text-xs text-hutan/60" title="{{ $record->note }}">{{ $record->note }}</span>
+                                    <span class="block max-w-52 truncate text-xs text-hutan/60 dark:text-santan/60" title="{{ $record->note }}">{{ $record->note }}</span>
                                 @endif
                             @else
                                 <flux:badge size="sm" color="zinc">Belum input</flux:badge>

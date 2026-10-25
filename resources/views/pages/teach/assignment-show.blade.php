@@ -164,7 +164,7 @@ new #[Title('Detail tugas')] class extends Component {
                     <flux:radio value="ungraded">Perlu dinilai</flux:radio>
                     <flux:radio value="all">Semua</flux:radio>
                 </flux:radio.group>
-                <span class="text-sm text-hutan/60">{{ $queueCount ? min($this->index + 1, $queueCount).' / '.$queueCount : '0' }}</span>
+                <span class="text-sm text-hutan/60 dark:text-santan/60">{{ $queueCount ? min($this->index + 1, $queueCount).' / '.$queueCount : '0' }}</span>
             </div>
 
             @if ($current)
@@ -176,7 +176,7 @@ new #[Title('Detail tugas')] class extends Component {
                         <flux:button size="sm" variant="ghost" icon="chevron-left" wire:click="go(-1)" :disabled="$this->index === 0" aria-label="Sebelumnya" />
                         <div class="min-w-0 text-center">
                             <p class="truncate font-display text-lg font-bold">{{ $current->user->name }}</p>
-                            <p class="text-xs text-hutan/60">Dikumpulkan {{ tanggal_jam($current->submitted_at) }}
+                            <p class="text-xs text-hutan/60 dark:text-santan/60">Dikumpulkan {{ tanggal_jam($current->submitted_at) }}
                                 @if ($current->is_late) · <span class="font-semibold text-rica">terlambat (−{{ $assignment->late_penalty_percent }}%)</span>@endif
                                 @if ($current->revision_count) · revisi ke-{{ $current->revision_count }}@endif
                             </p>
@@ -227,7 +227,7 @@ new #[Title('Detail tugas')] class extends Component {
             <x-card title="Instruksi">
                 <p class="whitespace-pre-line text-sm">{{ $assignment->instructions }}</p>
                 @if ($assignment->session)
-                    <p class="mt-2 text-xs text-hutan/60">Ditautkan ke sesi {{ tanggal($assignment->session->date) }} · {{ $assignment->session->topic }}</p>
+                    <p class="mt-2 text-xs text-hutan/60 dark:text-santan/60">Ditautkan ke sesi {{ tanggal($assignment->session->date) }} · {{ $assignment->session->topic }}</p>
                 @endif
                 @foreach ($assignment->attachments as $attachment)
                     <flux:button class="mt-2" size="sm" icon="paper-clip" :href="$attachment->url()" target="_blank">{{ $attachment->original_name }}</flux:button>

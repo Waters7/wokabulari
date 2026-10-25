@@ -164,7 +164,7 @@ new #[Title('Monitor makan')] class extends Component {
                 <div class="flex flex-wrap items-center justify-between gap-3">
                     <div class="min-w-0">
                         <p class="font-semibold">{{ $schedule->menu }}</p>
-                        <p class="text-sm text-hutan/60">{{ $schedule->vendor->name }} · {{ $schedule->windowLabel() }} WITA · dipesan {{ $schedule->portions_ordered }} porsi</p>
+                        <p class="text-sm text-hutan/60 dark:text-santan/60">{{ $schedule->vendor->name }} · {{ $schedule->windowLabel() }} WITA · dipesan {{ $schedule->portions_ordered }} porsi</p>
                     </div>
                     @if ($schedule->isOpen())
                         <flux:badge color="amber" icon="signal">Sedang dibuka</flux:badge>
@@ -177,7 +177,7 @@ new #[Title('Monitor makan')] class extends Component {
                 @php($percent = $total ? round($receivedCount / $total * 100) : 0)
                 <div class="mt-4">
                     <div class="flex items-end justify-between">
-                        <p class="font-display text-4xl font-bold text-woka">{{ $receivedCount }}<span class="text-xl text-hutan/50">/{{ $total }}</span></p>
+                        <p class="font-display text-4xl font-bold text-woka">{{ $receivedCount }}<span class="text-xl text-hutan/50 dark:text-santan/50">/{{ $total }}</span></p>
                         <p class="text-sm font-semibold">{{ $percent }}%</p>
                     </div>
                     <div class="mt-2 h-3 overflow-hidden rounded-full bg-woka-50 dark:bg-hutan-800">
@@ -194,7 +194,7 @@ new #[Title('Monitor makan')] class extends Component {
             <div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
                 <div class="min-w-0 lg:col-span-2">
                     <div class="mb-2 flex items-center justify-between gap-2">
-                        <h2 class="text-sm font-bold uppercase tracking-wide text-hutan/60">Belum mengambil ({{ $pending->count() }})</h2>
+                        <h2 class="text-sm font-bold uppercase tracking-wide text-hutan/60 dark:text-santan/60">Belum mengambil ({{ $pending->count() }})</h2>
                         <flux:input wire:model.live.debounce.300ms="search" icon="magnifying-glass" size="sm" placeholder="Cari nama" class="max-w-40" />
                     </div>
                     <x-card :padding="false" class="divide-y divide-woka-100 dark:divide-hutan-800">
@@ -203,7 +203,7 @@ new #[Title('Monitor makan')] class extends Component {
                                 <flux:avatar size="sm" :name="$participant->name" :initials="$participant->initials()" />
                                 <div class="min-w-0 flex-1">
                                     <p class="truncate font-semibold">{{ $participant->name }}</p>
-                                    <div class="flex flex-wrap items-center gap-1 text-xs text-hutan/60">
+                                    <div class="flex flex-wrap items-center gap-1 text-xs text-hutan/60 dark:text-santan/60">
                                         @if ($room = $participant->currentRoomAssignment?->room)
                                             <span>{{ $room->dormitory?->name }} · {{ $room->number }}</span>
                                         @endif
@@ -220,7 +220,7 @@ new #[Title('Monitor makan')] class extends Component {
                                 @endif
                             </div>
                         @empty
-                            <p class="px-4 py-6 text-center text-sm text-hutan/60">Semua peserta so ambil makanan. Mantap!</p>
+                            <p class="px-4 py-6 text-center text-sm text-hutan/60 dark:text-santan/60">Semua peserta so ambil makanan. Mantap!</p>
                         @endforelse
                     </x-card>
                 </div>
@@ -233,7 +233,7 @@ new #[Title('Monitor makan')] class extends Component {
                                     <div class="min-w-0 text-sm">
                                         <p class="font-semibold">{{ $special->user?->name }}</p>
                                         <p>{{ $special->request }}</p>
-                                        <p class="text-xs text-hutan/60">{{ $special->meal_type?->label() ?? 'Sepanjang hari' }}@if ($special->delivered_to_room) · antar ke kamar {{ $special->user?->currentRoomAssignment?->room?->number }}@endif</p>
+                                        <p class="text-xs text-hutan/60 dark:text-santan/60">{{ $special->meal_type?->label() ?? 'Sepanjang hari' }}@if ($special->delivered_to_room) · antar ke kamar {{ $special->user?->currentRoomAssignment?->room?->number }}@endif</p>
                                     </div>
                                     <x-status-badge :status="$special->status" />
                                 </div>
@@ -244,18 +244,18 @@ new #[Title('Monitor makan')] class extends Component {
                                 @endif
                             </div>
                         @empty
-                            <p class="text-sm text-hutan/60">Tidak ada permintaan makanan khusus.</p>
+                            <p class="text-sm text-hutan/60 dark:text-santan/60">Tidak ada permintaan makanan khusus.</p>
                         @endforelse
                     </x-card>
 
                     <x-card title="Baru diterima">
                         @forelse ($recent as $receipt)
                             <div class="flex items-center justify-between gap-2 py-1.5 text-sm" wire:key="r-{{ $receipt->id }}">
-                                <p class="min-w-0 truncate">{{ $receipt->user?->name }}@if ($receipt->isProxy()) <span class="text-xs text-hutan/60">(diwakilkan)</span>@endif</p>
+                                <p class="min-w-0 truncate">{{ $receipt->user?->name }}@if ($receipt->isProxy()) <span class="text-xs text-hutan/60 dark:text-santan/60">(diwakilkan)</span>@endif</p>
                                 <a href="{{ $receipt->signatureUrl() }}" target="_blank" class="shrink-0 text-xs font-semibold text-woka underline">{{ jam($receipt->received_at) }}</a>
                             </div>
                         @empty
-                            <p class="text-sm text-hutan/60">Belum ada penerimaan.</p>
+                            <p class="text-sm text-hutan/60 dark:text-santan/60">Belum ada penerimaan.</p>
                         @endforelse
                     </x-card>
                 </div>

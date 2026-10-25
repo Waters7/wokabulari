@@ -140,7 +140,7 @@ new class extends Component {
                         <flux:button size="sm" icon="document-duplicate" wire:click="copyFromBank({{ $item->id }})">Salin</flux:button>
                     </li>
                 @empty
-                    <li class="py-2 text-sm text-hutan/60">Tidak ada materi yang cocok.</li>
+                    <li class="py-2 text-sm text-hutan/60 dark:text-santan/60">Tidak ada materi yang cocok.</li>
                 @endforelse
             </ul>
         </x-card>
@@ -226,10 +226,10 @@ new class extends Component {
             @forelse ($logs as $log)
                 <li class="flex justify-between gap-2 py-2 text-sm">
                     <span class="font-semibold">{{ $log->user->name }}</span>
-                    <span class="text-end text-xs text-hutan/60">Dibuka {{ tanggal_jam($log->viewed_at) }}@if ($log->downloaded_at)<br>Diunduh {{ tanggal_jam($log->downloaded_at) }}@endif</span>
+                    <span class="text-end text-xs text-hutan/60 dark:text-santan/60">Dibuka {{ tanggal_jam($log->viewed_at) }}@if ($log->downloaded_at)<br>Diunduh {{ tanggal_jam($log->downloaded_at) }}@endif</span>
                 </li>
             @empty
-                <li class="py-2 text-sm text-hutan/60">Belum ada peserta yang membuka.</li>
+                <li class="py-2 text-sm text-hutan/60 dark:text-santan/60">Belum ada peserta yang membuka.</li>
             @endforelse
         </ul>
     </flux:modal>

@@ -72,10 +72,10 @@ Acuan: SPEC 3.12, 3.13, 3.14
 
 ## Fase 8 — Asrama & Kesehatan
 Acuan: SPEC 3.15–3.18
-- [ ] Absen asrama malam + konfirmasi/apel manual pengelola
-- [ ] Izin keluar asrama + QR keluar/masuk + `late_return`
-- [ ] Keluhan & inventaris kamar
-- [ ] Laporan sakit + tombol darurat + timeline penanganan + integrasi (izin sakit kelas, makanan khusus, status asrama)
+- [x] Absen asrama malam + konfirmasi/apel manual pengelola
+- [x] Izin keluar asrama + QR keluar/masuk + `late_return`
+- [x] Keluhan & inventaris kamar
+- [x] Laporan sakit + tombol darurat + timeline penanganan + integrasi (izin sakit kelas, makanan khusus, status asrama)
 
 ## Fase 9 — Portal Wali
 Acuan: SPEC 3.19
@@ -199,3 +199,13 @@ Acuan: DOCKER.md bagian C–D
 - Rating mingguan: vendor (ikon hati) dan pengajar (bintang) dengan sub-aspek, komentar, saran, opsi anonim; sekali per minggu; pengingat Jumat 15.00 (`app:rating-reminders`) hanya ke yang belum mengisi.
 - Rekap: rating vendor (unit konsumsi & pimpinan), rating pengajar dengan nama (admin & pimpinan), "Rating saya" untuk pengajar tanpa nama penilai anonim; tren 8 minggu.
 - Test: 160 lulus. Dicek di 360px: monitor (termasuk modal diwakilkan + tanda tangan), jadwal, alergi, rekap rating, konsumsi & rating peserta.
+
+### Fase 8 — 25 Okt 2026
+- Absen asrama malam: selfie + verifikasi wajah + geofence asrama dalam jendela waktu per asrama → menunggu konfirmasi; pengelola mengonfirmasi per orang/per kamar, apel manual, tandai tidak di asrama (polling 15 detik, merah setelah jam malam).
+- Izin keluar: sementara/pulang/menginap/darurat dengan batas per minggu, minimal jam sebelum keluar, cek bentrok sesi; persetujuan wali untuk jenis tertentu (bila wali terverifikasi) lalu pengelola; QR izin untuk pindai keluar & kembali; `app:check-late-returns` tiap 15 menit → `late_return` + notifikasi pengelola & wali.
+- Keluhan & permintaan asrama dengan foto, prioritas, status hingga selesai; inventaris barang per kamar.
+- Laporan sakit oleh peserta/teman sekamar/petugas: gejala, keparahan, suhu, foto; tombol DARURAT (konfirmasi, log setiap tekan, rate limit notifikasi); timeline penanganan (obat, rujukan, pemantauan + pengingat tiap jam); integrasi otomatis izin sakit kelas (dikonfirmasi petugas), absen asrama `sick_in_room`, permintaan makanan khusus ke unit konsumsi; penanda izin/sakit di monitor makan.
+- Privasi: deskripsi & catatan kondisi terenkripsi dan tersembunyi dari serialisasi; detail hanya peserta ybs., petugas asrama/kesehatan, super admin, wali terverifikasi; pimpinan ditolak.
+- Scheduler: pengingat belum absen asrama ke pengelola (tiap 15 menit, hanya bila daftar berubah) & ke wali setelah jam malam (sekali per malam), tutup absen malam 00.05.
+- Perbaikan: varian mode gelap untuk teks redup di semua halaman.
+- Test: 177 lulus. Dicek di 360px: absen asrama, izin keluar, lapor sakit (peserta); absen malam, izin keluar, pindai QR, keluhan, inventaris, laporan sakit & detail (petugas).

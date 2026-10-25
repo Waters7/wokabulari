@@ -81,7 +81,7 @@ new #[Title('Input kode sesi')] class extends Component {
         <x-card class="mb-4 text-center">
             <div class="mx-auto mb-2 flex size-14 animate-pop-in items-center justify-center rounded-full bg-woka-50 text-woka"><flux:icon.check class="size-8" /></div>
             <p class="font-display text-lg font-bold">Hadir di sesi {{ $success['topic'] }}</p>
-            <p class="text-sm text-hutan/60">{{ $success['class'] }} · pukul {{ $success['time'] }}</p>
+            <p class="text-sm text-hutan/60 dark:text-santan/60">{{ $success['class'] }} · pukul {{ $success['time'] }}</p>
         </x-card>
     @endif
 
@@ -113,13 +113,13 @@ new #[Title('Input kode sesi')] class extends Component {
     </x-card>
 
     @if ($todaySessions->isNotEmpty())
-        <h2 class="mb-2 mt-6 text-sm font-bold uppercase tracking-wide text-hutan/60">Sesi hari ini</h2>
+        <h2 class="mb-2 mt-6 text-sm font-bold uppercase tracking-wide text-hutan/60 dark:text-santan/60">Sesi hari ini</h2>
         <div class="space-y-2">
             @foreach ($todaySessions as $s)
                 <x-card wire:key="ts-{{ $s->id }}" class="flex items-center justify-between gap-3">
                     <div class="min-w-0">
                         <p class="truncate font-semibold">{{ $s->topic }}</p>
-                        <p class="text-xs text-hutan/60">{{ $s->timeRange() }} · <x-status-badge :status="$s->status" /></p>
+                        <p class="text-xs text-hutan/60 dark:text-santan/60">{{ $s->timeRange() }} · <x-status-badge :status="$s->status" /></p>
                     </div>
                     @if ($r = $myRecords->get($s->id))
                         <x-status-badge :status="$r->status" />

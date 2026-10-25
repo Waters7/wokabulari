@@ -85,7 +85,7 @@ new #[Title('Tugas')] class extends Component {
         <div class="mb-3 flex flex-wrap items-center gap-2 text-sm">
             <x-status-badge :status="$status" />
             <span @class(['font-semibold', 'text-rica' => $assignment->isOverdue() || $assignment->isDueSoon()])>Tenggat {{ tanggal_jam($assignment->due_at) }} WITA</span>
-            <span class="text-hutan/60">· maks {{ angka($assignment->max_score) }}</span>
+            <span class="text-hutan/60 dark:text-santan/60">· maks {{ angka($assignment->max_score) }}</span>
         </div>
         <p class="whitespace-pre-line">{{ $assignment->instructions }}</p>
         @if ($assignment->attachments->isNotEmpty())
@@ -95,7 +95,7 @@ new #[Title('Tugas')] class extends Component {
                 @endforeach
             </div>
         @endif
-        <p class="mt-3 text-xs text-hutan/60">
+        <p class="mt-3 text-xs text-hutan/60 dark:text-santan/60">
             Jenis pengumpulan: {{ $type->label() }}.
             @if ($assignment->allow_late) Terlambat tetap diterima dengan potongan {{ $assignment->late_penalty_percent }}%. @else Tidak menerima keterlambatan. @endif
             @if ($assignment->allow_resubmit) Boleh kumpul ulang sebelum dinilai. @endif
@@ -105,7 +105,7 @@ new #[Title('Tugas')] class extends Component {
     @if ($submission && in_array($status, [SubmissionStatus::Graded, SubmissionStatus::RevisionRequested], true))
         <x-card class="mb-4" :title="$status === SubmissionStatus::Graded ? 'Nilai & komentar' : 'Perlu revisi'">
             @if ($status === SubmissionStatus::Graded)
-                <p class="font-display text-4xl font-extrabold text-woka">{{ angka($submission->final_score, 1) }}<span class="text-lg text-hutan/50">/{{ angka($assignment->max_score) }}</span></p>
+                <p class="font-display text-4xl font-extrabold text-woka">{{ angka($submission->final_score, 1) }}<span class="text-lg text-hutan/50 dark:text-santan/50">/{{ angka($assignment->max_score) }}</span></p>
                 @if ($submission->is_late && $submission->score != $submission->final_score)
                     <p class="text-xs text-rica">Nilai awal {{ angka($submission->score, 1) }}, dipotong {{ $assignment->late_penalty_percent }}% karena terlambat.</p>
                 @endif
@@ -122,7 +122,7 @@ new #[Title('Tugas')] class extends Component {
 
     @if ($submission)
         <x-card class="mb-4" title="Pengumpulan ngana">
-            <p class="text-xs text-hutan/60">Dikumpulkan {{ tanggal_jam($submission->submitted_at) }} @if ($submission->is_late)<span class="font-semibold text-rica">· terlambat</span>@endif</p>
+            <p class="text-xs text-hutan/60 dark:text-santan/60">Dikumpulkan {{ tanggal_jam($submission->submitted_at) }} @if ($submission->is_late)<span class="font-semibold text-rica">· terlambat</span>@endif</p>
             @if ($submission->text_answer)
                 <p class="mt-2 whitespace-pre-line rounded-xl bg-santan p-3 text-sm dark:bg-hutan-950">{{ $submission->text_answer }}</p>
             @endif

@@ -164,7 +164,7 @@ new #[Title('Jadwal makan')] class extends Component {
         @foreach ($days as $day)
             @php($daySchedules = $schedules[$day->toDateString()] ?? collect())
             <section wire:key="md-{{ $day->toDateString() }}">
-                <h2 @class(['mb-2 text-sm font-bold uppercase tracking-wide', 'text-woka' => $day->isToday(), 'text-hutan/60' => ! $day->isToday()])>{{ tanggal($day, 'l, j M') }}</h2>
+                <h2 @class(['mb-2 text-sm font-bold uppercase tracking-wide', 'text-woka' => $day->isToday(), 'text-hutan/60 dark:text-santan/60' => ! $day->isToday()])>{{ tanggal($day, 'l, j M') }}</h2>
                 <div class="grid gap-2 sm:grid-cols-3">
                     @foreach ($types as $type)
                         @php($items = $daySchedules->where('meal_type', $type))
@@ -175,7 +175,7 @@ new #[Title('Jadwal makan')] class extends Component {
                                         <x-status-badge :status="$schedule->meal_type" />
                                         <p class="mt-1 text-sm font-semibold">{{ $schedule->vendor->name }}</p>
                                         <p class="line-clamp-2 text-sm">{{ $schedule->menu }}</p>
-                                        <p class="text-xs text-hutan/60">{{ $schedule->windowLabel() }} · {{ $schedule->receipts_count }}/{{ $schedule->portions_ordered }} porsi</p>
+                                        <p class="text-xs text-hutan/60 dark:text-santan/60">{{ $schedule->windowLabel() }} · {{ $schedule->receipts_count }}/{{ $schedule->portions_ordered }} porsi</p>
                                     </div>
                                     <div class="flex shrink-0 flex-col">
                                         <flux:button size="xs" variant="ghost" icon="pencil-square" wire:click="edit({{ $schedule->id }})" aria-label="Ubah" />
@@ -185,7 +185,7 @@ new #[Title('Jadwal makan')] class extends Component {
                             </x-card>
                         @empty
                             <button type="button" wire:click="create('{{ $day->toDateString() }}', '{{ $type->value }}')"
-                                    class="flex min-h-20 items-center justify-center gap-1 rounded-2xl border border-dashed border-woka-200 text-sm text-hutan/50 hover:bg-woka-50 dark:border-hutan-800">
+                                    class="flex min-h-20 items-center justify-center gap-1 rounded-2xl border border-dashed border-woka-200 text-sm text-hutan/50 dark:text-santan/50 hover:bg-woka-50 dark:border-hutan-800">
                                 <flux:icon.plus class="size-4" /> {{ $type->label() }}
                             </button>
                         @endforelse

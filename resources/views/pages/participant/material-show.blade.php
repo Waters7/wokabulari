@@ -55,7 +55,7 @@ new #[Title('Materi')] class extends Component {
             <div class="p-6 text-center">
                 <flux:icon.document-text class="mx-auto size-10 text-woka" />
                 <p class="mt-2 text-sm">{{ $material->original_name }} · {{ $material->sizeLabel() }}</p>
-                <p class="text-xs text-hutan/60">Pratinjau tidak tersedia untuk jenis berkas ini. Unduh untuk membuka.</p>
+                <p class="text-xs text-hutan/60 dark:text-santan/60">Pratinjau tidak tersedia untuk jenis berkas ini. Unduh untuk membuka.</p>
             </div>
         @endif
     </x-card>

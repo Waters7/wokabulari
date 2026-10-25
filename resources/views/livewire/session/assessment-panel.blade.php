@@ -199,7 +199,7 @@ new class extends Component {
                             <x-status-badge :status="$c->source" />
                         @endunless
                     </div>
-                    <p class="mt-1 text-xs text-hutan/60">Bobot {{ angka($c->weight) }} · maks {{ angka($c->max_score) }}</p>
+                    <p class="mt-1 text-xs text-hutan/60 dark:text-santan/60">Bobot {{ angka($c->weight) }} · maks {{ angka($c->max_score) }}</p>
                 </div>
             @endforeach
         </div>
@@ -259,7 +259,7 @@ new class extends Component {
                                                'ring-2 ring-rica': status['{{ $c->id }}-{{ $participant->id }}'] === 'error',
                                                'bg-woka-50': status['{{ $c->id }}-{{ $participant->id }}'] === 'ok',
                                            }"
-                                           class="h-11 w-20 rounded-lg border border-woka-100 bg-white text-center font-semibold focus:outline-none focus:ring-2 focus:ring-woka disabled:bg-zinc-50 disabled:text-hutan/60 dark:border-hutan-800 dark:bg-hutan-950">
+                                           class="h-11 w-20 rounded-lg border border-woka-100 bg-white text-center font-semibold focus:outline-none focus:ring-2 focus:ring-woka disabled:bg-zinc-50 disabled:text-hutan/60 dark:text-santan/60 dark:border-hutan-800 dark:bg-hutan-950">
                                 </td>
                             @endforeach
                             <td class="text-center font-display text-lg font-bold" x-text="finals[{{ $participant->id }}] != null ? Number(finals[{{ $participant->id }}]).toLocaleString('id-ID', {maximumFractionDigits: 1}) : '–'"></td>
@@ -268,7 +268,7 @@ new class extends Component {
                 </tbody>
             </table>
         </div>
-        <p class="mt-2 text-xs text-hutan/60">Tersimpan otomatis per sel. Enter/↓ pindah ke peserta berikutnya, ↑ ke sebelumnya, Tab ke komponen berikutnya.</p>
+        <p class="mt-2 text-xs text-hutan/60 dark:text-santan/60">Tersimpan otomatis per sel. Enter/↓ pindah ke peserta berikutnya, ↑ ke sebelumnya, Tab ke komponen berikutnya.</p>
     @endif
 
     <flux:modal wire:model.self="showComponent" class="w-full max-w-md">

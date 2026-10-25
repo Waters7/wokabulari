@@ -9,7 +9,7 @@
                     @else
                         <p class="truncate text-sm font-semibold">{{ $submission->assignment->title }}</p>
                     @endif
-                    <p class="text-xs text-hutan/60">{{ tanggal($submission->submitted_at) }} · <x-status-badge :status="$submission->status" /></p>
+                    <p class="text-xs text-hutan/60 dark:text-santan/60">{{ tanggal($submission->submitted_at) }} · <x-status-badge :status="$submission->status" /></p>
                 </div>
                 <span class="font-display text-xl font-bold">{{ $submission->final_score !== null ? angka($submission->percentage(), 0) : '–' }}</span>
             </li>

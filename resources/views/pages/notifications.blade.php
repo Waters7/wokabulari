@@ -62,7 +62,7 @@ new #[Title('Notifikasi')] class extends Component {
                         <span class="min-w-0 flex-1">
                             <span class="block font-semibold">{{ $data['title'] ?? 'Notifikasi' }}</span>
                             <span class="block text-sm text-hutan/80 dark:text-santan/80">{{ $data['body'] ?? '' }}</span>
-                            <span class="mt-0.5 block text-xs text-hutan/50">{{ $notification->created_at->diffForHumans() }}</span>
+                            <span class="mt-0.5 block text-xs text-hutan/50 dark:text-santan/50">{{ $notification->created_at->diffForHumans() }}</span>
                         </span>
                         @unless ($notification->read_at)
                             <span class="mt-2 size-2.5 shrink-0 rounded-full bg-rica" aria-label="Belum dibaca"></span>

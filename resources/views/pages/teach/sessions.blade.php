@@ -200,7 +200,7 @@ new #[Title('Sesi belajar')] class extends Component {
                                 <div class="mt-1 flex flex-wrap items-center gap-2">
                                     <x-status-badge :status="$session->status" />
                                     @if (in_array($session->status, [SessionStatus::Ongoing, SessionStatus::Completed], true))
-                                        <span class="text-xs text-hutan/70">{{ $session->present_count }} hadir</span>
+                                        <span class="text-xs text-hutan/70 dark:text-santan/70">{{ $session->present_count }} hadir</span>
                                     @endif
                                 </div>
                             </a>
@@ -219,7 +219,7 @@ new #[Title('Sesi belajar')] class extends Component {
                         </div>
                     </x-card>
                 @empty
-                    <p class="rounded-xl border border-dashed border-woka-100 px-4 py-3 text-sm text-hutan/50 dark:border-hutan-800">Tidak ada sesi.</p>
+                    <p class="rounded-xl border border-dashed border-woka-100 px-4 py-3 text-sm text-hutan/50 dark:text-santan/50 dark:border-hutan-800">Tidak ada sesi.</p>
                 @endforelse
             </section>
         @endforeach

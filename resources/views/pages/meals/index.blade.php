@@ -60,7 +60,7 @@ new #[Title('Konsumsi')] class extends Component {
                 <div class="min-w-0">
                     <x-status-badge :status="$active->meal_type" />
                     <p class="mt-1 font-display text-xl font-bold">{{ $active->menu }}</p>
-                    <p class="text-sm text-hutan/60">{{ $active->vendor->name }} · ambil {{ $active->windowLabel() }} WITA</p>
+                    <p class="text-sm text-hutan/60 dark:text-santan/60">{{ $active->vendor->name }} · ambil {{ $active->windowLabel() }} WITA</p>
                 </div>
                 <flux:icon :name="$active->meal_type->icon()" class="size-8 shrink-0 text-kunyit" />
             </div>
@@ -69,16 +69,16 @@ new #[Title('Konsumsi')] class extends Component {
         </x-card>
     @endif
 
-    <h2 class="mb-2 text-sm font-bold uppercase tracking-wide text-hutan/60">Jadwal hari ini</h2>
+    <h2 class="mb-2 text-sm font-bold uppercase tracking-wide text-hutan/60 dark:text-santan/60">Jadwal hari ini</h2>
     <div class="mb-6 space-y-2">
         @forelse ($today as $schedule)
             @php($receipt = $received->get($schedule->id))
             <x-card wire:key="today-{{ $schedule->id }}"><div class="flex items-center gap-3">
-                <span @class(['flex size-11 shrink-0 items-center justify-center rounded-xl', 'bg-woka-50 text-woka dark:bg-hutan-800' => $receipt, 'bg-santan text-hutan/60 dark:bg-hutan-800' => ! $receipt])>
+                <span @class(['flex size-11 shrink-0 items-center justify-center rounded-xl', 'bg-woka-50 text-woka dark:bg-hutan-800' => $receipt, 'bg-santan text-hutan/60 dark:text-santan/60 dark:bg-hutan-800' => ! $receipt])>
                     <flux:icon :name="$receipt ? 'check-circle' : $schedule->meal_type->icon()" class="size-6" />
                 </span>
                 <div class="min-w-0 flex-1">
-                    <p class="font-semibold">{{ $schedule->meal_type->label() }} <span class="font-normal text-hutan/60">· {{ $schedule->windowLabel() }}</span></p>
+                    <p class="font-semibold">{{ $schedule->meal_type->label() }} <span class="font-normal text-hutan/60 dark:text-santan/60">· {{ $schedule->windowLabel() }}</span></p>
                     <p class="truncate text-sm">{{ $schedule->menu }}</p>
                 </div>
                 <div class="shrink-0 text-end text-xs">
@@ -99,15 +99,15 @@ new #[Title('Konsumsi')] class extends Component {
     </div>
 
     @if ($history->isNotEmpty())
-        <h2 class="mb-2 text-sm font-bold uppercase tracking-wide text-hutan/60">Riwayat penerimaan</h2>
+        <h2 class="mb-2 text-sm font-bold uppercase tracking-wide text-hutan/60 dark:text-santan/60">Riwayat penerimaan</h2>
         <x-card :padding="false" class="divide-y divide-woka-100 dark:divide-hutan-800">
             @foreach ($history as $receipt)
                 <div class="flex items-center justify-between gap-3 px-4 py-3 text-sm" wire:key="h-{{ $receipt->id }}">
                     <div class="min-w-0">
                         <p class="font-semibold">{{ $receipt->schedule?->meal_type->label() }} · {{ tanggal($receipt->schedule?->date, 'D, j M') }}</p>
-                        <p class="truncate text-hutan/60">{{ $receipt->schedule?->vendor?->name }}@if ($receipt->isProxy()) · diwakilkan {{ $receipt->proxy?->name }}@endif</p>
+                        <p class="truncate text-hutan/60 dark:text-santan/60">{{ $receipt->schedule?->vendor?->name }}@if ($receipt->isProxy()) · diwakilkan {{ $receipt->proxy?->name }}@endif</p>
                     </div>
-                    <span class="shrink-0 text-hutan/60">{{ jam($receipt->received_at) }}</span>
+                    <span class="shrink-0 text-hutan/60 dark:text-santan/60">{{ jam($receipt->received_at) }}</span>
                 </div>
             @endforeach
         </x-card>

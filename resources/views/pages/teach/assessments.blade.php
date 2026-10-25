@@ -244,7 +244,7 @@ new #[Title('Penilaian periodik')] class extends Component {
                         </div>
                         <div class="text-end">
                             <p class="font-display text-2xl font-extrabold leading-none" x-text="avg({{ $userId }}) === null ? '–' : avg({{ $userId }}).toLocaleString('id-ID', {maximumFractionDigits: 1})"></p>
-                            <p class="text-xs text-hutan/60">Predikat <span class="font-bold" x-text="grade(avg({{ $userId }}))"></span></p>
+                            <p class="text-xs text-hutan/60 dark:text-santan/60">Predikat <span class="font-bold" x-text="grade(avg({{ $userId }}))"></span></p>
                         </div>
                     </div>
 

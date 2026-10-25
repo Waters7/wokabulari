@@ -135,6 +135,52 @@ class User extends Authenticatable
         return $this->hasMany(AssignmentSubmission::class);
     }
 
+    public function dormAttendances(): HasMany
+    {
+        return $this->hasMany(DormAttendance::class);
+    }
+
+    public function exitPermits(): HasMany
+    {
+        return $this->hasMany(DormExitPermit::class);
+    }
+
+    public function dormRequests(): HasMany
+    {
+        return $this->hasMany(DormRequest::class);
+    }
+
+    public function healthReports(): HasMany
+    {
+        return $this->hasMany(HealthReport::class);
+    }
+
+    /** Wali peserta (semua hubungan, termasuk yang belum diverifikasi). */
+    public function allGuardians(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'guardian_participant', 'participant_id', 'guardian_id')
+            ->withPivot(['relationship', 'is_primary', 'verified_at', 'verified_by'])->withTimestamps();
+    }
+
+    /** Wali peserta yang sudah diverifikasi admin. */
+    public function guardians(): BelongsToMany
+    {
+        return $this->allGuardians()->wherePivotNotNull('verified_at');
+    }
+
+    /** Peserta yang diwalikan (hubungan terverifikasi). */
+    public function wards(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'guardian_participant', 'guardian_id', 'participant_id')
+            ->withPivot(['relationship', 'is_primary', 'verified_at', 'verified_by'])->withTimestamps()
+            ->wherePivotNotNull('verified_at');
+    }
+
+    public function isGuardianOf(User $participant): bool
+    {
+        return $this->wards()->whereKey($participant->id)->exists();
+    }
+
     // ---- Role & unit
 
     public function primaryRole(): ?Role
@@ -209,6 +255,13 @@ class User extends Authenticatable
     public function scopeActive(Builder $query): void
     {
         $query->where('is_active', true);
+    }
+
+    /** Tim kerja aktif pada unit tertentu (mis. pengelola asrama, kesehatan). */
+    public function scopeInUnits(Builder $query, StaffUnit ...$units): void
+    {
+        $query->where('is_active', true)
+            ->whereHas('staffUnits', fn (Builder $q) => $q->whereIn('unit', array_map(fn (StaffUnit $u) => $u->value, $units)));
     }
 
     public function scopeParticipants(Builder $query): void

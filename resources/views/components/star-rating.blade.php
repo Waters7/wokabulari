@@ -19,6 +19,6 @@
                 </span>
             </button>
         @endforeach
-        <span class="ms-1 text-sm font-semibold text-hutan/60" x-text="value ? value + '/5' : ''"></span>
+        <span class="ms-1 text-sm font-semibold text-hutan/60 dark:text-santan/60" x-text="value ? value + '/5' : ''"></span>
     </div>
 </div>

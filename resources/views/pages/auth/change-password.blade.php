@@ -69,6 +69,6 @@ new #[Layout('layouts::auth')] #[Title('Ganti kata sandi')] class extends Compon
 
     <form method="POST" action="{{ route('logout') }}" class="text-center">
         @csrf
-        <button type="submit" class="text-sm font-semibold text-hutan/70 underline-offset-4 hover:underline dark:text-santan/70">Keluar</button>
+        <button type="submit" class="text-sm font-semibold text-hutan/70 dark:text-santan/70 underline-offset-4 hover:underline dark:text-santan/70">Keluar</button>
     </form>
 </div>

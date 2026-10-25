@@ -20,9 +20,10 @@ class MealRoster
     /**
      * @param  callable(CarbonInterface, Collection<int, int>): array<int, list<string>>  $source
      */
-    public static function addFlagSource(callable $source): void
+    public static function addFlagSource(string $key, callable $source): void
     {
-        static::$flagSources[] = $source;
+        // Berkunci agar tidak terdaftar ganda saat aplikasi di-boot ulang (mis. di test).
+        static::$flagSources[$key] = $source;
     }
 
     /** @return Collection<int, User> */

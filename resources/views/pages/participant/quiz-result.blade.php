@@ -45,7 +45,7 @@ new #[Title('Hasil quiz')] class extends Component {
     <x-page-header :title="'Hasil: '.$quiz->title" :back="route('quizzes.index')" />
 
     <x-card class="mb-4 text-center">
-        <p class="text-sm text-hutan/60">Dikumpulkan {{ tanggal_jam($attempt->submitted_at) }} @if ($attempt->auto_submitted)· otomatis saat waktu habis @endif</p>
+        <p class="text-sm text-hutan/60 dark:text-santan/60">Dikumpulkan {{ tanggal_jam($attempt->submitted_at) }} @if ($attempt->auto_submitted)· otomatis saat waktu habis @endif</p>
         @if ($visible)
             <p class="mt-2 font-display text-6xl font-extrabold {{ $attempt->passed() ? 'text-woka' : 'text-rica' }}">{{ angka($attempt->percentage, 0) }}</p>
             <p class="text-sm">{{ angka($attempt->score, 1) }} dari {{ angka($attempt->max_score, 1) }} poin</p>
@@ -63,7 +63,7 @@ new #[Title('Hasil quiz')] class extends Component {
         @else
             <flux:icon.check-circle class="mx-auto mt-3 size-12 text-woka" />
             <p class="mt-2 font-semibold">Jawaban terkumpul.</p>
-            <p class="text-sm text-hutan/60">{{ $quiz->result_visibility === \App\Enums\ResultVisibility::AfterClose ? 'Hasil tampil setelah quiz ditutup'.($quiz->closes_at ? ' ('.tanggal_jam($quiz->closes_at).')' : '').'.' : 'Hasil akan dirilis oleh pengajar.' }}</p>
+            <p class="text-sm text-hutan/60 dark:text-santan/60">{{ $quiz->result_visibility === \App\Enums\ResultVisibility::AfterClose ? 'Hasil tampil setelah quiz ditutup'.($quiz->closes_at ? ' ('.tanggal_jam($quiz->closes_at).')' : '').'.' : 'Hasil akan dirilis oleh pengajar.' }}</p>
         @endif
     </x-card>
 
@@ -83,7 +83,7 @@ new #[Title('Hasil quiz')] class extends Component {
                 @php($given = $a?->answer ?? [])
                 <x-card wire:key="r-{{ $q->id }}">
                     <div class="mb-1 flex items-center justify-between text-xs">
-                        <span class="font-semibold text-hutan/60">Soal {{ $loop->iteration }} · <x-status-badge :status="$q->type" /></span>
+                        <span class="font-semibold text-hutan/60 dark:text-santan/60">Soal {{ $loop->iteration }} · <x-status-badge :status="$q->type" /></span>
                         <span @class(['font-bold', 'text-woka' => $a?->is_correct, 'text-rica' => $a && $a->is_correct === false])>
                             {{ angka($a?->score ?? 0, 1) }}/{{ angka($quiz->pointsFor($q), 1) }}
                         </span>

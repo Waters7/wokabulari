@@ -93,7 +93,7 @@ new #[Title('Rating mingguan')] class extends Component {
     @endif
 
     @foreach ([['vendor', 'Vendor makanan', $vendors, $vendorAspects, 'heart'], ['teacher', 'Pengajar', $teachers, $teacherAspects, 'star']] as [$type, $heading, $items, $aspects, $icon])
-        <h2 class="mb-2 mt-5 text-sm font-bold uppercase tracking-wide text-hutan/60">{{ $heading }}</h2>
+        <h2 class="mb-2 mt-5 text-sm font-bold uppercase tracking-wide text-hutan/60 dark:text-santan/60">{{ $heading }}</h2>
         <div class="space-y-3">
             @forelse ($items as $item)
                 @php($model = $type === 'vendor' ? $item['vendor'] : $item['teacher'])
@@ -105,7 +105,7 @@ new #[Title('Rating mingguan')] class extends Component {
                         </span>
                         <div class="min-w-0 flex-1">
                             <p class="truncate font-semibold">{{ $model->name }}</p>
-                            <p class="text-xs text-hutan/60">{{ $type === 'teacher' ? $item['classroom']->name : 'Konsumsi minggu ini' }}</p>
+                            <p class="text-xs text-hutan/60 dark:text-santan/60">{{ $type === 'teacher' ? $item['classroom']->name : 'Konsumsi minggu ini' }}</p>
                         </div>
                         @if ($item['rating'])
                             <flux:badge color="green" size="sm" icon="check">{{ $item['rating']->rating }}/5</flux:badge>

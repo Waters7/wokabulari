@@ -61,7 +61,7 @@ new #[Title('Tugas')] class extends Component {
                 <div class="flex items-start justify-between gap-3">
                     <div class="min-w-0">
                         <p class="font-semibold">{{ $assignment->title }}</p>
-                        <p @class(['text-xs', 'font-semibold text-rica' => $assignment->isDueSoon() || ($assignment->isOverdue() && $tab !== 'done'), 'text-hutan/60' => ! $assignment->isDueSoon()])>
+                        <p @class(['text-xs', 'font-semibold text-rica' => $assignment->isDueSoon() || ($assignment->isOverdue() && $tab !== 'done'), 'text-hutan/60 dark:text-santan/60' => ! $assignment->isDueSoon()])>
                             Tenggat {{ tanggal_jam($assignment->due_at) }}
                             @if ($assignment->due_at->isFuture()) · {{ $assignment->due_at->diffForHumans(['parts' => 2]) }}@endif
                         </p>

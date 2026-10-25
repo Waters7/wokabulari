@@ -40,7 +40,7 @@ new #[Title('Quiz & ujian')] class extends Component {
 
     @foreach (['active' => 'Bisa dikerjakan', 'upcoming' => 'Akan datang', 'done' => 'Selesai'] as $key => $label)
         @continue($groups[$key]->isEmpty())
-        <h2 class="mb-2 mt-5 text-sm font-bold uppercase tracking-wide text-hutan/60 first:mt-0">{{ $label }}</h2>
+        <h2 class="mb-2 mt-5 text-sm font-bold uppercase tracking-wide text-hutan/60 dark:text-santan/60 first:mt-0">{{ $label }}</h2>
         <div class="space-y-2">
             @foreach ($groups[$key] as $quiz)
                 @php($last = $quiz->attempts->first())
@@ -49,7 +49,7 @@ new #[Title('Quiz & ujian')] class extends Component {
                         <div class="min-w-0">
                             <div class="flex flex-wrap gap-1"><x-status-badge :status="$quiz->type" /></div>
                             <p class="mt-1 font-semibold">{{ $quiz->title }}</p>
-                            <p class="text-xs text-hutan/60">
+                            <p class="text-xs text-hutan/60 dark:text-santan/60">
                                 {{ $quiz->questions_count }} soal · {{ $quiz->duration_minutes }} menit
                                 @if ($quiz->closes_at) · tutup {{ tanggal_jam($quiz->closes_at) }} @endif
                                 @if ($key === 'upcoming') · dibuka {{ tanggal_jam($quiz->opens_at) }} @endif

@@ -74,7 +74,7 @@ new #[Title('Riwayat absen')] class extends Component {
                 @continue($day->isFuture() && ! $record)
                 <li class="flex items-center justify-between gap-3 px-4 py-2.5" wire:key="d-{{ $day->toDateString() }}">
                     <div>
-                        <p class="text-sm font-semibold {{ $day->isWeekend() ? 'text-hutan/50' : '' }}">{{ tanggal($day, 'l, j M') }}</p>
+                        <p class="text-sm font-semibold {{ $day->isWeekend() ? 'text-hutan/50 dark:text-santan/50' : '' }}">{{ tanggal($day, 'l, j M') }}</p>
                         @if ($record?->reject_reason && $record->status === AttendanceStatus::Rejected)
                             <p class="text-xs text-rica">{{ $record->reject_reason }}</p>
                         @elseif ($record?->checked_in_at)

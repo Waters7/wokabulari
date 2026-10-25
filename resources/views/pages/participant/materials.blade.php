@@ -54,7 +54,7 @@ new #[Title('Materi')] class extends Component {
                             @unless ($opened->has($material->id))
                                 <flux:badge size="sm" color="amber">Baru</flux:badge>
                             @endunless
-                            <flux:icon.chevron-right class="size-5 text-hutan/40" />
+                            <flux:icon.chevron-right class="size-5 text-hutan/40 dark:text-santan/40" />
                         </x-card>
                     @endforeach
                 </div>

@@ -71,7 +71,7 @@ new #[Title('Perlu dinilai')] class extends Component {
         @forelse ($answers as $answer)
             @php($points = $answer->attempt->quiz->pointsFor($answer->attempt->quiz->questions->firstWhere('id', $answer->question_id) ?? $answer->question))
             <x-card wire:key="ga-{{ $answer->id }}">
-                <p class="text-xs text-hutan/60">{{ $answer->attempt->quiz->title }} · {{ $answer->attempt->quiz->classroom->label() }}</p>
+                <p class="text-xs text-hutan/60 dark:text-santan/60">{{ $answer->attempt->quiz->title }} · {{ $answer->attempt->quiz->classroom->label() }}</p>
                 <p class="font-semibold">{{ $answer->attempt->user->name }}</p>
                 <div class="mt-2 rounded-xl bg-santan p-3 dark:bg-hutan-950">
                     <x-status-badge :status="$answer->question->type" />

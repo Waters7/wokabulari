@@ -4,7 +4,7 @@
 <div x-data="signaturePad({ action: @js($action), args: @js($args) })" wire:ignore {{ $attributes->class('w-full') }}>
     <div class="relative overflow-hidden rounded-2xl border-2 border-dashed border-woka-200 bg-white dark:border-hutan-800">
         <canvas x-ref="canvas" class="{{ $height }} w-full touch-none" aria-label="Area tanda tangan"></canvas>
-        <p x-show="empty" class="pointer-events-none absolute inset-0 flex items-center justify-center text-sm text-hutan/40">Tanda tangan di sini</p>
+        <p x-show="empty" class="pointer-events-none absolute inset-0 flex items-center justify-center text-sm text-hutan/40 dark:text-santan/40">Tanda tangan di sini</p>
     </div>
     {{ $slot }}
     <div class="mt-3 flex gap-2">

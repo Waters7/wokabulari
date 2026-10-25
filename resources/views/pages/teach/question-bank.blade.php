@@ -215,9 +215,9 @@ new #[Title('Soal')] class extends Component {
                 <div class="flex items-start justify-between gap-3">
                     <div class="min-w-0 flex-1">
                         <div class="mb-1 flex flex-wrap items-center gap-1.5 text-xs">
-                            <span class="font-semibold text-hutan/60">#{{ $index + 1 }}</span>
+                            <span class="font-semibold text-hutan/60 dark:text-santan/60">#{{ $index + 1 }}</span>
                             <x-status-badge :status="$question->type" />
-                            <span class="text-hutan/60">{{ angka($question->points, 1) }} poin</span>
+                            <span class="text-hutan/60 dark:text-santan/60">{{ angka($question->points, 1) }} poin</span>
                             @if ($question->quizzes_count)<flux:badge size="sm">Dipakai {{ $question->quizzes_count }} quiz</flux:badge>@endif
                             @if ($question->media_path)<flux:badge size="sm" icon="musical-note">Media</flux:badge>@endif
                         </div>

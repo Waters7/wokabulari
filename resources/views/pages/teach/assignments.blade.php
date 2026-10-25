@@ -208,7 +208,7 @@ new #[Title('Tugas')] class extends Component {
             <x-card wire:key="asg-{{ $assignment->id }}">
                 <div class="flex flex-wrap items-start justify-between gap-3">
                     <a href="{{ route('teach.assignments.show', $assignment) }}" wire:navigate class="min-w-0 flex-1">
-                        <p class="text-xs text-hutan/60">{{ $assignment->classroom->label() }} · tenggat {{ tanggal_jam($assignment->due_at) }}</p>
+                        <p class="text-xs text-hutan/60 dark:text-santan/60">{{ $assignment->classroom->label() }} · tenggat {{ tanggal_jam($assignment->due_at) }}</p>
                         <p class="font-display text-lg font-bold hover:text-woka">{{ $assignment->title }}</p>
                         <div class="mt-1 flex flex-wrap items-center gap-1.5 text-xs">
                             <x-status-badge :status="$assignment->status" />

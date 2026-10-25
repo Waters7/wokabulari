@@ -95,7 +95,7 @@ new #[Title('Izin / sakit peserta')] class extends Component {
                         </div>
                         <p class="mt-1 text-sm">{{ $leave->reason }}</p>
                         @if ($leave->review_note)
-                            <p class="text-xs text-hutan/60">Catatan {{ $leave->reviewer?->name }}: {{ $leave->review_note }}</p>
+                            <p class="text-xs text-hutan/60 dark:text-santan/60">Catatan {{ $leave->reviewer?->name }}: {{ $leave->review_note }}</p>
                         @endif
                     </div>
                     <div class="flex shrink-0 flex-wrap gap-2">

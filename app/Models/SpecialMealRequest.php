@@ -27,6 +27,11 @@ class SpecialMealRequest extends Model
         return $this->belongsTo(User::class);
     }
 
+    public function healthReport(): BelongsTo
+    {
+        return $this->belongsTo(HealthReport::class);
+    }
+
     public function handler(): BelongsTo
     {
         return $this->belongsTo(User::class, 'handled_by');

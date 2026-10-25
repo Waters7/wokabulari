@@ -31,13 +31,13 @@ new #[Title('Nilai & masukan')] class extends Component {
 
     <div class="grid gap-4 lg:grid-cols-3">
         <x-card class="text-center">
-            <p class="text-xs font-semibold uppercase tracking-wide text-hutan/60">Penilaian terakhir</p>
+            <p class="text-xs font-semibold uppercase tracking-wide text-hutan/60 dark:text-santan/60">Penilaian terakhir</p>
             @if ($latest)
                 <p class="mt-1 font-display text-5xl font-extrabold text-woka">{{ angka($latest->average, 1) }}</p>
                 <flux:badge :color="GradeService::color($latest->grade)" size="lg">Predikat {{ $latest->grade }}</flux:badge>
-                <p class="mt-2 text-sm text-hutan/60">{{ $latest->periodLabel() }}</p>
+                <p class="mt-2 text-sm text-hutan/60 dark:text-santan/60">{{ $latest->periodLabel() }}</p>
             @else
-                <p class="mt-3 text-sm text-hutan/60">Belum ada penilaian terbit.</p>
+                <p class="mt-3 text-sm text-hutan/60 dark:text-santan/60">Belum ada penilaian terbit.</p>
             @endif
         </x-card>
 
@@ -88,7 +88,7 @@ new #[Title('Nilai & masukan')] class extends Component {
                             @php($n = $entry['item'])
                             <div class="flex items-start justify-between gap-2">
                                 <div>
-                                    <p class="text-xs text-hutan/60">{{ tanggal($n->created_at) }} · {{ $n->session->topic }} · {{ $n->teacher?->name }}</p>
+                                    <p class="text-xs text-hutan/60 dark:text-santan/60">{{ tanggal($n->created_at) }} · {{ $n->session->topic }} · {{ $n->teacher?->name }}</p>
                                     @if ($n->aspect)<x-status-badge :status="$n->aspect" />@endif
                                     <p class="mt-1 whitespace-pre-line text-sm">{{ $n->note }}</p>
                                 </div>
@@ -108,7 +108,7 @@ new #[Title('Nilai & masukan')] class extends Component {
                     <li class="flex items-center justify-between gap-3 px-4 py-2.5">
                         <div class="min-w-0">
                             <p class="truncate text-sm font-semibold">{{ $row['session']->topic }}</p>
-                            <p class="text-xs text-hutan/60">{{ tanggal($row['session']->date) }}</p>
+                            <p class="text-xs text-hutan/60 dark:text-santan/60">{{ tanggal($row['session']->date) }}</p>
                         </div>
                         <span class="font-display text-xl font-bold">{{ $row['score'] !== null ? angka($row['score'], 1) : '–' }}</span>
                     </li>

@@ -204,7 +204,7 @@ new #[Title('Quiz & ujian')] class extends Component {
             <x-card :href="route('teach.quizzes.show', $quiz)" wire:key="qz-{{ $quiz->id }}">
                 <div class="flex flex-wrap items-start justify-between gap-2">
                     <div class="min-w-0">
-                        <p class="text-xs text-hutan/60">{{ $quiz->classroom->label() }} · {{ $quiz->opens_at ? tanggal_jam($quiz->opens_at) : 'Tanpa jadwal' }}{{ $quiz->closes_at ? ' – '.tanggal_jam($quiz->closes_at) : '' }}</p>
+                        <p class="text-xs text-hutan/60 dark:text-santan/60">{{ $quiz->classroom->label() }} · {{ $quiz->opens_at ? tanggal_jam($quiz->opens_at) : 'Tanpa jadwal' }}{{ $quiz->closes_at ? ' – '.tanggal_jam($quiz->closes_at) : '' }}</p>
                         <p class="font-display text-lg font-bold">{{ $quiz->title }}</p>
                         <div class="mt-1 flex flex-wrap items-center gap-1.5 text-xs">
                             <x-status-badge :status="$quiz->type" />

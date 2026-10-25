@@ -34,6 +34,11 @@ class DormRoom extends Model
         return $this->hasMany(DormRoomAssignment::class)->whereNull('check_out_date');
     }
 
+    public function inventories(): HasMany
+    {
+        return $this->hasMany(DormInventory::class);
+    }
+
     public function label(): string
     {
         return 'Kamar '.$this->number;

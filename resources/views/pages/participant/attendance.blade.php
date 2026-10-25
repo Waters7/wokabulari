@@ -82,7 +82,7 @@ new #[Title('Absen harian')] class extends Component {
             <p class="mt-1 text-sm text-hutan/70 dark:text-santan/70">Tercatat pukul {{ jam($today->checked_in_at) }} WITA</p>
             <div class="mt-3"><x-status-badge :status="$today->status" size="lg" /></div>
             @if ($today->approval_note)
-                <p class="mt-3 text-xs text-hutan/60">Ditandai manual: {{ $today->approval_note }}</p>
+                <p class="mt-3 text-xs text-hutan/60 dark:text-santan/60">Ditandai manual: {{ $today->approval_note }}</p>
             @endif
             <div class="mt-5 grid gap-2">
                 @if (Route::has('sessions.code'))
@@ -95,7 +95,7 @@ new #[Title('Absen harian')] class extends Component {
         <x-card class="text-center">
             <p class="font-display text-xl font-bold">Status hari ini</p>
             <div class="mt-3"><x-status-badge :status="$today->status" size="lg" /></div>
-            <p class="mt-2 text-sm text-hutan/70">{{ $today->approval_note }}</p>
+            <p class="mt-2 text-sm text-hutan/70 dark:text-santan/70">{{ $today->approval_note }}</p>
         </x-card>
     @elseif (! $classroom)
         <x-empty-state icon="building-library" title="Belum terdaftar di kelas" description="Hubungi admin program agar ngana dimasukkan ke kelas." />

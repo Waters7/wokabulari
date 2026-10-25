@@ -149,7 +149,7 @@ new #[Title('Detail quiz')] class extends Component {
     <div class="mb-4 flex gap-1 overflow-x-auto rounded-xl bg-white p-1 ring-1 ring-woka-100 dark:bg-hutan-900 dark:ring-hutan-800" role="tablist">
         @foreach ($tabs as $key => $label)
             <button type="button" role="tab" wire:click="$set('tab', '{{ $key }}')" aria-selected="{{ $tab === $key ? 'true' : 'false' }}"
-                    @class(['min-h-11 flex-1 whitespace-nowrap rounded-lg px-3 text-sm font-semibold', 'bg-woka text-white' => $tab === $key, 'text-hutan/70 hover:bg-woka-50 dark:text-santan/70' => $tab !== $key])>{{ $label }}</button>
+                    @class(['min-h-11 flex-1 whitespace-nowrap rounded-lg px-3 text-sm font-semibold', 'bg-woka text-white' => $tab === $key, 'text-hutan/70 dark:text-santan/70 hover:bg-woka-50 dark:text-santan/70' => $tab !== $key])>{{ $label }}</button>
         @endforeach
     </div>
 
@@ -162,7 +162,7 @@ new #[Title('Detail quiz')] class extends Component {
                 @forelse ($questions as $i => $question)
                     <x-card wire:key="qq-{{ $question->id }}">
                         <div class="flex items-start gap-3">
-                            <span class="font-display text-lg font-bold text-hutan/50">{{ $i + 1 }}</span>
+                            <span class="font-display text-lg font-bold text-hutan/50 dark:text-santan/50">{{ $i + 1 }}</span>
                             <div class="min-w-0 flex-1">
                                 <div class="mb-1 flex flex-wrap gap-1"><x-status-badge :status="$question->type" /></div>
                                 <x-reading-text :text="\Illuminate\Support\Str::limit($question->body, 160)" :reading="$question->reading" :display="$quiz->reading_display" as="p" class="font-semibold" />
@@ -175,7 +175,7 @@ new #[Title('Detail quiz')] class extends Component {
                                         <flux:button size="sm" wire:click="savePivot({{ $question->id }})">Simpan</flux:button>
                                     </div>
                                 @else
-                                    <p class="mt-1 text-xs text-hutan/60">{{ angka($quiz->pointsFor($question), 1) }} poin {{ $question->pivot->section ? '· '.$question->pivot->section : '' }}</p>
+                                    <p class="mt-1 text-xs text-hutan/60 dark:text-santan/60">{{ angka($quiz->pointsFor($question), 1) }} poin {{ $question->pivot->section ? '· '.$question->pivot->section : '' }}</p>
                                 @endunless
                             </div>
                             @unless ($locked)
@@ -212,7 +212,7 @@ new #[Title('Detail quiz')] class extends Component {
                                 </span>
                             </label>
                         @empty
-                            <p class="text-sm text-hutan/60">Tidak ada soal tersisa di bank ini. <a href="{{ route('teach.questions.index') }}" wire:navigate class="font-semibold text-woka">Buka bank soal</a></p>
+                            <p class="text-sm text-hutan/60 dark:text-santan/60">Tidak ada soal tersisa di bank ini. <a href="{{ route('teach.questions.index') }}" wire:navigate class="font-semibold text-woka">Buka bank soal</a></p>
                         @endforelse
                     </div>
                     @if ($bankQuestions->isNotEmpty())
@@ -248,7 +248,7 @@ new #[Title('Detail quiz')] class extends Component {
                         </tr>
                     @endforeach
                     @foreach ($notAttempted as $user)
-                        <tr wire:key="na-{{ $user->id }}" class="text-hutan/50">
+                        <tr wire:key="na-{{ $user->id }}" class="text-hutan/50 dark:text-santan/50">
                             <td>{{ $user->name }}</td><td colspan="{{ $quiz->type === QuizType::Tryout ? 7 : 5 }}">Belum mengerjakan</td>
                         </tr>
                     @endforeach
@@ -277,7 +277,7 @@ new #[Title('Detail quiz')] class extends Component {
                     </tbody>
                 </table>
             </div>
-            <p class="mt-2 text-xs text-hutan/60">Kesukaran: proporsi skor (mudah &gt; 0,7; sukar &lt; 0,3). Daya pembeda: selisih proporsi kelompok atas dan bawah 27%.</p>
+            <p class="mt-2 text-xs text-hutan/60 dark:text-santan/60">Kesukaran: proporsi skor (mudah &gt; 0,7; sukar &lt; 0,3). Daya pembeda: selisih proporsi kelompok atas dan bawah 27%.</p>
         @endif
     @elseif ($tab === 'ngain')
         <div class="mb-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
@@ -306,6 +306,6 @@ new #[Title('Detail quiz')] class extends Component {
                 </tbody>
             </table>
         </div>
-        <p class="mt-2 text-xs text-hutan/60">N-Gain = (post − pre) / (100 − pre). Tinggi ≥ 0,7; sedang 0,3–0,7; rendah &lt; 0,3.</p>
+        <p class="mt-2 text-xs text-hutan/60 dark:text-santan/60">N-Gain = (post − pre) / (100 − pre). Tinggi ≥ 0,7; sedang 0,3–0,7; rendah &lt; 0,3.</p>
     @endif
 </div>

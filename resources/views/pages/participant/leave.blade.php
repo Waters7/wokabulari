@@ -103,10 +103,10 @@ new #[Title('Izin / sakit')] class extends Component {
                             <x-status-badge :status="$leave->type" />
                             <x-status-badge :status="$leave->status" />
                         </div>
-                        <p class="mt-1 font-semibold">{{ $leave->periodLabel() }} <span class="font-normal text-hutan/60">({{ $leave->dayCount() }} hari)</span></p>
+                        <p class="mt-1 font-semibold">{{ $leave->periodLabel() }} <span class="font-normal text-hutan/60 dark:text-santan/60">({{ $leave->dayCount() }} hari)</span></p>
                         <p class="text-sm">{{ $leave->reason }}</p>
                         @if ($leave->review_note)
-                            <p class="mt-1 text-xs text-hutan/60">Catatan {{ $leave->reviewer?->name }}: {{ $leave->review_note }}</p>
+                            <p class="mt-1 text-xs text-hutan/60 dark:text-santan/60">Catatan {{ $leave->reviewer?->name }}: {{ $leave->review_note }}</p>
                         @endif
                     </div>
                     @if ($leave->status === ReviewStatus::Pending)

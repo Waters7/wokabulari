@@ -5,7 +5,7 @@
     <div class="flex items-start justify-between gap-3">
         <div class="min-w-0">
             <p class="font-display text-lg font-bold leading-tight">{{ $title }}</p>
-            <p class="text-sm text-hutan/60">
+            <p class="text-sm text-hutan/60 dark:text-santan/60">
                 {{ $summary['count'] }} rating
                 @if ($participants)
                     · {{ round($summary['count'] / max($participants, 1) * 100) }}% partisipasi
@@ -43,7 +43,7 @@
             <ul class="mt-2 space-y-3">
                 @foreach ($comments as $rating)
                     <li class="text-sm" wire:key="c-{{ $rating->getTable() }}-{{ $rating->id }}">
-                        <p class="text-xs text-hutan/60">
+                        <p class="text-xs text-hutan/60 dark:text-santan/60">
                             @if ($anonymousAware)
                                 {{ $rating->raterNameFor(auth()->user()) }}
                             @elseif ($showNames)
@@ -54,7 +54,7 @@
                             · {{ $rating->rating }}/5 · {{ tanggal($rating->created_at, 'j M') }}
                         </p>
                         @if ($rating->comment)<p>{{ $rating->comment }}</p>@endif
-                        @if ($rating->suggestion)<p class="text-hutan/70"><span class="font-semibold">Saran:</span> {{ $rating->suggestion }}</p>@endif
+                        @if ($rating->suggestion)<p class="text-hutan/70 dark:text-santan/70"><span class="font-semibold">Saran:</span> {{ $rating->suggestion }}</p>@endif
                     </li>
                 @endforeach
             </ul>

@@ -160,7 +160,7 @@ new #[Title('Absen harian peserta')] class extends Component {
                                     @if ($record->status === AttendanceStatus::Rejected)
                                         <span class="block max-w-56 text-xs text-rica">{{ $record->reject_reason }}</span>
                                     @elseif ($record->approval_note)
-                                        <span class="block max-w-56 text-xs text-hutan/60">Manual: {{ $record->approval_note }} ({{ $record->approver?->name }})</span>
+                                        <span class="block max-w-56 text-xs text-hutan/60 dark:text-santan/60">Manual: {{ $record->approval_note }} ({{ $record->approver?->name }})</span>
                                     @endif
                                 @else
                                     <flux:badge size="sm" color="zinc">Belum absen</flux:badge>

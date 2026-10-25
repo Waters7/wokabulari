@@ -37,7 +37,7 @@ new #[Title('Alergi & pantangan')] class extends Component {
     </x-page-header>
 
     @forelse ($grouped as $dormitory => $participants)
-        <h2 class="mb-2 mt-4 text-sm font-bold uppercase tracking-wide text-hutan/60">{{ $dormitory }}</h2>
+        <h2 class="mb-2 mt-4 text-sm font-bold uppercase tracking-wide text-hutan/60 dark:text-santan/60">{{ $dormitory }}</h2>
         <x-card :padding="false" class="divide-y divide-woka-100 dark:divide-hutan-800">
             @foreach ($participants as $participant)
                 <div class="flex items-start gap-3 px-4 py-3" wire:key="a-{{ $participant->id }}">
@@ -48,7 +48,7 @@ new #[Title('Alergi & pantangan')] class extends Component {
                         <p class="font-semibold">{{ $participant->name }}</p>
                         <p class="text-sm">{{ $participant->profile->allergies }}</p>
                         @if ($room = $participant->currentRoomAssignment?->room)
-                            <p class="text-xs text-hutan/60">Kamar {{ $room->number }}</p>
+                            <p class="text-xs text-hutan/60 dark:text-santan/60">Kamar {{ $room->number }}</p>
                         @endif
                     </div>
                 </div>

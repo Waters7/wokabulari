@@ -22,6 +22,10 @@ Route::middleware('role:participant')->group(function () {
     Route::livewire('quiz/{quiz}/kerjakan', 'pages::participant.quiz-take')->name('quizzes.take');
     Route::livewire('konsumsi', 'pages::meals.index')->name('meals.index');
     Route::livewire('rating', 'pages::ratings.index')->name('ratings.index');
+    Route::livewire('asrama/absen', 'pages::dorm.attendance')->name('dorm.attendance');
+    Route::livewire('asrama/izin-keluar', 'pages::dorm.exits')->name('dorm.exit.index');
+    Route::livewire('asrama/keluhan', 'pages::dorm.requests')->name('dorm.requests.index');
+    Route::livewire('lapor-sakit', 'pages::health.report')->name('health.report');
 });
 
 // Materi bisa dibuka peserta dan pengajar (otorisasi di policy)

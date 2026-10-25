@@ -56,7 +56,7 @@ new #[Title('Log audit')] class extends Component {
                         <td class="whitespace-nowrap">{{ tanggal_jam($activity->created_at) }}</td>
                         <td>{{ $activity->causer?->name ?? 'Sistem' }}</td>
                         <td><flux:badge size="sm">{{ $activity->log_name }}</flux:badge></td>
-                        <td>{{ $activity->description }} @if ($activity->subject_type)<span class="text-xs text-hutan/60">({{ class_basename($activity->subject_type) }} #{{ $activity->subject_id }})</span>@endif</td>
+                        <td>{{ $activity->description }} @if ($activity->subject_type)<span class="text-xs text-hutan/60 dark:text-santan/60">({{ class_basename($activity->subject_type) }} #{{ $activity->subject_id }})</span>@endif</td>
                         <td class="max-w-md">
                             @php($changes = $activity->attribute_changes?->isNotEmpty() ? $activity->attribute_changes : $activity->properties)
                             @if ($changes?->isNotEmpty())

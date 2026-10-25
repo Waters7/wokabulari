@@ -233,7 +233,7 @@ new #[Title('Mengerjakan quiz')] class extends Component {
                 <div class="flex items-center justify-between gap-2">
                     <div class="min-w-0">
                         <p class="truncate text-sm font-bold">{{ $quiz->title }}</p>
-                        <p class="text-xs text-hutan/60">
+                        <p class="text-xs text-hutan/60 dark:text-santan/60">
                             Soal <span x-text="current + 1"></span>/{{ count($questions) }} ·
                             <span x-show="saving">menyimpan…</span>
                             <span x-show="!saving && lastSaved" x-text="'tersimpan ' + lastSaved"></span>
@@ -248,7 +248,7 @@ new #[Title('Mengerjakan quiz')] class extends Component {
             @foreach ($questions as $index => $q)
                 <section x-show="current === {{ $index }}" @if ($index > 0) x-cloak @endif wire:key="tq-{{ $q['id'] }}" aria-label="Soal {{ $index + 1 }}">
                     <x-card>
-                        <div class="mb-2 flex items-center justify-between text-xs text-hutan/60">
+                        <div class="mb-2 flex items-center justify-between text-xs text-hutan/60 dark:text-santan/60">
                             <x-status-badge :status="$q['type']" />
                             <span>{{ angka($q['points'], 1) }} poin</span>
                         </div>
@@ -269,7 +269,7 @@ new #[Title('Mengerjakan quiz')] class extends Component {
                                     @foreach ($q['options'] as $oi => $option)
                                         <label class="flex min-h-12 cursor-pointer items-center gap-3 rounded-xl border-2 px-3 py-2 transition has-[:checked]:border-woka has-[:checked]:bg-woka-50 border-woka-100 dark:border-hutan-800 dark:has-[:checked]:bg-hutan-800">
                                             <input type="radio" wire:model="answers.{{ $q['id'] }}" value="{{ $option['id'] }}" class="size-5 accent-woka">
-                                            <span class="font-semibold text-hutan/50">{{ chr(65 + $oi) }}.</span>
+                                            <span class="font-semibold text-hutan/50 dark:text-santan/50">{{ chr(65 + $oi) }}.</span>
                                             <x-reading-text :text="$option['body']" :reading="$option['reading']" :display="$display" />
                                         </label>
                                     @endforeach
@@ -311,7 +311,7 @@ new #[Title('Mengerjakan quiz')] class extends Component {
                 @foreach ($questions as $index => $q)
                     <button type="button" x-on:click="current = {{ $index }}"
                             class="size-10 rounded-lg text-sm font-bold ring-1"
-                            :class="current === {{ $index }} ? 'bg-hutan text-santan ring-hutan' : (answered({{ $q['id'] }}) ? 'bg-woka-50 text-woka ring-woka-200' : 'bg-white text-hutan/60 ring-woka-100 dark:bg-hutan-900')">{{ $index + 1 }}</button>
+                            :class="current === {{ $index }} ? 'bg-hutan text-santan ring-hutan' : (answered({{ $q['id'] }}) ? 'bg-woka-50 text-woka ring-woka-200' : 'bg-white text-hutan/60 dark:text-santan/60 ring-woka-100 dark:bg-hutan-900')">{{ $index + 1 }}</button>
                 @endforeach
             </div>
 

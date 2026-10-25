@@ -82,9 +82,9 @@ new #[Title('Bank soal')] class extends Component {
             <x-card wire:key="bank-{{ $bank->id }}">
                 <div class="flex items-start justify-between gap-2">
                     <a href="{{ route('teach.questions.bank', $bank) }}" wire:navigate class="min-w-0">
-                        <p class="text-xs text-hutan/60">{{ $bank->language->flag() }} {{ $bank->language->name }} {{ $bank->level ? '· '.$bank->level : '' }}</p>
+                        <p class="text-xs text-hutan/60 dark:text-santan/60">{{ $bank->language->flag() }} {{ $bank->language->name }} {{ $bank->level ? '· '.$bank->level : '' }}</p>
                         <p class="font-display text-lg font-bold hover:text-woka">{{ $bank->name }}</p>
-                        <p class="text-sm text-hutan/60">{{ $bank->questions_count }} soal · {{ $bank->topic ?? 'Umum' }} · {{ $bank->teacher?->name }}</p>
+                        <p class="text-sm text-hutan/60 dark:text-santan/60">{{ $bank->questions_count }} soal · {{ $bank->topic ?? 'Umum' }} · {{ $bank->teacher?->name }}</p>
                     </a>
                     @can('update', $bank)
                         <div class="flex shrink-0">

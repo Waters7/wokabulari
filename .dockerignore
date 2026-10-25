@@ -17,3 +17,9 @@ public/models
 docs
 tests
 *.sqlite
+# Data peserta asli tidak boleh ikut masuk image; salin ke container saat import (lihat docs/DEPLOY-SERVER.md).
+database/data/*
+!database/data/contoh-peserta.csv
+deploy
+scripts/deploy.sh
+scripts/backup.sh

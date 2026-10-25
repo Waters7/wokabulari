@@ -54,7 +54,33 @@ logs:
 	$(DC) logs -f
 
 prod-local:
-	APP_DOMAIN=localhost $(DCP) up -d --build
+	$(DCP) up -d --build
 
 prod-local-down:
 	$(DCP) down
+
+# ---- Server produksi (wokabulari.poltekkes-manado.ac.id). Lihat docs/DEPLOY-SERVER.md.
+DCS = docker compose -f compose.prod.yaml
+
+.PHONY: server-up server-init server-deploy server-backup server-logs server-artisan server-ps
+
+server-up:
+	$(DCS) up -d --build
+
+server-init:
+	./scripts/init-production.sh
+
+server-deploy:
+	./scripts/deploy.sh
+
+server-backup:
+	./scripts/backup.sh
+
+server-logs:
+	$(DCS) logs -f --tail=100
+
+server-artisan:
+	$(DCS) exec app php artisan $(cmd)
+
+server-ps:
+	$(DCS) ps

@@ -43,6 +43,7 @@ yarn-error.log
 .env.*
 !.env.example
 !.env.production.example
+!.env.db.example
 /storage/app/backups
 # Data peserta asli (data pribadi) tidak boleh masuk repo publik
 /database/data/*.csv

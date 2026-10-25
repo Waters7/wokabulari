@@ -1,0 +1,66 @@
+# Produksi di server Poltekkes Kemenkes Manado (wokabulari.poltekkes-manado.ac.id).
+# Aplikasi berjalan di belakang nginx yang sudah ada di server — lihat docs/DEPLOY-SERVER.md.
+# Hanya port aplikasi yang dibuka, dan hanya ke 127.0.0.1 (tidak bisa diakses dari luar server).
+# MySQL dan Redis tidak membuka port apa pun ke host.
+#
+# Pemakaian:  docker compose -f compose.prod.yaml up -d --build
+
+x-app: &app
+  image: wokabulari-app:prod
+  env_file: .env
+  volumes:
+    - storage-app:/var/www/html/storage/app
+    - storage-logs:/var/www/html/storage/logs
+  restart: unless-stopped
+  depends_on:
+    db: { condition: service_healthy }
+    redis: { condition: service_started }
+  logging:
+    driver: json-file
+    options: { max-size: "10m", max-file: "3" }
+
+services:
+  app:
+    <<: *app
+    build:
+      context: .
+      dockerfile: docker/app/Dockerfile
+      target: prod
+    # nginx host meneruskan ke sini. Ganti APP_PORT di .env bila 8090 sudah dipakai aplikasi lain.
+    ports: ["127.0.0.1:${APP_PORT:-8090}:8080"]
+
+  queue:
+    <<: *app
+    command: ["php", "/var/www/html/artisan", "queue:work", "--queue=notifications,exports,default", "--tries=3", "--max-time=3600"]
+    stop_signal: SIGTERM
+    healthcheck: { disable: true }
+
+  scheduler:
+    <<: *app
+    command: ["php", "/var/www/html/artisan", "schedule:work"]
+    stop_signal: SIGTERM
+    healthcheck: { disable: true }
+
+  db:
+    image: mysql:8.4
+    command: ["--default-time-zone=+08:00"]
+    env_file: .env.db
+    volumes: ["db-data:/var/lib/mysql"]
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+
+  redis:
+    image: redis:7-alpine
+    command: ["redis-server", "--appendonly", "yes", "--requirepass", "${REDIS_PASSWORD:?Isi REDIS_PASSWORD di .env}"]
+    volumes: ["redis-data:/data"]
+    restart: unless-stopped
+
+volumes:
+  db-data: {}
+  redis-data: {}
+  storage-app: {}
+  storage-logs: {}

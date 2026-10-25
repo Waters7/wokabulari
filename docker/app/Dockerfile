@@ -46,3 +46,5 @@ COPY --chown=www-data:www-data . /var/www/html
 COPY --chown=www-data:www-data --from=vendor /app/vendor /var/www/html/vendor
 COPY --chown=www-data:www-data --from=assets /app/public/build /var/www/html/public/build
 COPY --chown=www-data:www-data --from=assets /app/public/models /var/www/html/public/models
+# Tautan public/storage dibuat di image agar tidak hilang setiap build ulang (berkas tetap di volume storage-app).
+RUN ln -sfn /var/www/html/storage/app/public /var/www/html/public/storage

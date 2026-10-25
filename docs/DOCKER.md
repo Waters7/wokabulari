@@ -253,6 +253,8 @@ Sebelum menyentuh VPS, jalankan konfigurasi produksi persis di laptop:
 
 ## D. Produksi di VPS
 
+> **Server Poltekkes (wokabulari.poltekkes-manado.ac.id):** server sudah menjalankan nginx untuk aplikasi lain, jadi Caddy tidak dipakai. Ikuti **docs/DEPLOY-SERVER.md** (container di 127.0.0.1:8090 di belakang nginx host). Bagian D di bawah tetap berlaku sebagai acuan umum VPS kosong.
+
 ### D.1 Kebutuhan
 - VPS Ubuntu 24.04 LTS, minimal **2 vCPU, 4 GB RAM, 40 GB SSD** (cukup untuk ±200 pengguna aktif).
 - Domain/subdomain dengan record **A** ke IP VPS, contoh `[domain-anda]`.

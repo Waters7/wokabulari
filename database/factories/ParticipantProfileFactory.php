@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use App\Enums\Gender;
+use App\Enums\GuardianRelationship;
 use App\Models\ParticipantProfile;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -24,9 +25,18 @@ class ParticipantProfileFactory extends Factory
             'medical_history' => null,
             'emergency_contact_name' => fake()->name(),
             'emergency_contact_phone' => '628'.fake()->numerify('##########'),
+            'guardian_name' => fake()->name(),
+            'guardian_phone' => '628'.fake()->numerify('##########'),
+            'guardian_relationship' => GuardianRelationship::Mother,
             'target_exam' => null,
             'target_score' => null,
         ];
+    }
+
+    /** Peserta yang belum mengisi kontak orang tua/wali. */
+    public function withoutGuardianContact(): static
+    {
+        return $this->state(fn () => ['guardian_name' => null, 'guardian_phone' => null, 'guardian_relationship' => null]);
     }
 
     /**

@@ -21,6 +21,7 @@ new #[Title('Wali saya')] class extends Component {
         return [
             'invitation' => $this->invitationId ? GuardianInvitation::query()->where('participant_id', $user->id)->find($this->invitationId) : null,
             'guardians' => $user->allGuardians()->orderBy('name')->get(),
+            'profile' => $user->profile,
         ];
     }
 }; ?>
@@ -35,6 +36,12 @@ new #[Title('Wali saya')] class extends Component {
             <flux:button icon="clipboard-document" class="w-full" x-on:click="navigator.clipboard.writeText(@js('Daftar portal wali Wokabulari: '.$invitation->url().' (kode '.$invitation->code.')')); copied = true">
                 <span x-show="!copied">Salin tautan untuk wali</span><span x-show="copied" x-cloak>Tersalin</span>
             </flux:button>
+            @if ($profile?->hasGuardianContact())
+                <flux:button icon="chat-bubble-left-right" variant="primary" class="mt-2 w-full" target="_blank"
+                             :href="'https://wa.me/'.$profile->guardian_phone.'?text='.rawurlencode('Daftar portal wali Wokabulari: '.$invitation->url().' (kode '.$invitation->code.')')">
+                    Kirim ke WhatsApp {{ $profile->guardian_name }}
+                </flux:button>
+            @endif
             <p class="mt-3 text-xs text-hutan/60 dark:text-santan/60">Kirim lewat WhatsApp ke orang tua/wali. Hubungan diverifikasi panitia sebelum wali bisa melihat datamu.</p>
         @else
             <flux:icon.user-group class="mx-auto size-12 text-woka" />

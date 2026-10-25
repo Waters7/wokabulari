@@ -17,15 +17,20 @@ Route::middleware(['auth', 'active'])->group(function () {
         Route::livewire('persetujuan-data', 'pages::consent')->name('consent.show');
 
         Route::middleware('consent')->group(function () {
-            Route::livewire('beranda', 'pages::dashboard')->name('dashboard');
+            // Peserta wajib mengisi kontak orang tua/wali dulu.
+            Route::livewire('kontak-orang-tua', 'pages::participant.guardian-contact')->name('guardian-contact.edit');
 
-            require __DIR__.'/settings.php';
-            require __DIR__.'/participant.php';
-            require __DIR__.'/teacher.php';
-            require __DIR__.'/staff.php';
-            require __DIR__.'/guardian.php';
-            require __DIR__.'/admin.php';
-            require __DIR__.'/leader.php';
+            Route::middleware('guardian.contact')->group(function () {
+                Route::livewire('beranda', 'pages::dashboard')->name('dashboard');
+
+                require __DIR__.'/settings.php';
+                require __DIR__.'/participant.php';
+                require __DIR__.'/teacher.php';
+                require __DIR__.'/staff.php';
+                require __DIR__.'/guardian.php';
+                require __DIR__.'/admin.php';
+                require __DIR__.'/leader.php';
+            });
         });
     });
 });

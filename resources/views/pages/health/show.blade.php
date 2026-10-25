@@ -188,10 +188,13 @@ new #[Title('Detail laporan sakit')] class extends Component {
                         <flux:button icon="phone" :href="'tel:+'.$report->user->phone">Telepon peserta</flux:button>
                     @endif
                     @if ($profile?->emergency_contact_phone)
-                        <flux:button icon="phone" :href="'tel:'.$profile->emergency_contact_phone">Kontak darurat: {{ $profile->emergency_contact_name }}</flux:button>
+                        <flux:button icon="phone" :href="'tel:+'.$profile->emergency_contact_phone">Kontak darurat: {{ $profile->emergency_contact_name }}</flux:button>
+                    @endif
+                    @if ($profile?->hasGuardianContact() && $profile->guardian_phone !== $profile->emergency_contact_phone)
+                        <flux:button icon="phone" :href="'tel:+'.$profile->guardian_phone">{{ $profile->guardian_relationship?->label() ?? 'Orang tua/wali' }}: {{ $profile->guardian_name }}</flux:button>
                     @endif
                     @foreach ($report->user->allGuardians as $guardian)
-                        @if ($guardian->phone)
+                        @if ($guardian->phone && $guardian->phone !== $profile?->guardian_phone)
                             <flux:button icon="phone" variant="ghost" :href="'tel:+'.$guardian->phone">Wali: {{ $guardian->name }}</flux:button>
                         @endif
                     @endforeach

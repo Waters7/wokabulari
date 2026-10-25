@@ -54,6 +54,9 @@ class SaveParticipant
                 'medical_history' => $data['medical_history'] ?? null,
                 'emergency_contact_name' => $data['emergency_contact_name'] ?? null,
                 'emergency_contact_phone' => Phone::normalize($data['emergency_contact_phone'] ?? null),
+                'guardian_name' => filled($data['guardian_name'] ?? null) ? trim($data['guardian_name']) : null,
+                'guardian_relationship' => ($data['guardian_relationship'] ?? null) ?: null,
+                'guardian_phone' => Phone::normalize($data['guardian_phone'] ?? null),
                 'target_exam' => $data['target_exam'] ?? null,
                 'target_score' => $data['target_score'] ?? null,
             ]);

@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Enums\Gender;
+use App\Enums\GuardianRelationship;
 use App\Enums\LocationType;
 use App\Enums\Role;
 use App\Enums\StaffUnit;
@@ -99,6 +100,9 @@ class DemoSeeder extends Seeder
                     'medical_history' => $number === 9 ? 'Asma ringan, membawa inhaler' : null,
                     'emergency_contact_name' => 'Orang tua '.$firstNames[$number - 1],
                     'emergency_contact_phone' => '6281300000'.str_pad((string) $number, 3, '0', STR_PAD_LEFT),
+                    'guardian_name' => 'Orang tua '.$firstNames[$number - 1],
+                    'guardian_relationship' => $number % 3 === 0 ? GuardianRelationship::Father : GuardianRelationship::Mother,
+                    'guardian_phone' => '6281300000'.str_pad((string) $number, 3, '0', STR_PAD_LEFT),
                     'target_exam' => $language->exam_format,
                 ]);
                 $classroom->participants()->syncWithoutDetaching([$user->id => ['joined_at' => $batch->start_date]]);

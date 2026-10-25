@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Middleware\EnsureConsent;
+use App\Http\Middleware\EnsureGuardianContact;
 use App\Http\Middleware\EnsurePasswordChanged;
 use App\Http\Middleware\EnsureUserIsActive;
 use App\Http\Middleware\SecurityHeaders;
@@ -24,6 +25,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'permission' => PermissionMiddleware::class,
             'role_or_permission' => RoleOrPermissionMiddleware::class,
             'consent' => EnsureConsent::class,
+            'guardian.contact' => EnsureGuardianContact::class,
             'active' => EnsureUserIsActive::class,
             'password.changed' => EnsurePasswordChanged::class,
         ]);

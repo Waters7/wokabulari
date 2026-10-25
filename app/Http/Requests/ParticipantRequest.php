@@ -3,7 +3,9 @@
 namespace App\Http\Requests;
 
 use App\Enums\Gender;
+use App\Enums\GuardianRelationship;
 use App\Models\User;
+use App\Rules\IndonesianMobile;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -39,6 +41,10 @@ class ParticipantRequest extends FormRequest
             'medical_history' => ['nullable', 'string', 'max:1000'],
             'emergency_contact_name' => ['nullable', 'string', 'max:150'],
             'emergency_contact_phone' => ['nullable', 'string', 'max:20'],
+            // Admin boleh mengosongkan; peserta dipaksa mengisi saat login.
+            'guardian_name' => ['nullable', 'string', 'max:150'],
+            'guardian_relationship' => ['nullable', Rule::enum(GuardianRelationship::class)],
+            'guardian_phone' => ['nullable', 'string', 'max:20', new IndonesianMobile],
             'target_exam' => ['nullable', 'string', 'max:100'],
             'target_score' => ['nullable', 'string', 'max:50'],
         ];

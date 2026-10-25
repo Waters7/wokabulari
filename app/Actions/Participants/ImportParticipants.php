@@ -36,6 +36,8 @@ class ImportParticipants
         'medical_history' => ['riwayat_penyakit'],
         'emergency_contact_name' => ['kontak_darurat_nama', 'nama_kontak_darurat'],
         'emergency_contact_phone' => ['kontak_darurat_hp', 'hp_kontak_darurat'],
+        'guardian_name' => ['nama_orang_tua', 'nama_wali', 'nama_orang_tua_wali', 'orang_tua_wali'],
+        'guardian_phone' => ['hp_orang_tua', 'no_hp_orang_tua', 'hp_wali', 'no_hp_wali', 'hp_orang_tua_wali', 'no_hp_orang_tua_wali'],
         'target_exam' => ['target_ujian'],
         'target_score' => ['target_skor'],
         'classroom' => ['kelas'],
@@ -121,6 +123,8 @@ class ImportParticipants
             'medical_history' => $data['medical_history'],
             'emergency_contact_name' => $data['emergency_contact_name'],
             'emergency_contact_phone' => Phone::normalize($data['emergency_contact_phone']),
+            'guardian_name' => $data['guardian_name'],
+            'guardian_phone' => Phone::normalize($data['guardian_phone']),
             'target_exam' => $data['target_exam'],
             'target_score' => $data['target_score'],
         ], fn ($value) => filled($value)));

@@ -1,9 +1,14 @@
 <?php
 
+use App\Actions\Participants\SaveGuardianContact;
+use App\Enums\GuardianRelationship;
+use App\Http\Requests\GuardianContactRequest;
+use App\Services\ImageService;
 use App\Support\Phone;
 use Flux\Flux;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\Title;
@@ -23,6 +28,12 @@ new #[Title('Profil')] class extends Component {
 
     public $photo = null;
 
+    public string $guardian_name = '';
+
+    public string $guardian_relationship = 'mother';
+
+    public string $guardian_phone = '';
+
     public function mount(): void
     {
         $user = Auth::user();
@@ -30,9 +41,14 @@ new #[Title('Profil')] class extends Component {
         $this->email = $user->email;
         $this->phone = $user->phone ? Phone::display($user->phone) : '';
         $this->leaderboard_anonymous = $user->leaderboard_anonymous;
+
+        $profile = $user->profile;
+        $this->guardian_name = (string) $profile?->guardian_name;
+        $this->guardian_relationship = $profile?->guardian_relationship?->value ?? 'mother';
+        $this->guardian_phone = $profile?->guardian_phone ? Phone::display($profile->guardian_phone) : '';
     }
 
-    public function save(): void
+    public function save(ImageService $images, SaveGuardianContact $guardianContact): void
     {
         $user = Auth::user();
         $phone = Phone::normalize($this->phone);
@@ -41,7 +57,7 @@ new #[Title('Profil')] class extends Component {
             'name' => $user->isParticipant() ? ['nullable'] : ['required', 'string', 'max:150'],
             'email' => ['nullable', 'email', 'max:150', Rule::unique('users', 'email')->ignore($user->id)],
             'phone' => ['nullable', 'string', 'max:20'],
-            'photo' => ['nullable', 'image', 'max:2048'],
+            'photo' => ['nullable', 'image', 'max:10240'],
             'leaderboard_anonymous' => ['boolean'],
         ]);
 
@@ -60,11 +76,28 @@ new #[Title('Profil')] class extends Component {
         $user->phone = $phone;
         $user->leaderboard_anonymous = $validated['leaderboard_anonymous'];
 
+        // Kontak orang tua/wali wajib untuk peserta.
+        if ($user->isParticipant()) {
+            $contact = ['guardian_name' => $this->guardian_name, 'guardian_relationship' => $this->guardian_relationship, 'guardian_phone' => $this->guardian_phone];
+            $validator = Validator::make($contact, GuardianContactRequest::rulesFor(), GuardianContactRequest::messagesFor(), GuardianContactRequest::attributesFor());
+            if ($validator->fails()) {
+                throw \Illuminate\Validation\ValidationException::withMessages($validator->errors()->messages());
+            }
+            try {
+                $guardianContact->handle($user, $validator->validated());
+            } catch (\InvalidArgumentException $e) {
+                $this->addError('guardian_phone', $e->getMessage());
+
+                return;
+            }
+        }
+
         if ($this->photo) {
             if ($user->photo_path) {
                 Storage::disk('public')->delete($user->photo_path);
             }
-            $user->photo_path = $this->photo->storeAs('avatars', Str::uuid().'.'.$this->photo->extension(), 'public');
+            // Foto dari kamera HP diperkecil (maks. 600 px) agar ringan.
+            $user->photo_path = $images->storeUpload($this->photo, 'avatars', 600, 82, 'public');
             $this->photo = null;
         }
 
@@ -78,6 +111,9 @@ new #[Title('Profil')] class extends Component {
     @include('partials.settings-heading')
 
     <x-pages::settings.layout heading="Profil" subheading="Perbarui kontak dan foto profil ngana.">
+        <div class="mt-4 flex flex-wrap gap-2">
+            <flux:button size="sm" icon="key" :href="route('security.edit')" wire:navigate>Ganti kata sandi</flux:button>
+        </div>
         <form wire:submit="save" class="my-6 w-full space-y-5">
             <div class="flex items-center gap-4">
                 <flux:avatar size="xl" :name="auth()->user()->name" :initials="auth()->user()->initials()"
@@ -104,6 +140,17 @@ new #[Title('Profil')] class extends Component {
             <flux:input wire:model="email" label="Email" type="email" autocomplete="email" />
 
             @if (auth()->user()->isParticipant())
+                <fieldset class="space-y-4 rounded-2xl border border-woka-100 p-4 dark:border-hutan-800">
+                    <legend class="px-1 text-sm font-semibold">Orang tua/wali (wajib)</legend>
+                    <flux:input wire:model="guardian_name" label="Nama orang tua/wali" required />
+                    <flux:radio.group wire:model="guardian_relationship" label="Hubungan" variant="segmented">
+                        @foreach (GuardianRelationship::cases() as $relationship)
+                            <flux:radio :value="$relationship->value" :label="$relationship->label()" class="data-checked:bg-woka! data-checked:text-white!" />
+                        @endforeach
+                    </flux:radio.group>
+                    <flux:input wire:model="guardian_phone" label="No. HP / WhatsApp orang tua/wali" type="tel" inputmode="tel" required />
+                </fieldset>
+
                 <flux:switch wire:model="leaderboard_anonymous" label="Sembunyikan nama di peringkat"
                              description="Nama tampil sebagai inisial di leaderboard." />
             @endif

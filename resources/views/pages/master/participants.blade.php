@@ -3,6 +3,7 @@
 use App\Actions\Participants\ImportParticipants;
 use App\Actions\Participants\SaveParticipant;
 use App\Enums\Gender;
+use App\Enums\GuardianRelationship;
 use App\Http\Requests\ParticipantRequest;
 use App\Imports\ParticipantRowsImport;
 use App\Livewire\Concerns\WithCrudModal;
@@ -48,7 +49,8 @@ new #[Title('Peserta')] class extends Component {
             'name' => '', 'username' => '', 'email' => '', 'phone' => '', 'is_active' => true,
             'classroom_id' => $this->classroom, 'school_name' => '', 'major' => '', 'gender' => '',
             'birth_date' => '', 'allergies' => '', 'medical_history' => '', 'emergency_contact_name' => '',
-            'emergency_contact_phone' => '', 'target_exam' => '', 'target_score' => '',
+            'emergency_contact_phone' => '', 'guardian_name' => '', 'guardian_relationship' => '', 'guardian_phone' => '',
+            'target_exam' => '', 'target_score' => '',
         ];
     }
 
@@ -64,7 +66,8 @@ new #[Title('Peserta')] class extends Component {
 
     protected function labels(): array
     {
-        return ['name' => 'nama', 'username' => 'NIS', 'phone' => 'nomor HP', 'classroom_id' => 'kelas', 'school_name' => 'asal sekolah'];
+        return ['name' => 'nama', 'username' => 'NIS', 'phone' => 'nomor HP', 'classroom_id' => 'kelas', 'school_name' => 'asal sekolah',
+            'guardian_name' => 'nama orang tua/wali', 'guardian_phone' => 'HP orang tua/wali', 'guardian_relationship' => 'hubungan'];
     }
 
     protected function fillFrom(Model $model): array
@@ -87,6 +90,9 @@ new #[Title('Peserta')] class extends Component {
             'medical_history' => $profile?->medical_history,
             'emergency_contact_name' => $profile?->emergency_contact_name,
             'emergency_contact_phone' => $profile?->emergency_contact_phone ? Phone::display($profile->emergency_contact_phone) : '',
+            'guardian_name' => $profile?->guardian_name,
+            'guardian_relationship' => $profile?->guardian_relationship?->value ?? '',
+            'guardian_phone' => $profile?->guardian_phone ? Phone::display($profile->guardian_phone) : '',
             'target_exam' => $profile?->target_exam,
             'target_score' => $profile?->target_score,
         ];
@@ -202,6 +208,7 @@ new #[Title('Peserta')] class extends Component {
                 ->paginate(25),
             'classrooms' => Classroom::query()->with('language')->when($batch, fn ($q) => $q->where('batch_id', $batch->id))->orderBy('name')->get(),
             'genders' => Gender::cases(),
+            'relationships' => GuardianRelationship::cases(),
             'canManage' => auth()->user()->can('participant.manage'),
         ];
     }
@@ -319,6 +326,15 @@ new #[Title('Peserta')] class extends Component {
                 <flux:input wire:model="form.birth_date" label="Tanggal lahir" type="date" />
                 <flux:input wire:model="form.emergency_contact_name" label="Kontak darurat" />
                 <flux:input wire:model="form.emergency_contact_phone" label="HP kontak darurat" type="tel" />
+                <flux:input wire:model="form.guardian_name" label="Nama orang tua/wali" />
+                <flux:select wire:model="form.guardian_relationship" label="Hubungan dengan peserta">
+                    <flux:select.option value="">–</flux:select.option>
+                    @foreach ($relationships as $relationship)
+                        <flux:select.option :value="$relationship->value">{{ $relationship->label() }}</flux:select.option>
+                    @endforeach
+                </flux:select>
+                <flux:input wire:model="form.guardian_phone" label="HP orang tua/wali" type="tel" placeholder="081234567890"
+                            description="Boleh kosong; peserta wajib mengisinya saat login." />
                 <flux:input wire:model="form.target_exam" label="Target ujian" placeholder="IELTS, HSK 3, JFT" />
                 <flux:input wire:model="form.target_score" label="Target skor" />
                 <flux:textarea wire:model="form.allergies" label="Alergi / pantangan makanan" rows="2" class="sm:col-span-2" />

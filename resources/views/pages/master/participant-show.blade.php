@@ -63,6 +63,9 @@ new #[Title('Profil peserta')] class extends Component {
                     'Jurusan' => $user->profile?->major ?? '–',
                     'Asrama' => $user->currentRoomAssignment ? $user->currentRoomAssignment->room->dormitory->name.' · Kamar '.$user->currentRoomAssignment->room->number : '–',
                     'Kontak darurat' => trim(($user->profile?->emergency_contact_name ?? '–').' '.($user->profile?->emergency_contact_phone ? '('.Phone::display($user->profile->emergency_contact_phone).')' : '')),
+                    'Orang tua/wali' => $user->profile?->hasGuardianContact()
+                        ? trim(($user->profile->guardian_name ?? '–').($user->profile->guardian_relationship ? ' · '.$user->profile->guardian_relationship->label() : '').' ('.Phone::display($user->profile->guardian_phone).')')
+                        : 'Belum diisi',
                     'Target ujian' => trim(($user->profile?->target_exam ?? '–').' '.($user->profile?->target_score ?? '')),
                     'Login terakhir' => $user->last_login_at ? tanggal_jam($user->last_login_at) : 'Belum pernah',
                 ] as $label => $value)

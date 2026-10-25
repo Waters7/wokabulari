@@ -48,6 +48,28 @@ php artisan app:import-participants database/data/peserta.csv
 
 Kolom minimal: `nama`, `no_hp`, `asal_sekolah`. Peserta login dengan **No. HP** dan kata sandi awal, lalu wajib mengganti kata sandi saat login pertama. Berkas data asli di `database/data/` tidak ikut ter-commit.
 
+## Data uji coba (trial)
+
+Isi di `.env` lalu jalankan seeder trial (menghapus & membuat ulang database):
+
+```dotenv
+PARTICIPANT_DEFAULT_PASSWORD=...   # sandi awal peserta asli dari database/data/*.csv
+TRIAL_ADMIN_USERNAME=admin
+TRIAL_ADMIN_PASSWORD=...           # sandi super admin trial
+```
+
+```bash
+php artisan migrate:fresh --seed --seeder=TrialSeeder
+```
+
+Isi: data dasar + data contoh semua fase (akun demo SPEC 8, password `password`) + peserta asli dari `database/data/*.csv` (bila ada) + super admin dengan username dari `TRIAL_ADMIN_USERNAME`.
+
+Untuk produksi, buat super admin tanpa data contoh:
+
+```bash
+php artisan app:create-admin --username=admin
+```
+
 ## Test
 
 ```bash

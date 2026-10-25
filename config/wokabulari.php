@@ -24,6 +24,14 @@ return [
     'participant_default_password' => env('PARTICIPANT_DEFAULT_PASSWORD'),
 
     /*
+    | Super admin untuk TrialSeeder (uji coba localhost/staging). Isi lewat .env.
+    */
+    'trial_admin' => [
+        'username' => env('TRIAL_ADMIN_USERNAME', 'admin'),
+        'password' => env('TRIAL_ADMIN_PASSWORD'),
+    ],
+
+    /*
     |--------------------------------------------------------------------------
     | Nilai bawaan pengaturan sistem (tabel settings)
     |--------------------------------------------------------------------------

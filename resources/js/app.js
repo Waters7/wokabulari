@@ -3,6 +3,7 @@
 // Daftar modul lazy: Wokabulari.load('nama') mengembalikan modul hasil import().
 import audioRecorder from './components/audio-recorder.js';
 import faceCapture from './components/face-capture.js';
+import signaturePad from './components/signature-pad.js';
 
 const modules = {
     map: () => import('./modules/map.js'),
@@ -24,6 +25,7 @@ window.Wokabulari = {
 document.addEventListener('alpine:init', () => {
     window.Alpine.data('faceCapture', faceCapture);
     window.Alpine.data('audioRecorder', audioRecorder);
+    window.Alpine.data('signaturePad', signaturePad);
 
     // Hitung mundur ke waktu tertentu (ISO string). Dipakai di kode sesi, quiz, dan tenggat.
     window.Alpine.data('countdown', (target, onDone = null) => ({

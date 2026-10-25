@@ -13,6 +13,8 @@ Route::prefix('mengajar')->name('teach.')->group(function () {
     Route::livewire('tugas', 'pages::teach.assignments')->name('assignments.index')->middleware('can:assignment.manage');
     Route::livewire('tugas/{assignment}', 'pages::teach.assignment-show')->name('assignments.show')->middleware('can:assignment.manage');
 
+    Route::livewire('rating-saya', 'pages::teach.ratings')->name('ratings')->middleware('role:teacher');
+
     Route::middleware('can:quiz.manage')->group(function () {
         Route::livewire('bank-soal', 'pages::teach.question-banks')->name('questions.index');
         Route::get('bank-soal/template', QuestionTemplateController::class)->name('questions.template');

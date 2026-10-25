@@ -66,9 +66,9 @@ Acuan: SPEC 3.8
 
 ## Fase 7 — Konsumsi & Rating
 Acuan: SPEC 3.12, 3.13, 3.14
-- [ ] Jadwal makan, duplikasi mingguan, daftar alergi
-- [ ] Tanda tangan penerimaan + penerimaan diwakilkan, monitor realtime
-- [ ] Rating vendor & rating pengajar mingguan (anonim), pengingat Jumat
+- [x] Jadwal makan, duplikasi mingguan, daftar alergi
+- [x] Tanda tangan penerimaan + penerimaan diwakilkan, monitor realtime
+- [x] Rating vendor & rating pengajar mingguan (anonim), pengingat Jumat
 
 ## Fase 8 — Asrama & Kesehatan
 Acuan: SPEC 3.15–3.18
@@ -190,3 +190,12 @@ Acuan: DOCKER.md bagian C–D
 - Halaman nilai peserta: pretest vs posttest + riwayat quiz.
 - Perbaikan: `x-confirm-button` kini memanggil aksi tanpa argumen (mis. Selesai sesi, Terbitkan).
 - Test: 136 lulus. Dicek di 360px: daftar quiz, pengerjaan tryout (timer, autosave), halaman hasil.
+
+### Fase 7 — 25 Okt 2026
+- Jadwal makan per minggu (sarapan/siang/malam): vendor, menu, rentang pengambilan, porsi; isi cepat dari slot kosong; salin ke minggu depan tanpa menimpa.
+- Halaman Konsumsi peserta: jadwal yang sedang dibuka → tanda tangan di signature pad (PNG di disk privat), sekali per jadwal dan hanya dalam rentang waktu; status hari ini & riwayat; pengingat alergi pribadi.
+- Monitor makan (polling 5 detik): diterima vs total peserta, daftar belum ambil dengan penanda izin/sakit & alergi, penerimaan diwakilkan (tanda tangan petugas + catatan), daftar makanan khusus (status disiapkan/diantar), tautan tanda tangan bertanda tangan (signed URL).
+- Daftar alergi & pantangan per asrama + salin teks untuk vendor.
+- Rating mingguan: vendor (ikon hati) dan pengajar (bintang) dengan sub-aspek, komentar, saran, opsi anonim; sekali per minggu; pengingat Jumat 15.00 (`app:rating-reminders`) hanya ke yang belum mengisi.
+- Rekap: rating vendor (unit konsumsi & pimpinan), rating pengajar dengan nama (admin & pimpinan), "Rating saya" untuk pengajar tanpa nama penilai anonim; tren 8 minggu.
+- Test: 160 lulus. Dicek di 360px: monitor (termasuk modal diwakilkan + tanda tangan), jadwal, alergi, rekap rating, konsumsi & rating peserta.

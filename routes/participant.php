@@ -20,6 +20,8 @@ Route::middleware('role:participant')->group(function () {
     Route::livewire('quiz', 'pages::participant.quizzes')->name('quizzes.index');
     Route::livewire('quiz/hasil/{attempt}', 'pages::participant.quiz-result')->name('quizzes.result');
     Route::livewire('quiz/{quiz}/kerjakan', 'pages::participant.quiz-take')->name('quizzes.take');
+    Route::livewire('konsumsi', 'pages::meals.index')->name('meals.index');
+    Route::livewire('rating', 'pages::ratings.index')->name('ratings.index');
 });
 
 // Materi bisa dibuka peserta dan pengajar (otorisasi di policy)

@@ -232,6 +232,7 @@ class Navigation
             ],
             'Laporan' => [
                 ['label' => 'Pusat Laporan', 'icon' => 'document-arrow-down', 'route' => 'reports.index', 'match' => ['reports.*'], 'can' => 'report.view'],
+                ['label' => 'Rekap Rating Pengajar', 'icon' => 'star', 'route' => 'manage.teacher-ratings', 'can' => 'rating.view-names'],
                 ['label' => 'Profil Peserta 360°', 'icon' => 'identification', 'route' => 'leader.participants', 'match' => ['leader.participants', 'leader.participant'], 'can' => 'dashboard.leader'],
             ],
             'Sistem' => [

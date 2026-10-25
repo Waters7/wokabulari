@@ -50,6 +50,7 @@ Alamat lokal: aplikasi `http://localhost:8080`, Mailpit `http://localhost:8025`,
 2. Setiap fitur wajib punya: migration, model + relasi, factory, Policy, Form Request, dan Feature Test.
 3. Fase dianggap selesai hanya jika `make test` lulus dan halaman terkait sudah dicek di lebar layar 360px.
 4. Setelah fase selesai, centang checklist di `docs/PLAN.md` dan tulis ringkasan singkat perubahan.
+   Setiap perubahan yang akan dirilis: naikkan `version` di `config/wokabulari.php` (patch = perbaikan, minor = fitur) dan catat di `docs/CHANGELOG.md`. Versi tampil di halaman login.
 5. Commit kecil per fitur, pesan commit Bahasa Indonesia: `feat: absen harian dengan verifikasi wajah`, `fix: ...`, `test: ...`.
 6. Keputusan yang menyimpang dari SPEC dicatat di `docs/DECISIONS.md` beserta alasannya.
 7. Untuk aturan bisnis yang ambigu, tanyakan dulu. Jangan menebak untuk hal yang sulit dibatalkan (menghapus data, mengubah skema yang sudah berisi data).

@@ -34,28 +34,39 @@
             <flux:spacer />
 
             <x-desktop-user-menu class="hidden lg:block" />
+            <p class="px-2 text-[11px] text-hutan/50 dark:text-santan/50">Wokabulari versi {{ config('wokabulari.version') }}</p>
         </flux:sidebar>
 
         {{-- Header HP --}}
         <flux:header class="sticky top-0 z-30 border-b border-woka-100 bg-white/95 backdrop-blur lg:hidden dark:border-hutan-800 dark:bg-hutan-900/95">
             <flux:sidebar.toggle class="lg:hidden" icon="bars-2" inset="left" aria-label="Buka menu" />
 
-            <x-app-logo href="{{ route('dashboard') }}" class="ms-1" wire:navigate />
+            {{-- Teks logo diperkecil di layar 360px agar muat bersama lonceng, profil, dan tombol keluar --}}
+            <x-app-logo href="{{ route('dashboard') }}" class="ms-1 min-w-0 [&>span]:text-lg min-[400px]:[&>span]:text-xl" wire:navigate />
 
             <flux:spacer />
 
-            <x-notification-bell :count="$unread" />
+            <div class="flex shrink-0 items-center gap-1">
+                <x-notification-bell :count="$unread" />
 
-            <flux:dropdown position="top" align="end">
-                <flux:profile :initials="$user->initials()" :avatar="$user->photo_url" icon-trailing="chevron-down" />
-                <x-user-menu-items />
-            </flux:dropdown>
+                <flux:dropdown position="top" align="end">
+                    <flux:profile :initials="$user->initials()" :avatar="$user->photo_url" :chevron="false" />
+                    <x-user-menu-items />
+                </flux:dropdown>
+
+                <x-logout-button compact />
+            </div>
         </flux:header>
 
         <flux:main @class(['max-w-7xl', 'has-bottom-nav' => count($bottomItems) > 0])>
-            {{-- Bel notifikasi desktop --}}
-            <div class="mb-2 hidden justify-end lg:flex">
+            {{-- Bilah kanan atas (desktop): notifikasi, profil, keluar --}}
+            <div class="mb-3 hidden items-center justify-end gap-2 lg:flex">
                 <x-notification-bell :count="$unread" />
+                <flux:dropdown position="bottom" align="end">
+                    <flux:profile :name="$user->name" :initials="$user->initials()" :avatar="$user->photo_url" icon-trailing="chevron-down" />
+                    <x-user-menu-items />
+                </flux:dropdown>
+                <x-logout-button />
             </div>
 
             {{ $slot }}

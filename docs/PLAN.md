@@ -58,11 +58,11 @@ Acuan: SPEC 3.7
 
 ## Fase 6 — Quiz, Pretest, Posttest, Tryout
 Acuan: SPEC 3.8
-- [ ] Bank soal + import Excel, semua tipe soal termasuk hanzi/pinyin & nada
-- [ ] Pengerjaan quiz: timer, autosave, auto-submit, deteksi pindah tab
-- [ ] Penilaian otomatis & antrean "Perlu Dinilai"
-- [ ] N-Gain pretest–posttest, analisis butir soal, tryout format HSK
-- [ ] Test: kunci jawaban tidak bocor
+- [x] Bank soal + import Excel, semua tipe soal termasuk hanzi/pinyin & nada
+- [x] Pengerjaan quiz: timer, autosave, auto-submit, deteksi pindah tab
+- [x] Penilaian otomatis & antrean "Perlu Dinilai"
+- [x] N-Gain pretest–posttest, analisis butir soal, tryout format HSK
+- [x] Test: kunci jawaban tidak bocor
 
 ## Fase 7 — Konsumsi & Rating
 Acuan: SPEC 3.12, 3.13, 3.14
@@ -179,3 +179,14 @@ Acuan: DOCKER.md bagian C–D
 - Nilai tugas yang ditautkan sesi masuk komponen sesi (skala 0–100, terkunci); tugas tanpa sesi ikut saran penilaian periodik.
 - Pengingat H-1 (18.00) dan 2 jam sebelum tenggat (tiap 30 menit) hanya ke yang belum mengumpulkan, tanpa dobel.
 - Test: 125 lulus. Dicek di 360px: daftar & detail tugas peserta.
+
+### Fase 6 — 26 Okt 2026
+- Bank soal per bahasa/level/topik (dipakai ulang lintas quiz) + import Excel dengan template; 8 tipe soal: pilihan ganda, benar/salah, isian singkat (beberapa jawaban diterima, normalisasi huruf & tanda baca), menjodohkan (nilai parsial), esai, menyimak (audio), berbicara (rekam suara), nada Mandarin 1–4.
+- Hanzi+pinyin / kana+romaji dengan tampilan bacaan per quiz: `<ruby>`, disembunyikan, atau ketuk; font Noto Sans SC/JP hanya dimuat di halaman CJK.
+- Quiz/pretest/posttest/tryout: jadwal buka–tutup, durasi, jumlah percobaan, nilai lulus, acak soal & opsi, waktu tampil hasil (langsung/setelah tutup/manual), tautan ke sesi (nilai masuk komponen), skala skor tryout (HSK 200) + bagian soal + target peserta.
+- Pengerjaan: satu soal per layar, timer dari server, autosave 10 detik, auto-kumpul saat habis (browser + scheduler tiap menit), deteksi pindah tab, satu attempt aktif & satu sesi (sesi baru mengambil alih), validasi waktu di server.
+- Kunci jawaban tidak pernah dikirim ke browser sebelum dikumpulkan (diuji pada HTML & snapshot Livewire).
+- Antrean "Perlu Dinilai" untuk esai/berbicara; analisis butir (kesukaran & daya pembeda 27%); N-Gain per peserta & kelas dengan kategori.
+- Halaman nilai peserta: pretest vs posttest + riwayat quiz.
+- Perbaikan: `x-confirm-button` kini memanggil aksi tanpa argumen (mis. Selesai sesi, Terbitkan).
+- Test: 136 lulus. Dicek di 360px: daftar quiz, pengerjaan tryout (timer, autosave), halaman hasil.

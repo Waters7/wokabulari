@@ -17,6 +17,9 @@ Route::middleware('role:participant')->group(function () {
     Route::livewire('nilai', 'pages::participant.grades')->name('grades.index');
     Route::livewire('tugas', 'pages::participant.assignments')->name('assignments.index');
     Route::livewire('tugas/{assignment}', 'pages::participant.assignment-show')->name('assignments.show');
+    Route::livewire('quiz', 'pages::participant.quizzes')->name('quizzes.index');
+    Route::livewire('quiz/hasil/{attempt}', 'pages::participant.quiz-result')->name('quizzes.result');
+    Route::livewire('quiz/{quiz}/kerjakan', 'pages::participant.quiz-take')->name('quizzes.take');
 });
 
 // Materi bisa dibuka peserta dan pengajar (otorisasi di policy)

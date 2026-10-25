@@ -10,6 +10,11 @@
     'size' => 'sm',
 ])
 
+@php
+    // "submit" → "submit()" agar aksi tanpa argumen benar-benar dipanggil.
+    $call = str_contains($action, '(') ? $action : $action.'()';
+@endphp
+
 <div x-data="{ open: false }" class="inline-flex">
     <flux:button :size="$size" :variant="$label ? $variant : 'ghost'" :icon="$icon" x-on:click="open = true" {{ $attributes }}
                  :aria-label="$label ?? $title" :class="! $label && $variant === 'danger' ? 'text-rica!' : ''">
@@ -25,7 +30,7 @@
                 <p class="mt-1 text-sm text-hutan/70 dark:text-santan/70">{{ $message }}</p>
                 <div class="mt-5 flex justify-end gap-2">
                     <flux:button variant="ghost" x-on:click="open = false">Batal</flux:button>
-                    <flux:button :variant="$variant" x-on:click="open = false; $wire.{{ $action }}">{{ $confirmLabel }}</flux:button>
+                    <flux:button :variant="$variant" x-on:click="open = false; $wire.{{ $call }}">{{ $confirmLabel }}</flux:button>
                 </div>
             </div>
         </div>

@@ -57,9 +57,15 @@ class SaveParticipant
                 'guardian_name' => filled($data['guardian_name'] ?? null) ? trim($data['guardian_name']) : null,
                 'guardian_relationship' => ($data['guardian_relationship'] ?? null) ?: null,
                 'guardian_phone' => Phone::normalize($data['guardian_phone'] ?? null),
+                'lives_in_dorm' => (bool) ($data['lives_in_dorm'] ?? true),
                 'target_exam' => $data['target_exam'] ?? null,
                 'target_score' => $data['target_score'] ?? null,
             ]);
+
+            // Peserta pulang-pergi tidak menempati kamar.
+            if (! ($data['lives_in_dorm'] ?? true)) {
+                $user->roomAssignments()->whereNull('check_out_date')->update(['check_out_date' => today()]);
+            }
 
             if (! empty($data['classroom_id'])) {
                 $classroom = Classroom::findOrFail($data['classroom_id']);

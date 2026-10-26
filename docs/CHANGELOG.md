@@ -3,6 +3,14 @@
 Versi ditampilkan di halaman login dan menu aplikasi (`config/wokabulari.php` → `version`).
 Aturan penomoran: **patch** (1.0.x) perbaikan, **minor** (1.x.0) fitur baru, **major** (x.0.0) perubahan besar.
 
+## 1.2.0 — 26 Oktober 2026
+
+- **Assign kelas massal:** di halaman Peserta, centang banyak peserta (atau "Pilih semua hasil" dari filter, mis. *Belum punya kelas*), lalu pindahkan ke satu kelas atau **bagi rata** ke beberapa kelas dengan pratinjau.
+- **Assign asrama massal:** **isi kamar otomatis** sesuai jenis kelamin & sisa kapasitas, pindah ke kamar tertentu, atau tandai tinggal/tidak tinggal di asrama — dengan pratinjau. Jenis kelamin yang belum diisi bisa diisi massal (filter *Jenis kelamin belum diisi*).
+- **Peserta tidak asrama:** tidak ikut absen malam, izin keluar, dan keluhan asrama; menu asrama disembunyikan. Bisa diatur dari form peserta atau kolom impor `asrama` (ya/tidak).
+- **Konsumsi snack:** jenis baru *Snack pagi* dan *Snack sore* di jadwal makan.
+- **Konsumsi peserta tidak asrama** diatur tim konsumsi (tombol *Peserta tidak asrama* di Jadwal makan); bawaan: snack pagi, makan siang, snack sore.
+
 ## 1.1.0 — 25 Oktober 2026
 
 - Semua pengguna kecuali super admin bisa mengisi email sendiri (di Profil atau saat login pertama), lalu login memakai email atau No. HP.

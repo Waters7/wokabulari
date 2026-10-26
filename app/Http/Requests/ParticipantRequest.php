@@ -45,6 +45,7 @@ class ParticipantRequest extends FormRequest
             'guardian_name' => ['nullable', 'string', 'max:150'],
             'guardian_relationship' => ['nullable', Rule::enum(GuardianRelationship::class)],
             'guardian_phone' => ['nullable', 'string', 'max:20', new IndonesianMobile],
+            'lives_in_dorm' => ['boolean'],
             'target_exam' => ['nullable', 'string', 'max:100'],
             'target_score' => ['nullable', 'string', 'max:50'],
         ];

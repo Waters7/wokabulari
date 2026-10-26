@@ -1,5 +1,6 @@
 <?php
 
+use App\Actions\Dorm\AssignRooms;
 use App\Http\Requests\DormitoryRequest;
 use App\Models\Dormitory;
 use App\Models\DormRoom;
@@ -86,23 +87,21 @@ new #[Title('Kamar asrama')] class extends Component {
         $this->search = '';
     }
 
-    public function assign(int $userId): void
+    public function assign(int $userId, AssignRooms $rooms): void
     {
         $this->authorize('update', $this->dormitory);
         $room = $this->dormitory->rooms()->findOrFail($this->assignRoomId);
         $user = User::query()->participants()->findOrFail($userId);
 
-        if ($room->activeAssignments()->count() >= $room->capacity) {
-            Flux::toast(variant: 'danger', text: 'Kamar sudah penuh.');
+        try {
+            // Pindah dari kamar lama; peserta tidak asrama otomatis menjadi penghuni.
+            $rooms->assign($room, $user, auth()->user());
+        } catch (\InvalidArgumentException $e) {
+            Flux::toast(variant: 'danger', text: $e->getMessage());
 
             return;
         }
 
-        // Pindahkan dari kamar lama (tutup penempatan sebelumnya).
-        DormRoomAssignment::query()->where('user_id', $user->id)->whereNull('check_out_date')->update(['check_out_date' => today()]);
-        $room->assignments()->create(['user_id' => $user->id, 'check_in_date' => today()]);
-
-        activity('asrama')->causedBy(auth()->user())->performedOn($user)->withProperties(['kamar' => $room->number])->log('Menempatkan peserta di kamar');
         Flux::toast(variant: 'success', text: "{$user->name} ditempatkan di kamar {$room->number}.");
     }
 

@@ -75,6 +75,9 @@ new #[Title('Asrama & Kamar')] class extends Component {
 <div>
     <x-page-header title="Asrama & Kamar" subtitle="Asrama putra/putri, jam malam, jendela absen malam, kamar, dan penghuni.">
         <x-slot:actions>
+            @can('participant.view')
+                <flux:button icon="arrows-right-left" :href="route('master.participants', ['status' => 'no_room'])" wire:navigate>Isi kamar otomatis</flux:button>
+            @endcan
             <flux:button variant="primary" icon="plus" wire:click="create">Asrama baru</flux:button>
         </x-slot:actions>
     </x-page-header>

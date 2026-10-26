@@ -1,19 +1,28 @@
 <?php
 
+use App\Actions\Classrooms\AssignParticipants;
+use App\Actions\Classrooms\DistributeParticipants;
+use App\Actions\Dorm\AssignRooms;
+use App\Actions\Dorm\SetDormResidency;
 use App\Actions\Participants\ImportParticipants;
 use App\Actions\Participants\SaveParticipant;
+use App\Actions\Participants\SetParticipantGender;
 use App\Enums\Gender;
 use App\Enums\GuardianRelationship;
+use App\Http\Requests\BulkClassroomRequest;
+use App\Http\Requests\BulkDormRequest;
 use App\Http\Requests\ParticipantRequest;
 use App\Imports\ParticipantRowsImport;
 use App\Livewire\Concerns\WithCrudModal;
 use App\Models\Batch;
 use App\Models\Classroom;
+use App\Models\DormRoom;
 use App\Models\User;
 use App\Support\Phone;
 use Flux\Flux;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Validator;
 use Livewire\Attributes\Title;
 use Livewire\Attributes\Url;
 use Livewire\Component;
@@ -38,6 +47,26 @@ new #[Title('Peserta')] class extends Component {
     /** @var array<string, mixed>|null */
     public ?array $importResult = null;
 
+    /** @var list<int|string> Peserta terpilih untuk aksi massal */
+    public array $selected = [];
+
+    public bool $showBulkClass = false;
+
+    public string $bulkClassMode = 'single';
+
+    public ?int $bulkClassroom = null;
+
+    /** @var list<int|string> */
+    public array $bulkClassrooms = [];
+
+    public bool $showBulkDorm = false;
+
+    public string $bulkDormMode = 'auto';
+
+    public ?int $bulkRoom = null;
+
+    public string $bulkGender = '';
+
     protected function modelClass(): string
     {
         return User::class;
@@ -50,7 +79,7 @@ new #[Title('Peserta')] class extends Component {
             'classroom_id' => $this->classroom, 'school_name' => '', 'major' => '', 'gender' => '',
             'birth_date' => '', 'allergies' => '', 'medical_history' => '', 'emergency_contact_name' => '',
             'emergency_contact_phone' => '', 'guardian_name' => '', 'guardian_relationship' => '', 'guardian_phone' => '',
-            'target_exam' => '', 'target_score' => '',
+            'lives_in_dorm' => true, 'target_exam' => '', 'target_score' => '',
         ];
     }
 
@@ -93,6 +122,7 @@ new #[Title('Peserta')] class extends Component {
             'guardian_name' => $profile?->guardian_name,
             'guardian_relationship' => $profile?->guardian_relationship?->value ?? '',
             'guardian_phone' => $profile?->guardian_phone ? Phone::display($profile->guardian_phone) : '',
+            'lives_in_dorm' => $profile?->lives_in_dorm ?? true,
             'target_exam' => $profile?->target_exam,
             'target_score' => $profile?->target_score,
         ];
@@ -190,26 +220,206 @@ new #[Title('Peserta')] class extends Component {
         $this->resetPage();
     }
 
+    protected function filteredQuery(): Builder
+    {
+        return User::query()
+            ->participants()
+            ->search($this->search)
+            ->when($this->classroom, fn (Builder $q) => $q->whereHas('classrooms', fn ($q) => $q->where('classrooms.id', $this->classroom)))
+            ->when($this->status === 'no_class', fn (Builder $q) => $q->whereDoesntHave('classrooms'))
+            ->when($this->status === 'no_room', fn (Builder $q) => $q->where('is_active', true)
+                ->whereDoesntHave('profile', fn ($p) => $p->where('lives_in_dorm', false))
+                ->whereDoesntHave('roomAssignments', fn ($r) => $r->whereNull('check_out_date')))
+            ->when($this->status === 'non_resident', fn (Builder $q) => $q->whereHas('profile', fn ($p) => $p->where('lives_in_dorm', false)))
+            ->when($this->status === 'no_gender', fn (Builder $q) => $q->whereDoesntHave('profile', fn ($p) => $p->whereNotNull('gender')))
+            ->when($this->status === 'no_face', fn (Builder $q) => $q->whereDoesntHave('profile', fn ($q) => $q->whereNotNull('face_enrolled_at')))
+            ->when($this->status === 'first_login', fn (Builder $q) => $q->where('must_change_password', true))
+            ->when($this->status === 'inactive', fn (Builder $q) => $q->where('is_active', false));
+    }
+
+    // ---- Aksi massal (makro) ----
+
+    public function selectAllFiltered(): void
+    {
+        abort_unless($this->canBulk(), 403);
+        $this->selected = $this->filteredQuery()->pluck('users.id')->all();
+    }
+
+    public function clearSelection(): void
+    {
+        $this->reset('selected');
+    }
+
+    protected function canBulk(): bool
+    {
+        return auth()->user()->can('participant.manage') || auth()->user()->can('dormitory.manage');
+    }
+
+    /** @return \Illuminate\Support\Collection<int, User> */
+    protected function selectedParticipants(): \Illuminate\Support\Collection
+    {
+        return User::query()->participants()->with(['profile', 'currentRoomAssignment.room'])->whereIn('id', $this->selected)->orderBy('name')->get();
+    }
+
+    public function openBulkClass(): void
+    {
+        abort_unless(auth()->user()->can('participant.manage'), 403);
+        $this->resetErrorBag();
+        $this->bulkClassMode = 'single';
+        $this->bulkClassroom = $this->classroom;
+        $this->bulkClassrooms = [];
+        $this->showBulkClass = true;
+    }
+
+    public function applyBulkClass(AssignParticipants $assign, DistributeParticipants $distribute): void
+    {
+        abort_unless(auth()->user()->can('participant.manage'), 403);
+        $data = $this->validateBulk(BulkClassroomRequest::rulesFor(), BulkClassroomRequest::messagesFor(), [
+            'user_ids' => $this->selected, 'mode' => $this->bulkClassMode,
+            'classroom_id' => $this->bulkClassroom, 'classroom_ids' => $this->bulkClassrooms,
+        ]);
+
+        if ($data['mode'] === 'single') {
+            $classroom = Classroom::query()->findOrFail($data['classroom_id']);
+            $count = $assign->handle($classroom, $data['user_ids'], auth()->user());
+            $message = "{$count} peserta ditempatkan di {$classroom->label()}.";
+        } else {
+            $plan = $distribute->plan($this->selectedParticipants(), Classroom::query()->whereIn('id', $data['classroom_ids'])->get());
+            $count = $distribute->apply($plan, auth()->user());
+            $message = "{$count} peserta dibagi rata ke ".count($data['classroom_ids']).' kelas.';
+        }
+
+        $this->showBulkClass = false;
+        $this->reset('selected');
+        Flux::toast(variant: 'success', text: $message);
+    }
+
+    public function openBulkDorm(): void
+    {
+        abort_unless(auth()->user()->can('dormitory.manage'), 403);
+        $this->resetErrorBag();
+        $this->bulkDormMode = 'auto';
+        $this->bulkRoom = null;
+        $this->bulkGender = '';
+        $this->showBulkDorm = true;
+    }
+
+    public function applyBulkDorm(AssignRooms $rooms, SetDormResidency $residency, SetParticipantGender $setGender): void
+    {
+        abort_unless(auth()->user()->can('dormitory.manage'), 403);
+        $data = $this->validateBulk(BulkDormRequest::rulesFor(), BulkDormRequest::messagesFor(), [
+            'user_ids' => $this->selected, 'mode' => $this->bulkDormMode, 'room_id' => $this->bulkRoom, 'gender' => $this->bulkGender ?: null,
+        ]);
+        $actor = auth()->user();
+
+        // Jenis kelamin adalah data profil peserta: butuh izin kelola peserta juga.
+        abort_if($data['mode'] === 'gender' && ! $actor->can('participant.manage'), 403);
+
+        $message = match ($data['mode']) {
+            'auto' => (function () use ($rooms, $actor) {
+                $plan = $rooms->plan($this->selectedParticipants());
+                $placed = $rooms->apply($plan['placements'], $actor);
+
+                return "{$placed} peserta ditempatkan di kamar".(count($plan['skipped']) ? ', '.count($plan['skipped']).' dilewati.' : '.');
+            })(),
+            'room' => (function () use ($rooms, $actor, $data) {
+                $room = DormRoom::query()->with('dormitory')->findOrFail($data['room_id']);
+                $placed = 0;
+                $failed = [];
+                foreach ($this->selectedParticipants() as $participant) {
+                    try {
+                        $rooms->assign($room, $participant, $actor);
+                        $placed++;
+                    } catch (InvalidArgumentException $e) {
+                        $failed[] = $e->getMessage();
+                    }
+                }
+
+                return "{$placed} peserta dipindahkan ke kamar {$room->number}.".($failed ? ' Gagal: '.implode(' ', array_unique($failed)) : '');
+            })(),
+            'resident' => $residency->handle($data['user_ids'], true, $actor).' peserta ditandai tinggal di asrama.',
+            'non_resident' => $residency->handle($data['user_ids'], false, $actor).' peserta ditandai tidak tinggal di asrama.',
+            'gender' => $setGender->handle($data['user_ids'], Gender::from($data['gender']), $actor).' peserta diisi jenis kelaminnya ('.Gender::from($data['gender'])->label().').',
+        };
+
+        $this->showBulkDorm = false;
+        $this->reset('selected');
+        Flux::toast(variant: 'success', text: $message);
+    }
+
+    /**
+     * @param  array<string, mixed>  $rules
+     * @param  array<string, string>  $messages
+     * @param  array<string, mixed>  $input
+     * @return array<string, mixed>
+     */
+    protected function validateBulk(array $rules, array $messages, array $input): array
+    {
+        $this->resetErrorBag();
+        $validator = Validator::make($input, $rules, $messages);
+
+        if ($validator->fails()) {
+            throw \Illuminate\Validation\ValidationException::withMessages(collect($validator->errors()->messages())
+                ->mapWithKeys(fn ($m, $k) => [str_starts_with($k, 'user_ids') ? 'selected' : $k => $m])->all());
+        }
+
+        return $validator->validated();
+    }
+
+    /** Pratinjau aksi massal yang sedang dibuka. @return array<string, mixed> */
+    protected function bulkPreview(\Illuminate\Support\Collection $classrooms): array
+    {
+        if ($this->showBulkClass && $this->bulkClassMode === 'distribute' && $this->bulkClassrooms !== []) {
+            $participants = $this->selectedParticipants();
+            $targets = $classrooms->whereIn('id', array_map('intval', $this->bulkClassrooms))->values();
+            $distribute = app(DistributeParticipants::class);
+
+            return ['classSummary' => $distribute->summary($distribute->plan($participants, $targets), $participants)];
+        }
+
+        if ($this->showBulkDorm && $this->bulkDormMode === 'auto') {
+            $participants = $this->selectedParticipants();
+            $plan = app(AssignRooms::class)->plan($participants);
+            $rooms = DormRoom::query()->with('dormitory')->whereIn('id', array_unique($plan['placements']))->get()->keyBy('id');
+
+            return ['dormPlan' => [
+                'rooms' => collect($plan['placements'])->groupBy(fn ($roomId) => $roomId, preserveKeys: true)
+                    ->map(fn ($users, $roomId) => [
+                        'label' => $rooms[$roomId]->dormitory->name.' · Kamar '.$rooms[$roomId]->number,
+                        'names' => $participants->whereIn('id', $users->keys())->pluck('name')->all(),
+                    ])->values()->all(),
+                'skipped' => collect($plan['skipped'])->map(fn ($reason, $userId) => [
+                    'name' => $participants->firstWhere('id', $userId)?->name, 'reason' => $reason,
+                ])->values()->all(),
+            ]];
+        }
+
+        return [];
+    }
+
     public function with(): array
     {
         $batch = Batch::current();
+        $classrooms = Classroom::query()->with('language')->withCount('participants')->when($batch, fn ($q) => $q->where('batch_id', $batch->id))->orderBy('name')->get();
 
         return [
-            'participants' => User::query()
-                ->participants()
-                ->with(['profile', 'classrooms' => fn ($q) => $q->when($batch, fn ($q) => $q->where('batch_id', $batch->id))])
-                ->search($this->search)
-                ->when($this->classroom, fn (Builder $q) => $q->whereHas('classrooms', fn ($q) => $q->where('classrooms.id', $this->classroom)))
-                ->when($this->status === 'no_class', fn (Builder $q) => $q->whereDoesntHave('classrooms'))
-                ->when($this->status === 'no_face', fn (Builder $q) => $q->whereDoesntHave('profile', fn ($q) => $q->whereNotNull('face_enrolled_at')))
-                ->when($this->status === 'first_login', fn (Builder $q) => $q->where('must_change_password', true))
-                ->when($this->status === 'inactive', fn (Builder $q) => $q->where('is_active', false))
+            'participants' => $this->filteredQuery()
+                ->with(['profile', 'currentRoomAssignment.room', 'classrooms' => fn ($q) => $q->when($batch, fn ($q) => $q->where('batch_id', $batch->id))])
                 ->orderBy('name')
                 ->paginate(25),
-            'classrooms' => Classroom::query()->with('language')->when($batch, fn ($q) => $q->where('batch_id', $batch->id))->orderBy('name')->get(),
+            'classrooms' => $classrooms,
             'genders' => Gender::cases(),
             'relationships' => GuardianRelationship::cases(),
             'canManage' => auth()->user()->can('participant.manage'),
+            'canDorm' => auth()->user()->can('dormitory.manage'),
+            'canBulk' => $this->canBulk(),
+            'dormRooms' => $this->showBulkDorm && $this->bulkDormMode === 'room'
+                ? DormRoom::query()->with('dormitory')->withCount('activeAssignments')->get()
+                    ->sortBy(fn ($room) => [$room->dormitory?->name, strlen($room->number), $room->number])->values()
+                : collect(),
+            'classSummary' => [],
+            'dormPlan' => null,
+            ...$this->bulkPreview($classrooms),
         ];
     }
 }; ?>
@@ -235,6 +445,9 @@ new #[Title('Peserta')] class extends Component {
         <flux:select wire:model.live="status">
             <flux:select.option value="">Semua status</flux:select.option>
             <flux:select.option value="no_class">Belum punya kelas</flux:select.option>
+            <flux:select.option value="no_room">Asrama: belum dapat kamar</flux:select.option>
+            <flux:select.option value="non_resident">Tidak tinggal di asrama</flux:select.option>
+            <flux:select.option value="no_gender">Jenis kelamin belum diisi</flux:select.option>
             <flux:select.option value="no_face">Wajah belum didaftarkan</flux:select.option>
             <flux:select.option value="first_login">Belum ganti kata sandi awal</flux:select.option>
             <flux:select.option value="inactive">Nonaktif</flux:select.option>
@@ -244,14 +457,29 @@ new #[Title('Peserta')] class extends Component {
     @if ($participants->isEmpty())
         <x-empty-state icon="user-group" title="Belum ada peserta" description="Tambahkan peserta satu per satu atau import dari Excel/CSV." />
     @else
+        @if ($canBulk)
+            <div class="mb-2 flex flex-wrap items-center gap-2 text-sm">
+                <flux:button size="sm" icon="check-circle" wire:click="selectAllFiltered">Pilih semua hasil ({{ $participants->total() }})</flux:button>
+                <span class="text-hutan/60 dark:text-santan/60">lalu atur kelas atau asrama sekaligus.</span>
+            </div>
+        @endif
         <div class="table-scroll">
             <table>
                 <thead>
-                    <tr><th>Nama</th><th>No. HP</th><th>Asal</th><th>Kelas</th><th>Status</th><th></th></tr>
+                    <tr>
+                        @if ($canBulk)<th class="w-8"><span class="sr-only">Pilih</span></th>@endif
+                        <th>Nama</th><th>No. HP</th><th>Asal</th><th>Kelas</th><th>Asrama</th><th>Status</th><th></th>
+                    </tr>
                 </thead>
                 <tbody>
                     @foreach ($participants as $participant)
                         <tr wire:key="pt-{{ $participant->id }}">
+                            @if ($canBulk)
+                                <td>
+                                    <input type="checkbox" wire:model.live="selected" value="{{ $participant->id }}" aria-label="Pilih {{ $participant->name }}"
+                                           class="size-5 rounded border-woka-200 accent-woka">
+                                </td>
+                            @endif
                             <td>
                                 <a href="{{ route('master.participants.show', $participant) }}" wire:navigate class="font-semibold hover:text-woka">{{ $participant->name }}</a>
                                 @if ($participant->username)
@@ -261,6 +489,15 @@ new #[Title('Peserta')] class extends Component {
                             <td class="whitespace-nowrap">{{ Phone::display($participant->phone) }}</td>
                             <td class="max-w-48 truncate">{{ $participant->profile?->school_name ?? '–' }}</td>
                             <td>{{ $participant->classrooms->first()?->name ?? '–' }}</td>
+                            <td class="whitespace-nowrap">
+                                @if ($participant->profile?->lives_in_dorm === false)
+                                    <flux:badge size="sm" color="zinc">Tidak asrama</flux:badge>
+                                @elseif ($participant->currentRoomAssignment?->room)
+                                    Kamar {{ $participant->currentRoomAssignment->room->number }}
+                                @else
+                                    <span class="text-xs text-amber-700 dark:text-amber-400">Belum dapat kamar</span>
+                                @endif
+                            </td>
                             <td class="space-x-1 whitespace-nowrap">
                                 @unless ($participant->is_active)
                                     <flux:badge size="sm" color="zinc">Nonaktif</flux:badge>
@@ -293,6 +530,135 @@ new #[Title('Peserta')] class extends Component {
             </table>
         </div>
         <div class="mt-4">{{ $participants->links() }}</div>
+    @endif
+
+    {{-- Bilah aksi massal --}}
+    @if ($canBulk && count($selected) > 0)
+        {{-- Di atas bottom nav bila peran memakainya; selain itu menempel di bawah layar. --}}
+        <div @class([
+                'fixed inset-x-3 z-30 mx-auto flex max-w-xl items-center gap-2 rounded-2xl bg-hutan p-3 text-santan shadow-lg lg:bottom-6',
+                'bottom-20' => auth()->user()->primaryRole()?->usesBottomNav(),
+                'bottom-4' => ! auth()->user()->primaryRole()?->usesBottomNav(),
+            ]) data-test="bulk-bar">
+            <span class="me-auto text-sm font-semibold">{{ count($selected) }} <span class="hidden sm:inline">peserta</span> dipilih</span>
+            @if ($canManage)
+                <flux:button size="sm" icon="academic-cap" wire:click="openBulkClass"><span class="sm:hidden">Kelas</span><span class="hidden sm:inline">Atur kelas</span></flux:button>
+            @endif
+            @if ($canDorm)
+                <flux:button size="sm" icon="home-modern" wire:click="openBulkDorm"><span class="sm:hidden">Asrama</span><span class="hidden sm:inline">Atur asrama</span></flux:button>
+            @endif
+            <flux:button size="sm" variant="ghost" icon="x-mark" wire:click="clearSelection" aria-label="Batal pilih" class="text-santan!" />
+        </div>
+        <div class="h-24 lg:h-16"></div>
+    @endif
+
+    @if ($canManage)
+        <flux:modal wire:model.self="showBulkClass" class="w-full max-w-lg">
+            <form wire:submit="applyBulkClass" class="space-y-4">
+                <div>
+                    <flux:heading size="lg">Atur kelas {{ count($selected) }} peserta</flux:heading>
+                    <flux:text class="mt-1">Peserta yang sudah di kelas lain pada angkatan ini akan dipindahkan.</flux:text>
+                </div>
+                <flux:error name="selected" />
+
+                <flux:radio.group wire:model.live="bulkClassMode" variant="segmented">
+                    <flux:radio value="single" label="Satu kelas" class="data-checked:bg-woka! data-checked:text-white!" />
+                    <flux:radio value="distribute" label="Bagi rata" class="data-checked:bg-woka! data-checked:text-white!" />
+                </flux:radio.group>
+
+                @if ($bulkClassMode === 'single')
+                    <flux:select wire:model="bulkClassroom" label="Kelas tujuan">
+                        <flux:select.option value="">– Pilih kelas –</flux:select.option>
+                        @foreach ($classrooms as $c)
+                            <flux:select.option :value="$c->id">{{ $c->label() }} ({{ $c->participants_count }} peserta)</flux:select.option>
+                        @endforeach
+                    </flux:select>
+                    <flux:error name="classroom_id" />
+                @else
+                    <flux:checkbox.group wire:model.live="bulkClassrooms" label="Bagi ke kelas" description="Kelas dengan peserta paling sedikit diisi lebih dulu; jenis kelamin diseimbangkan.">
+                        @foreach ($classrooms as $c)
+                            <flux:checkbox :value="$c->id" :label="$c->label().' · '.$c->participants_count.' peserta'" />
+                        @endforeach
+                    </flux:checkbox.group>
+                    <flux:error name="classroom_ids" />
+
+                    @if ($classSummary)
+                        <div class="rounded-xl bg-santan p-3 text-sm dark:bg-hutan-800" data-test="class-preview">
+                            <p class="mb-2 font-semibold">Pratinjau</p>
+                            <ul class="space-y-1">
+                                @foreach ($classrooms->whereIn('id', array_keys($classSummary)) as $c)
+                                    @php($row = $classSummary[$c->id])
+                                    <li class="flex justify-between gap-2">
+                                        <span class="min-w-0 truncate">{{ $c->label() }}</span>
+                                        <span class="shrink-0 font-semibold">+{{ $row['added'] }} <span class="font-normal text-hutan/60 dark:text-santan/60">(L {{ $row['male'] }} · P {{ $row['female'] }})</span></span>
+                                    </li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
+                @endif
+
+                <div class="flex justify-end gap-2">
+                    <flux:modal.close><flux:button variant="ghost">Batal</flux:button></flux:modal.close>
+                    <flux:button type="submit" variant="primary">Simpan</flux:button>
+                </div>
+            </form>
+        </flux:modal>
+    @endif
+
+    @if ($canDorm)
+        <flux:modal wire:model.self="showBulkDorm" class="w-full max-w-lg">
+            <form wire:submit="applyBulkDorm" class="space-y-4">
+                <flux:heading size="lg">Atur asrama {{ count($selected) }} peserta</flux:heading>
+                <flux:error name="selected" />
+
+                <flux:radio.group wire:model.live="bulkDormMode" label="Tindakan">
+                    <flux:radio value="auto" label="Isi kamar otomatis" description="Ditempatkan di kamar kosong sesuai jenis kelamin dan sisa kapasitas." />
+                    <flux:radio value="room" label="Pindahkan ke kamar tertentu" />
+                    <flux:radio value="non_resident" label="Tandai tidak tinggal di asrama" description="Dikeluarkan dari kamar; tidak ikut absen malam, izin keluar, dan keluhan asrama." />
+                    <flux:radio value="resident" label="Tandai tinggal di asrama" />
+                    @if ($canManage)
+                        <flux:radio value="gender" label="Isi jenis kelamin" description="Wajib sebelum isi kamar otomatis (asrama putra/putri)." />
+                    @endif
+                </flux:radio.group>
+
+                @if ($bulkDormMode === 'gender')
+                    <flux:radio.group wire:model="bulkGender" variant="segmented">
+                        @foreach ($genders as $gender)
+                            <flux:radio :value="$gender->value" :label="$gender->label()" class="data-checked:bg-woka! data-checked:text-white!" />
+                        @endforeach
+                    </flux:radio.group>
+                    <flux:error name="gender" />
+                @endif
+
+                @if ($bulkDormMode === 'room')
+                    <flux:select wire:model="bulkRoom" label="Kamar tujuan">
+                        <flux:select.option value="">– Pilih kamar –</flux:select.option>
+                        @foreach ($dormRooms as $room)
+                            <flux:select.option :value="$room->id">{{ $room->dormitory?->name }} · Kamar {{ $room->number }} ({{ $room->active_assignments_count }}/{{ $room->capacity }})</flux:select.option>
+                        @endforeach
+                    </flux:select>
+                    <flux:error name="room_id" />
+                @endif
+
+                @if ($bulkDormMode === 'auto' && $dormPlan)
+                    <div class="max-h-64 space-y-2 overflow-y-auto rounded-xl bg-santan p-3 text-sm dark:bg-hutan-800" data-test="dorm-preview">
+                        <p class="font-semibold">Pratinjau: {{ collect($dormPlan['rooms'])->sum(fn ($r) => count($r['names'])) }} ditempatkan, {{ count($dormPlan['skipped']) }} dilewati</p>
+                        @foreach ($dormPlan['rooms'] as $row)
+                            <p><span class="font-semibold">{{ $row['label'] }}:</span> {{ implode(', ', $row['names']) }}</p>
+                        @endforeach
+                        @foreach ($dormPlan['skipped'] as $row)
+                            <p class="text-amber-800 dark:text-amber-300">{{ $row['name'] }} — {{ $row['reason'] }}</p>
+                        @endforeach
+                    </div>
+                @endif
+
+                <div class="flex justify-end gap-2">
+                    <flux:modal.close><flux:button variant="ghost">Batal</flux:button></flux:modal.close>
+                    <flux:button type="submit" variant="primary">Simpan</flux:button>
+                </div>
+            </form>
+        </flux:modal>
     @endif
 
     @if ($canManage)
@@ -335,6 +701,8 @@ new #[Title('Peserta')] class extends Component {
                 </flux:select>
                 <flux:input wire:model="form.guardian_phone" label="HP orang tua/wali" type="tel" placeholder="081234567890"
                             description="Boleh kosong; peserta wajib mengisinya saat login." />
+                <flux:switch wire:model="form.lives_in_dorm" label="Tinggal di asrama" class="sm:col-span-2"
+                             description="Matikan untuk peserta pulang-pergi: dikeluarkan dari kamar dan konsumsinya mengikuti pengaturan tim konsumsi." />
                 <flux:input wire:model="form.target_exam" label="Target ujian" placeholder="IELTS, HSK 3, JFT" />
                 <flux:input wire:model="form.target_score" label="Target skor" />
                 <flux:textarea wire:model="form.allergies" label="Alergi / pantangan makanan" rows="2" class="sm:col-span-2" />

@@ -78,6 +78,9 @@ new #[Title('Kelas')] class extends Component {
 <div>
     <x-page-header title="Kelas" subtitle="Kelas per angkatan dan bahasa, beserta pengajar dan lokasinya.">
         <x-slot:actions>
+            @can('participant.manage')
+                <flux:button icon="arrows-right-left" :href="route('master.participants', ['status' => 'no_class'])" wire:navigate>Bagi peserta ke kelas</flux:button>
+            @endcan
             <flux:button variant="primary" icon="plus" wire:click="create">Kelas baru</flux:button>
         </x-slot:actions>
     </x-page-header>

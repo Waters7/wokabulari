@@ -38,6 +38,7 @@ class ImportParticipants
         'emergency_contact_phone' => ['kontak_darurat_hp', 'hp_kontak_darurat'],
         'guardian_name' => ['nama_orang_tua', 'nama_wali', 'nama_orang_tua_wali', 'orang_tua_wali'],
         'guardian_phone' => ['hp_orang_tua', 'no_hp_orang_tua', 'hp_wali', 'no_hp_wali', 'hp_orang_tua_wali', 'no_hp_orang_tua_wali'],
+        'lives_in_dorm' => ['asrama', 'tinggal_di_asrama', 'tinggal_asrama', 'status_asrama'],
         'target_exam' => ['target_ujian'],
         'target_score' => ['target_skor'],
         'classroom' => ['kelas'],
@@ -125,6 +126,7 @@ class ImportParticipants
             'emergency_contact_phone' => Phone::normalize($data['emergency_contact_phone']),
             'guardian_name' => $data['guardian_name'],
             'guardian_phone' => Phone::normalize($data['guardian_phone']),
+            'lives_in_dorm' => $this->parseResidency($data['lives_in_dorm']),
             'target_exam' => $data['target_exam'],
             'target_score' => $data['target_score'],
         ], fn ($value) => filled($value)));
@@ -207,6 +209,16 @@ class ImportParticipants
             ->when($batch, fn ($query) => $query->where('batch_id', $batch->id))
             ->where('name', $name)
             ->first();
+    }
+
+    /** Kolom asrama: ya/tidak (kosong = tidak diubah). */
+    protected function parseResidency(?string $value): ?bool
+    {
+        return match (mb_strtolower(trim((string) $value))) {
+            'ya', 'y', '1', 'asrama', 'tinggal di asrama' => true,
+            'tidak', 't', '0', 'tidak asrama', 'pp', 'pulang pergi', 'pulang-pergi' => false,
+            default => null,
+        };
     }
 
     protected function parseDate(?string $value): ?string

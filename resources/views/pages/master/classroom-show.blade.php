@@ -1,5 +1,6 @@
 <?php
 
+use App\Actions\Classrooms\AssignParticipants;
 use App\Enums\Role;
 use App\Models\Classroom;
 use App\Models\User;
@@ -21,7 +22,7 @@ new #[Title('Detail kelas')] class extends Component {
         $this->classroom = $classroom->load(['batch', 'language', 'teacher', 'location']);
     }
 
-    public function addSelected(): void
+    public function addSelected(AssignParticipants $assign): void
     {
         $this->authorize('update', $this->classroom);
 
@@ -29,14 +30,9 @@ new #[Title('Detail kelas')] class extends Component {
             return;
         }
 
-        // Satu peserta hanya di satu kelas per angkatan.
-        $ids = User::query()->whereIn('id', $this->selected)->participants()->pluck('id');
-        foreach ($ids as $id) {
-            User::find($id)->classrooms()->where('batch_id', $this->classroom->batch_id)->detach();
-        }
-        $this->classroom->participants()->syncWithoutDetaching($ids->mapWithKeys(fn ($id) => [$id => ['joined_at' => now()]])->all());
+        $count = $assign->handle($this->classroom, $this->selected, auth()->user());
 
-        Flux::toast(variant: 'success', text: count($ids).' peserta ditambahkan ke kelas.');
+        Flux::toast(variant: 'success', text: $count.' peserta ditambahkan ke kelas.');
         $this->reset('selected', 'search');
     }
 

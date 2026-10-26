@@ -73,7 +73,9 @@ new #[Title('Absen asrama')] class extends Component {
 
     @php($tonight = $this->tonight)
 
-    @if (! $dormitory)
+    @if (! auth()->user()->livesInDorm())
+        <x-empty-state icon="home-modern" title="Ngana terdaftar tidak tinggal di asrama" description="Absen malam tidak berlaku. Bila sebenarnya tinggal di asrama, hubungi tim kerja." />
+    @elseif (! $dormitory)
         <x-empty-state icon="home-modern" title="Belum ada kamar asrama" description="Hubungi pengelola asrama agar ngana ditempatkan di kamar." />
     @elseif ($tonight && $tonight->status !== DormAttendanceStatus::Rejected)
         <x-card class="text-center">

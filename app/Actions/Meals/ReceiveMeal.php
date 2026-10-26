@@ -6,6 +6,7 @@ use App\Models\MealReceipt;
 use App\Models\MealSchedule;
 use App\Models\User;
 use App\Services\ImageService;
+use App\Services\MealRoster;
 use InvalidArgumentException;
 
 /**
@@ -15,12 +16,16 @@ use InvalidArgumentException;
  */
 class ReceiveMeal
 {
-    public function __construct(protected ImageService $images) {}
+    public function __construct(protected ImageService $images, protected MealRoster $roster) {}
 
     public function handle(MealSchedule $schedule, User $participant, string $signatureDataUri, ?User $proxy = null, ?string $note = null, ?float $latitude = null, ?float $longitude = null): MealReceipt
     {
         if (! $participant->isParticipant() || ! $participant->is_active) {
             throw new InvalidArgumentException('Penerima harus peserta aktif.');
+        }
+
+        if (! $this->roster->isEligible($participant, $schedule->meal_type)) {
+            throw new InvalidArgumentException($schedule->meal_type->label().' tidak termasuk konsumsi peserta tidak asrama.');
         }
 
         if ($proxy) {

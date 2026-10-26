@@ -28,9 +28,16 @@ class ParticipantProfileFactory extends Factory
             'guardian_name' => fake()->name(),
             'guardian_phone' => '628'.fake()->numerify('##########'),
             'guardian_relationship' => GuardianRelationship::Mother,
+            'lives_in_dorm' => true,
             'target_exam' => null,
             'target_score' => null,
         ];
+    }
+
+    /** Peserta pulang-pergi (tidak tinggal di asrama). */
+    public function nonResident(): static
+    {
+        return $this->state(fn () => ['lives_in_dorm' => false]);
     }
 
     /** Peserta yang belum mengisi kontak orang tua/wali. */

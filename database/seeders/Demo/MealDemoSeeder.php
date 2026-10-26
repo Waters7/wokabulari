@@ -23,6 +23,8 @@ class MealDemoSeeder extends Seeder
         MealType::Breakfast->value => ['Nasi kuning, telur, abon cakalang', 'Bubur Manado (tinutuan), perkedel nike', 'Roti, telur dadar, pisang', 'Nasi goreng, telur mata sapi, kerupuk'],
         MealType::Lunch->value => ['Nasi, ikan woku belanga, sayur kangkung', 'Nasi, ayam rica-rica, tumis buncis', 'Nasi, cakalang fufu, sayur bunga pepaya', 'Nasi, ikan bakar dabu-dabu, sayur bayam'],
         MealType::Dinner->value => ['Nasi, sup brenebon, tempe goreng', 'Nasi, ayam goreng, sayur sop', 'Nasi, ikan kuah asam, tahu bacem', 'Nasi, daging sapi kecap, capcay'],
+        MealType::MorningSnack->value => ['Panada, teh manis', 'Lalampa, air mineral', 'Kue cucur, kopi susu', 'Pisang goroho goreng, sambal roa'],
+        MealType::AfternoonSnack->value => ['Klappertaart, teh', 'Biapong, air mineral', 'Kue lapis, jus jeruk', 'Bubur kacang hijau'],
     ];
 
     public function run(): void

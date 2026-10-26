@@ -18,7 +18,7 @@ class ParticipantProfile extends Model
     protected $fillable = [
         'user_id', 'school_name', 'major', 'gender', 'birth_date', 'allergies', 'medical_history',
         'emergency_contact_name', 'emergency_contact_phone', 'guardian_name', 'guardian_phone', 'guardian_relationship',
-        'face_reference_path', 'face_descriptor',
+        'lives_in_dorm', 'face_reference_path', 'face_descriptor',
         'face_enrolled_at', 'target_exam', 'target_score',
     ];
 
@@ -31,6 +31,7 @@ class ParticipantProfile extends Model
             'gender' => Gender::class,
             'birth_date' => DateOnly::class,
             'guardian_relationship' => GuardianRelationship::class,
+            'lives_in_dorm' => 'boolean',
             'medical_history' => 'encrypted',
             'face_descriptor' => 'encrypted:array',
             'face_enrolled_at' => 'datetime',
@@ -41,7 +42,7 @@ class ParticipantProfile extends Model
     {
         // Data kesehatan & descriptor hanya dicatat perubahannya, tanpa nilai.
         return LogOptions::defaults()
-            ->logOnly(['school_name', 'major', 'gender', 'allergies', 'emergency_contact_phone', 'guardian_phone', 'face_enrolled_at'])
+            ->logOnly(['school_name', 'major', 'gender', 'allergies', 'emergency_contact_phone', 'guardian_phone', 'lives_in_dorm', 'face_enrolled_at'])
             ->logOnlyDirty()
             ->dontLogEmptyChanges()
             ->useLogName('peserta');

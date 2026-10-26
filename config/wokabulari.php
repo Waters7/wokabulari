@@ -6,7 +6,7 @@ return [
     | Versi aplikasi (semver). Naikkan setiap rilis dan catat di docs/CHANGELOG.md:
     | patch (1.0.x) untuk perbaikan, minor (1.x.0) untuk fitur baru, major untuk perubahan besar.
     */
-    'version' => '1.1.0',
+    'version' => '1.2.0',
 
     /*
     |--------------------------------------------------------------------------
@@ -28,6 +28,14 @@ return [
     | saat login pertama. Isi lewat .env, jangan ditulis di repo.
     */
     'participant_default_password' => env('PARTICIPANT_DEFAULT_PASSWORD'),
+
+    /*
+    | Konsumsi bawaan untuk peserta tidak asrama; diubah tim konsumsi di halaman Jadwal makan
+    | (tersimpan di tabel settings dengan kunci meals.non_resident_types).
+    */
+    'meals' => [
+        'non_resident_types' => ['morning_snack', 'lunch', 'afternoon_snack'],
+    ],
 
     /*
     | Super admin untuk TrialSeeder (uji coba localhost/staging). Isi lewat .env.

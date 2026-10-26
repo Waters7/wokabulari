@@ -221,6 +221,12 @@ class User extends Authenticatable
         return $this->hasRole(Role::Participant->value);
     }
 
+    /** Peserta yang tinggal di asrama (bawaan ya bila profil belum ada). */
+    public function livesInDorm(): bool
+    {
+        return $this->isParticipant() && ($this->profile?->lives_in_dorm ?? true);
+    }
+
     public function isGuardian(): bool
     {
         return $this->hasRole(Role::Guardian->value);

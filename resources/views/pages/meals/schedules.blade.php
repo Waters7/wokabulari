@@ -1,10 +1,13 @@
 <?php
 
 use App\Actions\Meals\ManageMealSchedules;
+use App\Actions\Meals\SetNonResidentMealTypes;
 use App\Enums\MealType;
 use App\Http\Requests\MealScheduleRequest;
+use App\Http\Requests\NonResidentMealsRequest;
 use App\Models\MealSchedule;
 use App\Models\Vendor;
+use App\Services\MealRoster;
 use Carbon\CarbonImmutable;
 use Flux\Flux;
 use Illuminate\Support\Facades\Validator;
@@ -24,10 +27,30 @@ new #[Title('Jadwal makan')] class extends Component {
     /** @var array<string, mixed> */
     public array $form = [];
 
-    public function mount(): void
+    public bool $showNonResident = false;
+
+    /** @var list<string> Jenis konsumsi peserta tidak asrama */
+    public array $nonResidentTypes = [];
+
+    public function mount(MealRoster $roster): void
     {
         $this->week = $this->week ?: now()->startOfWeek()->toDateString();
         $this->resetForm();
+        $this->nonResidentTypes = array_map(fn (MealType $type) => $type->value, $roster->nonResidentTypes());
+    }
+
+    public function saveNonResident(SetNonResidentMealTypes $setTypes): void
+    {
+        abort_unless(auth()->user()->can('meal.manage'), 403);
+
+        $validator = Validator::make(['types' => $this->nonResidentTypes], NonResidentMealsRequest::rulesFor());
+        if ($validator->fails()) {
+            throw ValidationException::withMessages(['nonResidentTypes' => $validator->errors()->all()]);
+        }
+
+        $setTypes->handle($validator->validated()['types'], auth()->user());
+        $this->showNonResident = false;
+        Flux::toast(variant: 'success', text: 'Konsumsi peserta tidak asrama tersimpan.');
     }
 
     protected function resetForm(?string $date = null, ?string $type = null): void
@@ -42,13 +65,19 @@ new #[Title('Jadwal makan')] class extends Component {
             'menu' => '',
             'start_time' => $start,
             'end_time' => $end,
-            'portions_ordered' => app(\App\Services\MealRoster::class)->participants()->count(),
+            'portions_ordered' => app(MealRoster::class)->participants($mealType)->count(),
         ];
     }
 
     public function updatedFormMealType(string $value): void
     {
-        [$this->form['start_time'], $this->form['end_time']] = (MealType::tryFrom($value) ?? MealType::Breakfast)->defaultWindow();
+        $type = MealType::tryFrom($value) ?? MealType::Breakfast;
+        [$this->form['start_time'], $this->form['end_time']] = $type->defaultWindow();
+
+        // Jadwal baru: porsi bawaan mengikuti jumlah penerima jenis ini.
+        if (! $this->editingId) {
+            $this->form['portions_ordered'] = app(MealRoster::class)->participants($type)->count();
+        }
     }
 
     public function shift(int $weeks): void
@@ -141,13 +170,17 @@ new #[Title('Jadwal makan')] class extends Component {
                 ->orderBy('starts_at')->get()->groupBy(fn ($s) => $s->date->toDateString()),
             'vendors' => Vendor::query()->active()->orderBy('name')->get(),
             'types' => MealType::cases(),
+            'nonResidentCount' => app(MealRoster::class)->participants()->filter(fn ($p) => $p->profile?->lives_in_dorm === false)->count(),
         ];
     }
 }; ?>
 
 <div>
-    <x-page-header title="Jadwal makan" subtitle="Sarapan, makan siang, dan makan malam per hari beserta vendor dan rentang pengambilan.">
+    <x-page-header title="Jadwal makan" subtitle="Sarapan, snack, makan siang, dan makan malam per hari beserta vendor dan rentang pengambilan.">
         <x-slot:actions>
+            @can('meal.manage')
+                <flux:button icon="adjustments-horizontal" wire:click="$set('showNonResident', true)">Peserta tidak asrama</flux:button>
+            @endcan
             <x-confirm-button action="duplicate" label="Salin ke minggu depan" icon="document-duplicate" variant="filled" size="base"
                               title="Salin jadwal minggu ini?" message="Semua jadwal minggu ini disalin ke minggu berikutnya. Jadwal yang sudah ada tidak ditimpa." confirmLabel="Salin" />
             <flux:button variant="primary" icon="plus" wire:click="create">Jadwal baru</flux:button>
@@ -165,7 +198,7 @@ new #[Title('Jadwal makan')] class extends Component {
             @php($daySchedules = $schedules[$day->toDateString()] ?? collect())
             <section wire:key="md-{{ $day->toDateString() }}">
                 <h2 @class(['mb-2 text-sm font-bold uppercase tracking-wide', 'text-woka' => $day->isToday(), 'text-hutan/60 dark:text-santan/60' => ! $day->isToday()])>{{ tanggal($day, 'l, j M') }}</h2>
-                <div class="grid gap-2 sm:grid-cols-3">
+                <div class="grid gap-2 sm:grid-cols-3 xl:grid-cols-5">
                     @foreach ($types as $type)
                         @php($items = $daySchedules->where('meal_type', $type))
                         @forelse ($items as $schedule)
@@ -185,7 +218,7 @@ new #[Title('Jadwal makan')] class extends Component {
                             </x-card>
                         @empty
                             <button type="button" wire:click="create('{{ $day->toDateString() }}', '{{ $type->value }}')"
-                                    class="flex min-h-20 items-center justify-center gap-1 rounded-2xl border border-dashed border-woka-200 text-sm text-hutan/50 dark:text-santan/50 hover:bg-woka-50 dark:border-hutan-800">
+                                    class="flex min-h-11 items-center justify-center gap-1 rounded-2xl border border-dashed border-woka-200 text-sm text-hutan/50 sm:min-h-20 dark:text-santan/50 hover:bg-woka-50 dark:border-hutan-800">
                                 <flux:icon.plus class="size-4" /> {{ $type->label() }}
                             </button>
                         @endforelse
@@ -194,6 +227,30 @@ new #[Title('Jadwal makan')] class extends Component {
             </section>
         @endforeach
     </div>
+
+    @can('meal.manage')
+        <flux:modal wire:model.self="showNonResident" class="w-full max-w-md">
+            <form wire:submit="saveNonResident" class="space-y-4">
+                <div>
+                    <flux:heading size="lg">Konsumsi peserta tidak asrama</flux:heading>
+                    <flux:text class="mt-1">
+                        {{ $nonResidentCount }} peserta terdaftar tidak tinggal di asrama. Centang konsumsi yang tetap mereka terima;
+                        jenis lain tidak dihitung di porsi, monitor, maupun daftar konsumsi mereka.
+                    </flux:text>
+                </div>
+                <flux:checkbox.group wire:model="nonResidentTypes" label="Konsumsi yang diterima">
+                    @foreach ($types as $type)
+                        <flux:checkbox :value="$type->value" :label="$type->label()" />
+                    @endforeach
+                </flux:checkbox.group>
+                <flux:error name="nonResidentTypes" />
+                <div class="flex justify-end gap-2">
+                    <flux:modal.close><flux:button variant="ghost">Batal</flux:button></flux:modal.close>
+                    <flux:button type="submit" variant="primary">Simpan</flux:button>
+                </div>
+            </form>
+        </flux:modal>
+    @endcan
 
     <flux:modal wire:model.self="showForm" class="w-full max-w-md">
         <form wire:submit="save" class="space-y-4">

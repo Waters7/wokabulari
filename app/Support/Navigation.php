@@ -60,6 +60,10 @@ class Navigation
 
         $items = collect($routes)
             ->map(fn (string $route) => $all->get($route) ?? $this->extraBottomItems()[$route] ?? null)
+            // Peserta tidak asrama: tab "Asrama" menjadi "Konsumsi".
+            ->map(fn (?array $item) => $item && $item['route'] === 'participant.dorm' && ! $user->livesInDorm()
+                ? ['label' => 'Konsumsi', 'icon' => 'cake'] + $item
+                : $item)
             ->filter(fn (?array $item) => $item !== null && $this->visible($user, $item))
             ->map(fn (array $item) => $this->resolve($item, short: true))
             ->take(4)
@@ -121,6 +125,11 @@ class Navigation
             return false;
         }
 
+        // Menu asrama hanya untuk peserta yang tinggal di asrama.
+        if (($item['resident'] ?? false) && ! $user->livesInDorm()) {
+            return false;
+        }
+
         return true;
     }
 
@@ -164,9 +173,9 @@ class Navigation
             ],
             'Asrama & Konsumsi' => [
                 ['label' => 'Konsumsi', 'icon' => 'cake', 'route' => 'meals.index', 'roles' => $participant],
-                ['label' => 'Absen Asrama', 'icon' => 'moon', 'route' => 'dorm.attendance', 'roles' => $participant],
-                ['label' => 'Izin Keluar', 'icon' => 'arrow-right-start-on-rectangle', 'route' => 'dorm.exit.index', 'match' => ['dorm.exit.*'], 'roles' => $participant],
-                ['label' => 'Keluhan Asrama', 'icon' => 'wrench-screwdriver', 'route' => 'dorm.requests.index', 'match' => ['dorm.requests.*'], 'roles' => $participant],
+                ['label' => 'Absen Asrama', 'icon' => 'moon', 'route' => 'dorm.attendance', 'roles' => $participant, 'resident' => true],
+                ['label' => 'Izin Keluar', 'icon' => 'arrow-right-start-on-rectangle', 'route' => 'dorm.exit.index', 'match' => ['dorm.exit.*'], 'roles' => $participant, 'resident' => true],
+                ['label' => 'Keluhan Asrama', 'icon' => 'wrench-screwdriver', 'route' => 'dorm.requests.index', 'match' => ['dorm.requests.*'], 'roles' => $participant, 'resident' => true],
                 ['label' => 'Lapor Sakit', 'icon' => 'heart', 'route' => 'health.report', 'match' => ['health.report*'], 'roles' => $participant],
             ],
             'Aktivitas' => [

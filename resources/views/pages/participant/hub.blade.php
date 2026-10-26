@@ -21,7 +21,7 @@ new #[Title('Menu')] class extends Component {
         $headings = $this->section === 'asrama' ? ['Asrama & Konsumsi'] : ['Kelas Saya', 'Aktivitas'];
 
         return [
-            'title' => $this->section === 'asrama' ? 'Asrama & konsumsi' : 'Kelas saya',
+            'title' => $this->section === 'asrama' ? (auth()->user()->livesInDorm() ? 'Asrama & konsumsi' : 'Konsumsi & kesehatan') : 'Kelas saya',
             'items' => collect($headings)->flatMap(fn ($h) => $groups->get($h)['items'] ?? [])->all(),
         ];
     }

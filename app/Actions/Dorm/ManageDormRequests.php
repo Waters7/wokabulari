@@ -27,6 +27,10 @@ class ManageDormRequests
             throw new InvalidArgumentException('Keluhan asrama diajukan oleh peserta.');
         }
 
+        if (! $participant->livesInDorm()) {
+            throw new InvalidArgumentException('Keluhan asrama hanya untuk peserta yang tinggal di asrama.');
+        }
+
         return DormRequest::query()->create([
             'user_id' => $participant->id,
             'dorm_room_id' => $participant->currentRoomAssignment?->dorm_room_id,

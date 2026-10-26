@@ -98,7 +98,8 @@ new #[Title('Monitor makan')] class extends Component {
         $date = CarbonImmutable::parse($this->date);
         $schedules = MealSchedule::query()->with('vendor')->onDate($date)->orderBy('starts_at')->get();
         $schedule = $this->schedule($schedules);
-        $participants = $roster->participants();
+        // Total mengikuti jenis konsumsi (peserta tidak asrama hanya untuk jenis tertentu).
+        $participants = $roster->participants($schedule?->meal_type);
         $receipts = $schedule
             ? MealReceipt::query()->with('proxy')->where('meal_schedule_id', $schedule->id)->latest('received_at')->get()->keyBy('user_id')
             : collect();
@@ -117,7 +118,7 @@ new #[Title('Monitor makan')] class extends Component {
             'proxyCount' => $receipts->whereNotNull('proxy_by')->count(),
             'flaggedCount' => count(array_intersect_key($flags, $participants->keyBy('id')->all())),
             'pending' => $pending,
-            'recent' => $receipts->take(8)->map(fn ($r) => $r->setRelation('user', $participants->firstWhere('id', $r->user_id))),
+            'recent' => $receipts->take(8)->map(fn ($r) => $r->setRelation('user', $participants->firstWhere('id', $r->user_id) ?? $r->user)),
             'flags' => $flags,
             'specials' => SpecialMealRequest::query()->with(['user.currentRoomAssignment.room.dormitory'])->whereDate('date', $date)
                 ->orderByRaw("case status when 'pending' then 0 when 'prepared' then 1 else 2 end")->get(),

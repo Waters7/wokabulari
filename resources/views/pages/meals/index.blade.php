@@ -3,6 +3,7 @@
 use App\Actions\Meals\ReceiveMeal;
 use App\Models\MealReceipt;
 use App\Models\MealSchedule;
+use App\Services\MealRoster;
 use Flux\Flux;
 use Livewire\Attributes\Title;
 use Livewire\Component;
@@ -24,10 +25,12 @@ new #[Title('Konsumsi')] class extends Component {
         Flux::toast(variant: 'success', text: 'Makanan diterima. Selamat makan, neh!');
     }
 
-    public function with(): array
+    public function with(MealRoster $roster): array
     {
         $user = auth()->user();
-        $today = MealSchedule::query()->with('vendor')->onDate(today())->orderBy('starts_at')->get();
+        // Peserta tidak asrama hanya melihat jenis konsumsi yang menjadi haknya.
+        $today = MealSchedule::query()->with('vendor')->onDate(today())->orderBy('starts_at')->get()
+            ->filter(fn (MealSchedule $schedule) => $roster->isEligible($user, $schedule->meal_type))->values();
         $received = MealReceipt::query()->where('user_id', $user->id)->whereIn('meal_schedule_id', $today->pluck('id'))->get()->keyBy('meal_schedule_id');
 
         return [

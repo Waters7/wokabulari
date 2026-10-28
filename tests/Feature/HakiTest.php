@@ -54,9 +54,10 @@ test('sidik HaKI dan versi tampil di halaman login serta header respons', functi
         ->assertSee('name="copyright"', false);
 });
 
-test('tombol keluar dan ganti kata sandi tersedia di bagian atas', function () {
+test('keluar dan ganti kata sandi ada di menu profil, tanpa tombol keluar ganda', function () {
     $this->actingAs(participant())->get(route('dashboard'))
         ->assertOk()
-        ->assertSee('data-test="logout-top"', false)
+        ->assertSee('data-test="logout-button"', false)
+        ->assertDontSee('data-test="logout-top"', false)
         ->assertSee('Ganti kata sandi');
 });

@@ -41,7 +41,7 @@
         <flux:header class="sticky top-0 z-30 border-b border-woka-100 bg-white/95 backdrop-blur lg:hidden dark:border-hutan-800 dark:bg-hutan-900/95">
             <flux:sidebar.toggle class="lg:hidden" icon="bars-2" inset="left" aria-label="Buka menu" />
 
-            {{-- Teks logo diperkecil di layar 360px agar muat bersama lonceng, profil, dan tombol keluar --}}
+            {{-- Teks logo diperkecil di layar 360px agar muat bersama lonceng dan profil --}}
             <x-app-logo href="{{ route('dashboard') }}" class="ms-1 min-w-0 [&>span]:text-lg min-[400px]:[&>span]:text-xl" wire:navigate />
 
             <flux:spacer />
@@ -53,20 +53,17 @@
                     <flux:profile :initials="$user->initials()" :avatar="$user->photo_url" :chevron="false" />
                     <x-user-menu-items />
                 </flux:dropdown>
-
-                <x-logout-button compact />
             </div>
         </flux:header>
 
         <flux:main @class(['max-w-7xl', 'has-bottom-nav' => count($bottomItems) > 0])>
-            {{-- Bilah kanan atas (desktop): notifikasi, profil, keluar --}}
+            {{-- Bilah kanan atas (desktop): notifikasi dan profil (Keluar ada di menu profil) --}}
             <div class="mb-3 hidden items-center justify-end gap-2 lg:flex">
                 <x-notification-bell :count="$unread" />
                 <flux:dropdown position="bottom" align="end">
                     <flux:profile :name="$user->name" :initials="$user->initials()" :avatar="$user->photo_url" icon-trailing="chevron-down" />
                     <x-user-menu-items />
                 </flux:dropdown>
-                <x-logout-button />
             </div>
 
             {{ $slot }}

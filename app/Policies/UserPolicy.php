@@ -57,6 +57,6 @@ class UserPolicy
 
     protected function teaches(User $teacher, User $participant): bool
     {
-        return $participant->classrooms()->where('teacher_id', $teacher->id)->exists();
+        return $participant->classrooms()->taughtBy($teacher)->exists();
     }
 }

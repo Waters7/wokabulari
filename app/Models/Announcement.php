@@ -91,7 +91,7 @@ class Announcement extends Model
             $ids = $ids->merge($user->classrooms()->pluck('classrooms.id'));
         }
         if ($user->isTeacher()) {
-            $ids = $ids->merge($user->teachingClassrooms()->pluck('id'));
+            $ids = $ids->merge(Classroom::query()->taughtBy($user)->pluck('classrooms.id'));
         }
         if ($user->isGuardian()) {
             $ids = $ids->merge(Classroom::query()->whereHas('participants', fn ($q) => $q->whereIn('users.id', $user->wards()->pluck('users.id')))->pluck('id'));
@@ -148,7 +148,7 @@ class Announcement extends Model
             AnnouncementAudience::Classroom => $this->classroom
                 ? $this->classroom->participants()->where('is_active', true)->get()
                     ->merge($this->classroom->participants()->get()->flatMap(fn (User $p) => $p->guardians()->get()))
-                    ->push($this->classroom->teacher)->filter()
+                    ->merge($this->classroom->teachers()->get())->push($this->classroom->teacher)->filter()->unique('id')
                 : collect(),
             AnnouncementAudience::Dormitory => $this->dormitory
                 ? $this->dormitory->residents()->where('is_active', true)->get()

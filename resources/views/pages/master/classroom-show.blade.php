@@ -19,7 +19,7 @@ new #[Title('Detail kelas')] class extends Component {
     public function mount(Classroom $classroom): void
     {
         $this->authorize('view', $classroom);
-        $this->classroom = $classroom->load(['batch', 'language', 'teacher', 'location']);
+        $this->classroom = $classroom->load(['batch', 'language', 'teacher', 'teachers', 'location']);
     }
 
     public function addSelected(AssignParticipants $assign): void
@@ -60,7 +60,7 @@ new #[Title('Detail kelas')] class extends Component {
 
 <div>
     <x-page-header :title="$classroom->label()" :back="route('master.classrooms')"
-                   :subtitle="$classroom->language->name.' · '.$classroom->batch->name.' · Pengajar: '.($classroom->teacher?->name ?? '–')" />
+                   :subtitle="$classroom->language->name.' · '.$classroom->batch->name.' · Pengajar: '.($classroom->teachers->sortByDesc(fn ($t) => $t->id === $classroom->teacher_id)->pluck('name')->join(', ') ?: '–')" />
 
     <div class="grid gap-4 lg:grid-cols-3">
         <x-card class="lg:col-span-2" title="Peserta ({{ $participants->count() }})">

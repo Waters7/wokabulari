@@ -68,7 +68,7 @@ new #[Title('Kelola pengumuman')] class extends Component {
         $user = auth()->user();
 
         return Classroom::query()->where('batch_id', Batch::current()?->id)
-            ->when($source === AnnouncementSource::Teacher && ! $user->isSuperAdmin(), fn ($q) => $q->where('teacher_id', $user->id))
+            ->when($source === AnnouncementSource::Teacher && ! $user->isSuperAdmin(), fn ($q) => $q->taughtBy($user))
             ->orderBy('name')->get();
     }
 

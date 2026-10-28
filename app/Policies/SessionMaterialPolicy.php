@@ -43,7 +43,7 @@ class SessionMaterialPolicy
     public function update(User $user, SessionMaterial $material): bool
     {
         return $user->can('material.manage')
-            && ($material->teacher_id === $user->id || $user->can('classroom.manage') || $material->session?->classroom?->teacher_id === $user->id);
+            && ($material->teacher_id === $user->id || $user->can('classroom.manage') || (bool) $material->session?->classroom?->hasTeacher($user));
     }
 
     public function delete(User $user, SessionMaterial $material): bool

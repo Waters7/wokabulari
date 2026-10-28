@@ -29,6 +29,9 @@ class ClassroomRequest extends FormRequest
             'name' => ['required', 'string', 'max:100'],
             'level' => ['nullable', 'string', 'max:50'],
             'teacher_id' => ['nullable', Rule::exists('users', 'id')->whereNull('deleted_at')],
+            // Pengajar lain di kelas (tim pengajar), selain pengajar utama.
+            'co_teacher_ids' => ['array'],
+            'co_teacher_ids.*' => ['integer', 'distinct', Rule::exists('users', 'id')->whereNull('deleted_at')],
             'location_id' => ['nullable', 'exists:locations,id'],
         ];
     }

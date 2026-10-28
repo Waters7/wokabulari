@@ -46,6 +46,6 @@ class LearningSessionPolicy
 
     protected function teaches(User $user, LearningSession $session): bool
     {
-        return $session->teacher_id === $user->id || $session->classroom?->teacher_id === $user->id;
+        return $session->teacher_id === $user->id || (bool) $session->classroom?->hasTeacher($user);
     }
 }

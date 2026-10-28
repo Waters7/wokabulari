@@ -25,6 +25,6 @@ class AssessmentPolicy
     /** Pengajar kelas (dengan permission assessment.manage) mengelola penilaian kelasnya. */
     public function manage(User $user, Classroom $classroom): bool
     {
-        return $user->can('assessment.manage') && $classroom->teacher_id === $user->id;
+        return $user->can('assessment.manage') && $classroom->hasTeacher($user);
     }
 }

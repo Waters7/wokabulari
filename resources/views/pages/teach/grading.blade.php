@@ -24,7 +24,7 @@ new #[Title('Perlu dinilai')] class extends Component {
             ->whereNull('score')
             ->whereHas('attempt', fn ($q) => $q->where('status', AttemptStatus::NeedsGrading)
                 ->whereHas('quiz', fn ($q) => $q->when($this->quiz, fn ($q) => $q->whereKey($this->quiz))
-                    ->when(! $user->isSuperAdmin(), fn ($q) => $q->where(fn ($q) => $q->where('teacher_id', $user->id)->orWhereHas('classroom', fn ($c) => $c->where('teacher_id', $user->id))))));
+                    ->when(! $user->isSuperAdmin(), fn ($q) => $q->where(fn ($q) => $q->where('teacher_id', $user->id)->orWhereHas('classroom', fn ($c) => $c->taughtBy($user))))));
     }
 
     public function grade(int $answerId, GradeQuizAnswer $grader): void

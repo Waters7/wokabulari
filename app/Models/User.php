@@ -84,10 +84,10 @@ class User extends Authenticatable
         return $this->belongsToMany(Classroom::class)->withPivot('joined_at')->withTimestamps();
     }
 
-    /** Kelas yang diajar (pengajar utama). */
-    public function teachingClassrooms(): HasMany
+    /** Kelas yang diajar (pengajar utama maupun anggota tim pengajar). */
+    public function teachingClassrooms(): BelongsToMany
     {
-        return $this->hasMany(Classroom::class, 'teacher_id');
+        return $this->belongsToMany(Classroom::class, 'classroom_teacher')->withTimestamps();
     }
 
     public function roomAssignments(): HasMany

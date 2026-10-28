@@ -41,7 +41,7 @@ new #[Title('Penilaian periodik')] class extends Component {
         $user = auth()->user();
 
         return Classroom::query()->active()->with('language')
-            ->when(! $user->isSuperAdmin(), fn ($q) => $q->where('teacher_id', $user->id))
+            ->when(! $user->isSuperAdmin(), fn ($q) => $q->taughtBy($user))
             ->orderBy('name')->get();
     }
 

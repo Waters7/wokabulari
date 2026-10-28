@@ -19,7 +19,7 @@ class DailyAttendancePolicy
         }
 
         return $user->can('attendance.approve')
-            && ($user->can('participant.manage') || $attendance->user->classrooms()->where('teacher_id', $user->id)->exists());
+            && ($user->can('participant.manage') || $attendance->user->classrooms()->taughtBy($user)->exists());
     }
 
     /** Peserta absen untuk dirinya sendiri. */
@@ -35,7 +35,7 @@ class DailyAttendancePolicy
             return false;
         }
 
-        return $user->can('participant.manage') || $participant->classrooms()->where('teacher_id', $user->id)->exists();
+        return $user->can('participant.manage') || $participant->classrooms()->taughtBy($user)->exists();
     }
 
     /** Selfie hanya untuk peserta sendiri dan petugas yang berwenang (bukan wali). */

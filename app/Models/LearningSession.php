@@ -87,7 +87,7 @@ class LearningSession extends Model
         }
 
         $query->where(fn (Builder $q) => $q
-            ->whereHas('classroom', fn (Builder $c) => $c->where('teacher_id', $user->id))
+            ->whereHas('classroom', fn (Builder $c) => $c->taughtBy($user))
             ->orWhere('teacher_id', $user->id));
     }
 

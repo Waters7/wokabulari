@@ -42,7 +42,7 @@ class ManageAnnouncements
 
         if ($audience === AnnouncementAudience::Classroom) {
             $classroom = Classroom::query()->find($data['target_id'] ?? null) ?? throw new InvalidArgumentException('Pilih kelas sasaran.');
-            if ($source === AnnouncementSource::Teacher && $classroom->teacher_id !== $by->id && ! $by->isSuperAdmin()) {
+            if ($source === AnnouncementSource::Teacher && ! $classroom->hasTeacher($by) && ! $by->isSuperAdmin()) {
                 throw new InvalidArgumentException('Pengajar hanya bisa mengumumkan ke kelas yang diajarnya.');
             }
             $targetId = $classroom->id;

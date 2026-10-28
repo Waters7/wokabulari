@@ -39,6 +39,6 @@ class LeaveRequestPolicy
         }
 
         return $user->can('participant.manage')
-            || $leave->user->classrooms()->where('teacher_id', $user->id)->exists();
+            || $leave->user->classrooms()->taughtBy($user)->exists();
     }
 }

@@ -45,10 +45,12 @@ class RatingTargets
         $week = SubmitRating::weekStart();
         $ratings = TeacherRating::query()->where('user_id', $participant->id)->whereDate('week_start', $week)->get()->keyBy('teacher_id');
 
-        return $participant->classrooms()->active()->whereNotNull('teacher_id')->with(['teacher', 'language'])->get()
-            ->filter(fn ($classroom) => $classroom->teacher)
-            ->unique('teacher_id')
-            ->map(fn ($classroom) => ['teacher' => $classroom->teacher, 'classroom' => $classroom, 'rating' => $ratings->get($classroom->teacher_id)])
+        // Setiap pengajar di tim pengajar kelas dinilai terpisah.
+        return $participant->classrooms()->active()->with(['teachers', 'language'])->get()
+            ->flatMap(fn (Classroom $classroom) => $classroom->teachers->map(fn (User $teacher) => [
+                'teacher' => $teacher, 'classroom' => $classroom, 'rating' => $ratings->get($teacher->id),
+            ]))
+            ->unique(fn (array $row) => $row['teacher']->id)
             ->values();
     }
 

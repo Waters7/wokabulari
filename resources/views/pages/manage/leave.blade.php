@@ -60,7 +60,7 @@ new #[Title('Izin / sakit peserta')] class extends Component {
         return [
             'leaves' => LeaveRequest::query()
                 ->with(['user', 'reviewer'])
-                ->when(! $user->can('participant.manage'), fn (Builder $q) => $q->whereHas('user.classrooms', fn ($c) => $c->where('teacher_id', $user->id)))
+                ->when(! $user->can('participant.manage'), fn (Builder $q) => $q->whereHas('user.classrooms', fn ($c) => $c->taughtBy($user)))
                 ->when($this->status, fn (Builder $q) => $q->where('status', $this->status))
                 ->latest()
                 ->paginate(20),

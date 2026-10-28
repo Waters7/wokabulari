@@ -63,8 +63,8 @@ new #[Title('Izin / sakit')] class extends Component {
         ]);
 
         // Kabari pengajar kelas peserta.
-        $teacherIds = auth()->user()->classrooms()->pluck('teacher_id')->filter();
-        Notification::send(User::query()->whereIn('id', $teacherIds)->get(), new LeaveRequestSubmitted($leave));
+        $classroomIds = auth()->user()->classrooms()->pluck('classrooms.id');
+        Notification::send(User::query()->whereHas('teachingClassrooms', fn ($c) => $c->whereIn('classrooms.id', $classroomIds))->get(), new LeaveRequestSubmitted($leave));
 
         $this->showForm = false;
         Flux::toast(variant: 'success', text: 'Pengajuan terkirim. Semoga lekas beres, neh!');

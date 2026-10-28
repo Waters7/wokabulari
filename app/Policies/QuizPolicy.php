@@ -33,7 +33,7 @@ class QuizPolicy
     /** Pengajar kelas yang membuat/mengelola quiz dan menilai jawaban. */
     public function manage(User $user, Quiz $quiz): bool
     {
-        return $user->can('quiz.manage') && ($quiz->teacher_id === $user->id || $quiz->classroom?->teacher_id === $user->id);
+        return $user->can('quiz.manage') && ($quiz->teacher_id === $user->id || (bool) $quiz->classroom?->hasTeacher($user));
     }
 
     public function update(User $user, Quiz $quiz): bool

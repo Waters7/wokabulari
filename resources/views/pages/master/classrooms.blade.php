@@ -38,8 +38,25 @@ new #[Title('Kelas')] class extends Component {
             'name' => '',
             'level' => '',
             'teacher_id' => null,
+            'co_teacher_ids' => [],
             'location_id' => Location::query()->where('type', LocationType::Classroom)->value('id'),
         ];
+    }
+
+    protected function fillFrom(Model $model): array
+    {
+        return [
+            ...$model->only(['batch_id', 'language_id', 'name', 'level', 'teacher_id', 'location_id']),
+            'co_teacher_ids' => $model->teachers()->whereKeyNot($model->teacher_id ?? 0)->pluck('users.id')->map(fn ($id) => (string) $id)->all(),
+        ];
+    }
+
+    protected function persist(array $data, ?Model $model): void
+    {
+        $model ??= new Classroom;
+        $model->fill(collect($data)->except('co_teacher_ids')->all())->save();
+        // Tim pengajar: pengajar utama + pengajar lain.
+        $model->syncTeachers(filled($data['teacher_id'] ?? null) ? (int) $data['teacher_id'] : null, $data['co_teacher_ids'] ?? []);
     }
 
     protected function formRules(): array
@@ -49,7 +66,7 @@ new #[Title('Kelas')] class extends Component {
 
     protected function labels(): array
     {
-        return ['batch_id' => 'angkatan', 'language_id' => 'bahasa', 'name' => 'nama kelas', 'teacher_id' => 'pengajar', 'location_id' => 'lokasi'];
+        return ['batch_id' => 'angkatan', 'language_id' => 'bahasa', 'name' => 'nama kelas', 'teacher_id' => 'pengajar', 'co_teacher_ids' => 'pengajar lain', 'location_id' => 'lokasi'];
     }
 
     protected function deleteBlockedReason(Model $model): ?string
@@ -61,7 +78,7 @@ new #[Title('Kelas')] class extends Component {
     {
         return [
             'classrooms' => Classroom::query()
-                ->with(['language', 'teacher', 'location', 'batch'])
+                ->with(['language', 'teacher', 'teachers', 'location', 'batch'])
                 ->withCount('participants')
                 ->when($this->batch, fn ($query) => $query->where('batch_id', $this->batch))
                 ->when($this->search, fn ($query) => $query->where('name', 'like', "%{$this->search}%"))
@@ -110,6 +127,10 @@ new #[Title('Kelas')] class extends Component {
                 </div>
                 <dl class="mt-3 space-y-1 text-sm">
                     <div class="flex justify-between gap-2"><dt class="text-hutan/60 dark:text-santan/60">Pengajar</dt><dd class="truncate font-semibold">{{ $classroom->teacher?->name ?? 'Belum ditentukan' }}</dd></div>
+                    @php($others = $classroom->teachers->where('id', '!=', $classroom->teacher_id))
+                    @if ($others->isNotEmpty())
+                        <div class="flex justify-between gap-2"><dt class="text-hutan/60 dark:text-santan/60">Pengajar lain</dt><dd class="min-w-0 text-end">{{ $others->pluck('name')->join(', ') }}</dd></div>
+                    @endif
                     <div class="flex justify-between gap-2"><dt class="text-hutan/60 dark:text-santan/60">Lokasi</dt><dd class="truncate">{{ $classroom->location?->name ?? '–' }}</dd></div>
                     <div class="flex justify-between gap-2"><dt class="text-hutan/60 dark:text-santan/60">Peserta</dt><dd class="font-semibold">{{ $classroom->participants_count }}</dd></div>
                 </dl>
@@ -142,6 +163,16 @@ new #[Title('Kelas')] class extends Component {
                         <flux:select.option :value="$teacher->id">{{ $teacher->name }}</flux:select.option>
                     @endforeach
                 </flux:select>
+                <div class="sm:col-span-2">
+                    <flux:checkbox.group wire:model="form.co_teacher_ids" label="Pengajar lain (tim pengajar)" description="Semua pengajar kelas punya akses yang sama: sesi, penilaian, tugas, quiz. Peserta memberi rating ke tiap pengajar.">
+                        <div class="grid gap-2 sm:grid-cols-2">
+                            @foreach ($teachers as $teacher)
+                                <flux:checkbox :value="(string) $teacher->id" :label="$teacher->name" />
+                            @endforeach
+                        </div>
+                    </flux:checkbox.group>
+                    <flux:error name="form.co_teacher_ids" />
+                </div>
                 <flux:select wire:model="form.location_id" label="Lokasi kelas">
                     <flux:select.option value="">– Pilih lokasi –</flux:select.option>
                     @foreach ($locations as $location)

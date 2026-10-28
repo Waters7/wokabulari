@@ -36,7 +36,7 @@ new #[Title('Peringkat')] class extends Component {
         // Peserta hanya melihat kelasnya; pengajar kelas yang diajar; admin/pimpinan semua kelas angkatan aktif.
         return match (true) {
             $user->isParticipant() => $user->classrooms()->where('batch_id', $batch?->id)->get(),
-            $user->isTeacher() && ! $user->can('gamification.manage') => Classroom::query()->where('batch_id', $batch?->id)->where('teacher_id', $user->id)->get(),
+            $user->isTeacher() && ! $user->can('gamification.manage') => Classroom::query()->where('batch_id', $batch?->id)->taughtBy($user)->get(),
             default => Classroom::query()->where('batch_id', $batch?->id)->orderBy('name')->get(),
         };
     }

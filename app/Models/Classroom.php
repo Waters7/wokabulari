@@ -18,6 +18,16 @@ class Classroom extends Model
 
     protected $fillable = ['batch_id', 'language_id', 'name', 'level', 'teacher_id', 'location_id'];
 
+    protected static function booted(): void
+    {
+        // Pengajar utama selalu termasuk tim pengajar kelas.
+        static::saved(function (Classroom $classroom) {
+            if ($classroom->teacher_id && ($classroom->wasRecentlyCreated || $classroom->wasChanged('teacher_id'))) {
+                $classroom->teachers()->syncWithoutDetaching([$classroom->teacher_id]);
+            }
+        });
+    }
+
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()->logFillable()->logOnlyDirty()->dontLogEmptyChanges()->useLogName('kelas');
@@ -33,9 +43,43 @@ class Classroom extends Model
         return $this->belongsTo(Language::class);
     }
 
+    /** Pengajar utama (koordinator kelas). */
     public function teacher(): BelongsTo
     {
         return $this->belongsTo(User::class, 'teacher_id');
+    }
+
+    /** Semua pengajar kelas, termasuk pengajar utama. */
+    public function teachers(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'classroom_teacher')->withTimestamps();
+    }
+
+    public function hasTeacher(?User $user): bool
+    {
+        if (! $user) {
+            return false;
+        }
+
+        if ($this->teacher_id === $user->id) {
+            return true;
+        }
+
+        return $this->relationLoaded('teachers')
+            ? $this->teachers->contains('id', $user->id)
+            : $this->teachers()->whereKey($user->id)->exists();
+    }
+
+    /**
+     * Atur tim pengajar: pengajar utama + pengajar lain.
+     *
+     * @param  iterable<int>  $otherIds
+     */
+    public function syncTeachers(?int $leadId, iterable $otherIds = []): void
+    {
+        $this->forceFill(['teacher_id' => $leadId])->save();
+        $this->teachers()->sync(collect($otherIds)->push($leadId)->filter()->map(fn ($id) => (int) $id)->unique()->values()->all());
+        $this->unsetRelation('teachers');
     }
 
     public function location(): BelongsTo
@@ -65,7 +109,16 @@ class Classroom extends Model
             return;
         }
 
-        $query->where('teacher_id', $user->id);
+        $query->taughtBy($user);
+    }
+
+    /** Kelas yang diajar pengguna (sebagai pengajar utama atau anggota tim pengajar). */
+    public function scopeTaughtBy(Builder $query, User|int $user): void
+    {
+        $id = $user instanceof User ? $user->id : $user;
+
+        $query->where(fn (Builder $q) => $q->where('classrooms.teacher_id', $id)
+            ->orWhereHas('teachers', fn (Builder $t) => $t->whereKey($id)));
     }
 
     public function label(): string

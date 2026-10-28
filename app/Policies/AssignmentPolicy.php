@@ -34,7 +34,7 @@ class AssignmentPolicy
     public function manage(User $user, Assignment $assignment): bool
     {
         return $user->can('assignment.manage')
-            && ($assignment->teacher_id === $user->id || $assignment->classroom?->teacher_id === $user->id);
+            && ($assignment->teacher_id === $user->id || (bool) $assignment->classroom?->hasTeacher($user));
     }
 
     public function update(User $user, Assignment $assignment): bool

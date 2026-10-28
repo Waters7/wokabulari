@@ -16,7 +16,7 @@ class ClassroomPolicy
     {
         return $user->can('classroom.manage')
             || $user->can('session.view-all')
-            || $classroom->teacher_id === $user->id;
+            || $classroom->hasTeacher($user);
     }
 
     public function create(User $user): bool
@@ -37,7 +37,7 @@ class ClassroomPolicy
     /** Pengajar kelas atau admin boleh mengelola kegiatan belajar kelas ini. */
     public function teach(User $user, Classroom $classroom): bool
     {
-        return $classroom->teacher_id === $user->id
+        return $classroom->hasTeacher($user)
             || ($user->can('session.manage') && $user->can('classroom.manage'));
     }
 }

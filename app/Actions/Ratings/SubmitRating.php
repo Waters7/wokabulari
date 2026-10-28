@@ -55,7 +55,7 @@ class SubmitRating
      */
     public function teacher(User $participant, User $teacher, array $data): TeacherRating
     {
-        $classroom = $participant->classrooms()->where('teacher_id', $teacher->id)->first();
+        $classroom = $participant->classrooms()->taughtBy($teacher)->first();
 
         if (! $classroom) {
             throw new InvalidArgumentException('Pengajar ini tidak mengajar kelas ngana.');

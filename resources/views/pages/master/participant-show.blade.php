@@ -59,8 +59,11 @@ new #[Title('Profil peserta')] class extends Component {
                     'NIS' => $user->username ?? '–',
                     'Email' => $user->email ?? '–',
                     'Jenis kelamin' => $user->profile?->gender?->label() ?? '–',
-                    'Tanggal lahir' => tanggal($user->profile?->birth_date),
-                    'Jurusan' => $user->profile?->major ?? '–',
+                    'Tempat, tanggal lahir' => collect([$user->profile?->birth_place, $user->profile?->birth_date ? tanggal($user->profile->birth_date) : null])->filter()->join(', ') ?: '–',
+                    'Alamat' => $user->profile?->address ?: '–',
+                    'Kelas · jurusan' => collect([$user->profile?->school_grade, $user->profile?->major])->filter()->join(' · ') ?: '–',
+                    'Ukuran baju' => $user->profile?->shirt_size ?? '–',
+                    'Biodata' => ($user->profile?->biodataCompletion() ?? 0).'% lengkap',
                     'Asrama' => $user->profile?->lives_in_dorm === false
                         ? 'Tidak tinggal di asrama'
                         : ($user->currentRoomAssignment ? $user->currentRoomAssignment->room->dormitory->name.' · Kamar '.$user->currentRoomAssignment->room->number : 'Belum dapat kamar'),
@@ -94,6 +97,7 @@ new #[Title('Profil peserta')] class extends Component {
                 <dl class="space-y-2 text-sm">
                     <div><dt class="text-hutan/60 dark:text-santan/60">Alergi / pantangan</dt><dd class="font-semibold">{{ $user->profile?->allergies ?: 'Tidak ada' }}</dd></div>
                     @if ($canSeeHealth)
+                        <div><dt class="text-hutan/60 dark:text-santan/60">Golongan darah</dt><dd class="font-semibold">{{ $user->profile?->blood_type ?: '–' }}</dd></div>
                         <div><dt class="text-hutan/60 dark:text-santan/60">Riwayat penyakit</dt><dd class="font-semibold">{{ $user->profile?->medical_history ?: 'Tidak ada' }}</dd></div>
                     @else
                         <flux:text class="text-xs">Riwayat penyakit hanya untuk petugas kesehatan/asrama.</flux:text>

@@ -8,6 +8,19 @@
 @endphp
 
 <div class="space-y-3">
+    @php($biodata = $me->profile?->biodataCompletion() ?? 0)
+    @if ($biodata < 100)
+        <a href="{{ route('biodata.edit') }}" wire:navigate data-test="biodata-reminder"
+           class="flex items-center gap-3 rounded-2xl bg-white px-4 py-3 ring-1 ring-zinc-200/70 transition hover:ring-woka-200 dark:bg-hutan-900 dark:ring-hutan-800">
+            <flux:icon.identification class="size-5 shrink-0 text-woka dark:text-woka-light" />
+            <span class="min-w-0 flex-1">
+                <span class="block font-semibold">Lengkapi biodata</span>
+                <span class="block text-xs text-hutan/50 dark:text-santan/50">Baru {{ $biodata }}% terisi</span>
+            </span>
+            <flux:icon.chevron-right class="size-4 shrink-0 text-hutan/40" />
+        </a>
+    @endif
+
     <a href="{{ route('points.index') }}" wire:navigate class="block transition hover:opacity-90">
         <x-gamification.level-card :progress="$progress" :streak="$me->streak" :week="$weekPoints" />
     </a>

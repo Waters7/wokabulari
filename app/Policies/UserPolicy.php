@@ -49,6 +49,12 @@ class UserPolicy
         return $user->is($target) && ! $target->isSuperAdmin();
     }
 
+    /** Peserta melengkapi biodatanya sendiri. */
+    public function updateBiodata(User $user, User $target): bool
+    {
+        return $user->is($target) && $target->isParticipant();
+    }
+
     /** Reset/kelola wajah referensi peserta. */
     public function manageFace(User $user, User $target): bool
     {

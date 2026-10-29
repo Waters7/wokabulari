@@ -10,6 +10,9 @@
     <flux:menu.separator />
     <flux:menu.radio.group>
         <flux:menu.item :href="route('profile.edit')" icon="user-circle" wire:navigate>Profil &amp; foto</flux:menu.item>
+        @if (auth()->user()->isParticipant())
+            <flux:menu.item :href="route('biodata.edit')" icon="identification" wire:navigate>Biodata</flux:menu.item>
+        @endif
         <flux:menu.item :href="route('security.edit')" icon="key" wire:navigate>Ganti kata sandi</flux:menu.item>
         @if (Route::has('notifications.index'))
             <flux:menu.item :href="route('notifications.index')" icon="bell" wire:navigate>Notifikasi</flux:menu.item>

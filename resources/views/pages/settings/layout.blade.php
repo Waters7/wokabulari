@@ -2,6 +2,9 @@
     <div class="me-10 w-full pb-4 md:w-[220px]">
         <flux:navlist aria-label="Pengaturan akun">
             <flux:navlist.item icon="user-circle" :href="route('profile.edit')" :current="request()->routeIs('profile.edit')" wire:navigate>Profil</flux:navlist.item>
+            @if (auth()->user()->isParticipant())
+                <flux:navlist.item icon="identification" :href="route('biodata.edit')" :current="request()->routeIs('biodata.edit')" wire:navigate>Biodata</flux:navlist.item>
+            @endif
             <flux:navlist.item icon="lock-closed" :href="route('security.edit')" :current="request()->routeIs('security.edit')" wire:navigate>Kata sandi</flux:navlist.item>
             <flux:navlist.item icon="swatch" :href="route('appearance.edit')" :current="request()->routeIs('appearance.edit')" wire:navigate>Tampilan</flux:navlist.item>
             @if (auth()->user()->isParticipant() && Route::has('face.enroll'))

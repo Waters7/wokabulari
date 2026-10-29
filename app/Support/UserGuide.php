@@ -65,6 +65,7 @@ class UserGuide
                         'Login memakai No. HP, email, atau NIS beserta kata sandi awal dari panitia.',
                         'Ganti kata sandi awal, lalu setujui persetujuan penggunaan data pribadi.',
                         'Isi nama dan No. HP orang tua/wali (wajib), kemudian kamu masuk ke Beranda.',
+                        'Lengkapi Biodata di menu profil (tempat & tanggal lahir, alamat, sekolah, golongan darah, kontak darurat).',
                         'Opsional: tambahkan email di Profil supaya bisa login dengan email.',
                     ]],
                     ['title' => 'Absen harian (wajah + lokasi)', 'steps' => [

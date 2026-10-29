@@ -161,6 +161,27 @@ new #[Title('Peserta')] class extends Component {
         }
     }
 
+    /** Reset massal kata sandi peserta terpilih ke sandi awal. */
+    public function resetSelectedPasswords(SaveParticipant $save): void
+    {
+        abort_unless(auth()->user()->can('participant.manage'), 403);
+
+        if ($this->selected === []) {
+            return;
+        }
+
+        try {
+            $count = $save->resetPasswords($this->selected, auth()->user());
+        } catch (InvalidArgumentException $e) {
+            Flux::toast(variant: 'danger', text: $e->getMessage());
+
+            return;
+        }
+
+        $this->reset('selected');
+        Flux::toast(variant: 'success', text: "Kata sandi {$count} peserta dikembalikan ke sandi awal; wajib diganti saat login berikutnya.");
+    }
+
     public function openImport(): void
     {
         $this->authorize('create', User::class);
@@ -547,7 +568,16 @@ new #[Title('Peserta')] class extends Component {
             @if ($canDorm)
                 <flux:button size="sm" icon="home-modern" wire:click="openBulkDorm"><span class="sm:hidden">Asrama</span><span class="hidden sm:inline">Atur asrama</span></flux:button>
             @endif
-            <flux:button size="sm" variant="ghost" icon="x-mark" wire:click="clearSelection" aria-label="Batal pilih" class="text-santan!" />
+            <flux:dropdown position="top" align="end">
+                <flux:button size="sm" variant="ghost" icon="ellipsis-vertical" aria-label="Aksi lain" class="text-santan!" />
+                <flux:menu>
+                    @if ($canManage)
+                        <flux:menu.item icon="key" wire:click="resetSelectedPasswords"
+                                        wire:confirm="Kembalikan kata sandi {{ count($selected) }} peserta ke sandi awal? Mereka wajib menggantinya saat login berikutnya.">Reset kata sandi</flux:menu.item>
+                    @endif
+                    <flux:menu.item icon="x-mark" wire:click="clearSelection">Batal pilih</flux:menu.item>
+                </flux:menu>
+            </flux:dropdown>
         </div>
         <div class="h-24 lg:h-16"></div>
     @endif

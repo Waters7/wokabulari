@@ -12,6 +12,7 @@ use App\Models\User;
 use App\Services\DormRoster;
 use App\Support\Navigation;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Hash;
 use Livewire\Livewire;
 
 /** @return Collection<int, User> */
@@ -189,6 +190,29 @@ test('jenis kelamin diisi massal lalu kamar bisa diisi otomatis', function () {
         ->assertHasNoErrors();
 
     expect(DormRoomAssignment::query()->whereIn('user_id', $users->pluck('id'))->whereNull('check_out_date')->count())->toBe(2);
+});
+
+test('reset kata sandi massal ke sandi awal dan wajib ganti', function () {
+    config(['wokabulari.participant_default_password' => 'sandi-awal']);
+    $users = collect(range(1, 3))->map(fn () => participant());
+    $untouched = participant();
+
+    Livewire::actingAs(programAdmin())->test('pages::master.participants')
+        ->set('selected', $users->pluck('id')->all())
+        ->call('resetSelectedPasswords')
+        ->assertSet('selected', []);
+
+    $users->each(function ($user) {
+        $user->refresh();
+        expect($user->must_change_password)->toBeTrue()
+            ->and(Hash::check('sandi-awal', $user->password))->toBeTrue();
+    });
+    expect($untouched->fresh()->must_change_password)->toBeFalse();
+
+    Livewire::actingAs(teacher())->test('pages::master.participants')
+        ->set('selected', [$untouched->id])
+        ->call('resetSelectedPasswords')
+        ->assertForbidden();
 });
 
 test('aksi massal asrama hanya untuk pemegang izin kelola asrama', function () {

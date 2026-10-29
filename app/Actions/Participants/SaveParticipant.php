@@ -7,6 +7,7 @@ use App\Models\Classroom;
 use App\Models\User;
 use App\Support\Phone;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use InvalidArgumentException;
 
@@ -90,5 +91,36 @@ class SaveParticipant
         $user->forceFill(['password' => $password, 'must_change_password' => true])->save();
 
         activity('pengguna')->causedBy(auth()->user())->performedOn($user)->log('Mengatur ulang kata sandi peserta ke sandi awal');
+    }
+
+    /**
+     * Reset massal kata sandi peserta ke sandi awal; semuanya wajib ganti saat login berikutnya.
+     *
+     * @param  iterable<int>  $userIds
+     * @return int jumlah peserta yang direset
+     */
+    public function resetPasswords(iterable $userIds, User $actor): int
+    {
+        $password = config('wokabulari.participant_default_password');
+
+        if (blank($password)) {
+            throw new InvalidArgumentException('Kata sandi awal peserta belum diatur (PARTICIPANT_DEFAULT_PASSWORD).');
+        }
+
+        $participants = User::query()->participants()->whereIn('id', collect($userIds)->all())->get();
+        // Hash sekali untuk semua peserta.
+        $hash = Hash::make($password);
+
+        DB::transaction(function () use ($participants, $hash) {
+            foreach ($participants as $participant) {
+                $participant->forceFill(['password' => $hash, 'must_change_password' => true])->saveQuietly();
+            }
+        });
+
+        activity('pengguna')->causedBy($actor)
+            ->withProperties(['jumlah' => $participants->count(), 'peserta' => $participants->pluck('name')->all()])
+            ->log('Mengatur ulang kata sandi peserta secara massal');
+
+        return $participants->count();
     }
 }

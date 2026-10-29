@@ -84,3 +84,23 @@ test('lencana yang diraih bisa dibagikan; notifikasi lencana membuka kartu bagik
 
     expect((new BadgeEarnedNotification($earned))->url())->toBe(route('points.index', ['bagikan' => $earned->id]));
 });
+
+test('data kosakata ikut ke image Docker dan migrasinya aman diulang', function () {
+    // Berkas di folder yang diabaikan .dockerignore tidak ada di server produksi.
+    $path = 'database/vocabulary/zh.php';
+    $ignored = collect(file(base_path('.dockerignore'), FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES))
+        ->map(fn ($line) => trim($line))
+        ->reject(fn ($line) => $line === '' || str_starts_with($line, '#') || str_starts_with($line, '!'))
+        ->filter(fn ($pattern) => fnmatch($pattern, $path) || fnmatch(rtrim($pattern, '/').'/*', $path) || str_starts_with($path, rtrim($pattern, '/*').'/'));
+    expect($ignored->all())->toBe([]);
+
+    // Tabel sudah ada tetapi kosong (sisa percobaan gagal): migrasi mengisi sekali saja.
+    mandarin();
+    $migration = require database_path('migrations/2026_11_01_002200_create_vocabulary_words_table.php');
+    $migration->up();
+    $count = VocabularyWord::query()->count();
+    $migration->up();
+
+    expect($count)->toBe(count(require database_path('vocabulary/zh.php')))
+        ->and(VocabularyWord::query()->count())->toBe($count);
+});

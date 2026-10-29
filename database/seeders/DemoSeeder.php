@@ -119,6 +119,10 @@ class DemoSeeder extends Seeder
             Vendor::query()->updateOrCreate(['name' => $vendor], ['contact_person' => 'Ibu '.explode(' ', $vendor)[1], 'phone' => '6281355500'.(str_contains($vendor, 'Rica') ? '01' : '02'), 'address' => 'Manado', 'is_active' => true]);
         }
 
+        // Akun login vendor contoh (lapor pengantaran).
+        $vendorAccount = $this->account('vendor@wokabulari.test', 'Ibu Ully (Vendor)', Role::Vendor, ['phone' => '6281355500901']);
+        $vendorAccount->forceFill(['vendor_id' => Vendor::query()->where('name', 'Katering Rica-Rica Mama Ully')->value('id')])->save();
+
         // Seeder data contoh fase berikutnya, berurutan (dijalankan bila sudah ada).
         foreach (self::PHASE_SEEDERS as $seeder) {
             if (class_exists($class = 'Database\\Seeders\\Demo\\'.$seeder)) {

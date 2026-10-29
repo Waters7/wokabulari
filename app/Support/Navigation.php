@@ -52,6 +52,7 @@ class Navigation
         $routes = match ($role) {
             Role::Participant => ['dashboard', 'attendance.daily', 'participant.class', 'participant.dorm'],
             Role::Guardian => ['dashboard', 'guardian.child', 'guardian.attendance', 'guardian.approvals'],
+            Role::Vendor => ['dashboard', 'vendor.deliveries.index', 'vendor.deliveries.create'],
             Role::Staff => array_merge(['dashboard'], $this->staffBottomRoutes($user)),
             default => [],
         };
@@ -161,7 +162,11 @@ class Navigation
             'Utama' => [
                 ['label' => 'Beranda', 'icon' => 'home', 'route' => 'dashboard'],
                 ['label' => 'Dashboard Pimpinan', 'short' => 'Pimpinan', 'icon' => 'presentation-chart-line', 'route' => 'leader.dashboard', 'match' => ['leader.*'], 'can' => 'dashboard.leader'],
-                ['label' => 'Pengumuman', 'icon' => 'megaphone', 'route' => 'announcements.index', 'match' => ['announcements.*']],
+                ['label' => 'Pengumuman', 'icon' => 'megaphone', 'route' => 'announcements.index', 'match' => ['announcements.*'], 'roles' => array_values(array_filter(Role::cases(), fn (Role $r) => $r !== Role::Vendor))],
+            ],
+            'Vendor' => [
+                ['label' => 'Pengantaran', 'icon' => 'truck', 'route' => 'vendor.deliveries.index', 'match' => ['vendor.deliveries.index'], 'roles' => [Role::Vendor]],
+                ['label' => 'Lapor Pengantaran', 'short' => 'Lapor', 'icon' => 'camera', 'route' => 'vendor.deliveries.create', 'roles' => [Role::Vendor]],
             ],
             'Kelas Saya' => [
                 ['label' => 'Absen Harian', 'short' => 'Absen', 'icon' => 'camera', 'route' => 'attendance.daily', 'match' => ['attendance.daily', 'attendance.history'], 'roles' => $participant],

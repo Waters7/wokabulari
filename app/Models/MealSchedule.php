@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\Activitylog\Models\Concerns\LogsActivity;
 use Spatie\Activitylog\Support\LogOptions;
@@ -43,6 +44,12 @@ class MealSchedule extends Model
     public function receipts(): HasMany
     {
         return $this->hasMany(MealReceipt::class);
+    }
+
+    /** Laporan pengantaran vendor (jam siap, tempat, foto). */
+    public function delivery(): HasOne
+    {
+        return $this->hasOne(MealDelivery::class);
     }
 
     public function scopeOnDate(Builder $query, $date): void

@@ -6,6 +6,7 @@ use App\Enums\Role;
 use App\Enums\StaffUnit;
 use App\Models\ParticipantProfile;
 use App\Models\User;
+use App\Models\Vendor;
 use App\Services\StaffUnitService;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
@@ -86,6 +87,12 @@ class UserFactory extends Factory
     public function guardian(): static
     {
         return $this->consented()->withRole(Role::Guardian);
+    }
+
+    /** Akun login vendor makanan (bawaan: vendor baru). */
+    public function vendorAccount(?Vendor $vendor = null): static
+    {
+        return $this->state(fn () => ['vendor_id' => $vendor?->id ?? Vendor::factory()])->withRole(Role::Vendor);
     }
 
     /**

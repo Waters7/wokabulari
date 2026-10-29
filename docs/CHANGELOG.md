@@ -3,6 +3,13 @@
 Versi ditampilkan di halaman login dan menu aplikasi (`config/wokabulari.php` → `version`).
 Aturan penomoran: **patch** (1.0.x) perbaikan, **minor** (1.x.0) fitur baru, **major** (x.0.0) perubahan besar.
 
+## 1.6.0 — 31 Oktober 2026
+
+- **Akun Vendor Makanan:** dibuat tim konsumsi di Master → Vendor → *Akun login* (login pakai No. HP, wajib ganti kata sandi di awal; bisa reset/nonaktifkan).
+- **Lapor pengantaran** (vendor): jumlah (pcs/dos), menu, tanggal terima, jam siap diambil, tempat makanan tersedia, foto menu, dan foto total. Bisa untuk jadwal dari tim konsumsi atau langsung (jadwal dibuat otomatis); pengambilan dibuka mulai jam siap.
+- **Notifikasi makanan siap:** tepat pada jam siap, peserta yang berhak dan belum mengambil diberi tahu *jam & tempat* (plus kartu "siap diambil" di beranda dan info tempat di halaman Konsumsi).
+- Monitor makan menampilkan laporan vendor (jumlah, jam siap, tempat, foto).
+
 ## 1.5.1 — 30 Oktober 2026
 
 - **Pengguna & Tim:** satu akun bisa punya beberapa role, mis. **Tim Kerja + Pengajar**. Unit tim kerja wajib dipilih bila role Tim Kerja dicentang. Profil menampilkan semua role (mis. "Pengajar · Tim Kerja") dan beranda menampilkan akses cepat untuk tugas mengajar maupun unit.

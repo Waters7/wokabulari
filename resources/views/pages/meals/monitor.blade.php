@@ -96,7 +96,7 @@ new #[Title('Monitor makan')] class extends Component {
     public function with(MealRoster $roster): array
     {
         $date = CarbonImmutable::parse($this->date);
-        $schedules = MealSchedule::query()->with('vendor')->onDate($date)->orderBy('starts_at')->get();
+        $schedules = MealSchedule::query()->with(['vendor', 'delivery'])->onDate($date)->orderBy('starts_at')->get();
         $schedule = $this->schedule($schedules);
         // Total mengikuti jenis konsumsi (peserta tidak asrama hanya untuk jenis tertentu).
         $participants = $roster->participants($schedule?->meal_type);
@@ -164,8 +164,19 @@ new #[Title('Monitor makan')] class extends Component {
             <x-card class="mb-4">
                 <div class="flex flex-wrap items-center justify-between gap-3">
                     <div class="min-w-0">
-                        <p class="font-semibold">{{ $schedule->menu }}</p>
+                        <p class="whitespace-pre-line font-semibold">{{ $schedule->menu }}</p>
                         <p class="text-sm text-hutan/60 dark:text-santan/60">{{ $schedule->vendor->name }} · {{ $schedule->windowLabel() }} WITA · dipesan {{ $schedule->portions_ordered }} porsi</p>
+                        @if ($delivery = $schedule->delivery)
+                            <p class="mt-1 text-sm" data-test="delivery-info">
+                                <span class="font-semibold text-woka dark:text-woka-light">Vendor melaporkan {{ $delivery->quantityLabel() }}</span>
+                                · siap {{ jam($delivery->ready_at) }} · {{ $delivery->location }}
+                                @if ($delivery->notified_at) · peserta diberi tahu {{ jam($delivery->notified_at) }} @endif
+                            </p>
+                            <p class="mt-1 flex gap-3 text-xs">
+                                @if ($delivery->menu_photo_path)<a href="{{ $delivery->photoUrl('menu') }}" target="_blank" class="font-semibold text-woka underline">Foto menu</a>@endif
+                                @if ($delivery->total_photo_path)<a href="{{ $delivery->photoUrl('total') }}" target="_blank" class="font-semibold text-woka underline">Foto total</a>@endif
+                            </p>
+                        @endif
                     </div>
                     @if ($schedule->isOpen())
                         <flux:badge color="amber" icon="signal">Sedang dibuka</flux:badge>

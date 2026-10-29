@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\Activitylog\Models\Concerns\LogsActivity;
 use Spatie\Activitylog\Support\LogOptions;
@@ -28,5 +29,21 @@ class Vendor extends Model
     public function scopeActive(Builder $query): void
     {
         $query->where('is_active', true);
+    }
+
+    /** Akun login vendor. */
+    public function accounts(): HasMany
+    {
+        return $this->hasMany(User::class);
+    }
+
+    public function schedules(): HasMany
+    {
+        return $this->hasMany(MealSchedule::class);
+    }
+
+    public function deliveries(): HasMany
+    {
+        return $this->hasMany(MealDelivery::class);
     }
 }

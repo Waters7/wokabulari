@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
@@ -41,7 +42,7 @@ class User extends Authenticatable
     /** Urutan prioritas untuk menentukan role utama pengguna. */
     protected const ROLE_PRIORITY = [
         Role::SuperAdmin, Role::Leader, Role::ProgramAdmin, Role::Teacher,
-        Role::Staff, Role::Guardian, Role::Participant,
+        Role::Staff, Role::Vendor, Role::Guardian, Role::Participant,
     ];
 
     protected function casts(): array
@@ -76,6 +77,17 @@ class User extends Authenticatable
     public function staffUnits(): HasMany
     {
         return $this->hasMany(StaffUnitAssignment::class);
+    }
+
+    /** Vendor makanan yang diwakili akun ini (role vendor). */
+    public function vendor(): BelongsTo
+    {
+        return $this->belongsTo(Vendor::class);
+    }
+
+    public function isVendor(): bool
+    {
+        return $this->hasRole(Role::Vendor->value) && $this->vendor_id !== null;
     }
 
     /** Kelas yang diikuti peserta. */
@@ -307,7 +319,8 @@ class User extends Authenticatable
 
     public function initials(): string
     {
-        $initials = Str::initials($this->name, true);
+        // Hanya huruf, mis. "Ibu Ully (Vendor)" → "IV", bukan "I(".
+        $initials = Str::initials(trim((string) preg_replace('/[^\pL\s]+/u', ' ', $this->name)) ?: $this->name, true);
 
         return Str::length($initials) > 1
             ? Str::substr($initials, 0, 1).Str::substr($initials, -1)

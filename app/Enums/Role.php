@@ -11,6 +11,7 @@ enum Role: string
     case Staff = 'staff';
     case Participant = 'participant';
     case Guardian = 'guardian';
+    case Vendor = 'vendor';
 
     public function label(): string
     {
@@ -22,6 +23,7 @@ enum Role: string
             self::Staff => 'Tim Kerja',
             self::Participant => 'Peserta',
             self::Guardian => 'Orang Tua/Wali',
+            self::Vendor => 'Vendor Makanan',
         };
     }
 
@@ -35,13 +37,14 @@ enum Role: string
             self::Staff => 'amber',
             self::Participant => 'emerald',
             self::Guardian => 'zinc',
+            self::Vendor => 'orange',
         };
     }
 
     /** Role yang memakai bottom navigation di HP. */
     public function usesBottomNav(): bool
     {
-        return in_array($this, [self::Participant, self::Guardian, self::Staff], true);
+        return in_array($this, [self::Participant, self::Guardian, self::Staff, self::Vendor], true);
     }
 
     /** @return array<string, string> */

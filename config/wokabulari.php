@@ -6,7 +6,7 @@ return [
     | Versi aplikasi (semver). Naikkan setiap rilis dan catat di docs/CHANGELOG.md:
     | patch (1.0.x) untuk perbaikan, minor (1.x.0) untuk fitur baru, major untuk perubahan besar.
     */
-    'version' => '1.5.1',
+    'version' => '1.6.0',
 
     /*
     |--------------------------------------------------------------------------
@@ -90,7 +90,7 @@ return [
         'session.manage', 'session.view-all', 'material.manage',
         'assessment.manage', 'assignment.manage', 'quiz.manage',
         'leave.approve', 'word.manage',
-        'meal.manage', 'meal.monitor', 'meal.proxy',
+        'meal.manage', 'meal.monitor', 'meal.proxy', 'meal.deliver',
         'rating.view-vendor', 'rating.view-teacher', 'rating.view-names',
         'dorm-exit.approve', 'dorm-request.handle', 'dorm-inventory.manage',
         'health.view-detail', 'health.handle', 'health.view-stats',
@@ -125,6 +125,8 @@ return [
         'staff' => [],
         'participant' => [],
         'guardian' => [],
+        // Vendor makanan: hanya melapor pengantaran (jumlah, menu, jam siap, foto, tempat).
+        'vendor' => ['meal.deliver'],
     ],
 
     /*

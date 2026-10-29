@@ -29,7 +29,7 @@ new #[Title('Konsumsi')] class extends Component {
     {
         $user = auth()->user();
         // Peserta tidak asrama hanya melihat jenis konsumsi yang menjadi haknya.
-        $today = MealSchedule::query()->with('vendor')->onDate(today())->orderBy('starts_at')->get()
+        $today = MealSchedule::query()->with(['vendor', 'delivery'])->onDate(today())->orderBy('starts_at')->get()
             ->filter(fn (MealSchedule $schedule) => $roster->isEligible($user, $schedule->meal_type))->values();
         $received = MealReceipt::query()->where('user_id', $user->id)->whereIn('meal_schedule_id', $today->pluck('id'))->get()->keyBy('meal_schedule_id');
 
@@ -62,10 +62,21 @@ new #[Title('Konsumsi')] class extends Component {
             <div class="mb-3 flex items-start justify-between gap-3">
                 <div class="min-w-0">
                     <x-status-badge :status="$active->meal_type" />
-                    <p class="mt-1 font-display text-xl font-bold">{{ $active->menu }}</p>
+                    <p class="mt-1 whitespace-pre-line font-display text-xl font-bold">{{ $active->menu }}</p>
                     <p class="text-sm text-hutan/60 dark:text-santan/60">{{ $active->vendor->name }} · ambil {{ $active->windowLabel() }} WITA</p>
+                    @if ($active->delivery)
+                        <p class="mt-1 flex items-center gap-1 text-sm font-semibold text-woka dark:text-woka-light" data-test="meal-location">
+                            <flux:icon.map-pin class="size-4 shrink-0" /> {{ $active->delivery->location }}
+                        </p>
+                    @endif
                 </div>
-                <flux:icon :name="$active->meal_type->icon()" class="size-8 shrink-0 text-kunyit" />
+                @if ($active->delivery?->menu_photo_path)
+                    <a href="{{ $active->delivery->photoUrl('menu') }}" target="_blank" class="shrink-0">
+                        <img src="{{ $active->delivery->photoUrl('menu') }}" alt="Foto menu" class="size-16 rounded-xl object-cover">
+                    </a>
+                @else
+                    <flux:icon :name="$active->meal_type->icon()" class="size-8 shrink-0 text-kunyit" />
+                @endif
             </div>
             <p class="mb-2 text-sm">Tanda tangan sebagai bukti ngana so terima makanan.</p>
             <x-signature-pad action="receive" :args="[$active->id]" wire:key="sig-{{ $active->id }}" />
@@ -82,7 +93,10 @@ new #[Title('Konsumsi')] class extends Component {
                 </span>
                 <div class="min-w-0 flex-1">
                     <p class="font-semibold">{{ $schedule->meal_type->label() }} <span class="font-normal text-hutan/60 dark:text-santan/60">· {{ $schedule->windowLabel() }}</span></p>
-                    <p class="truncate text-sm">{{ $schedule->menu }}</p>
+                    <p class="truncate text-sm">{{ preg_replace('/\s*\R\s*/', ', ', $schedule->menu) }}</p>
+                    @if ($schedule->delivery)
+                        <p class="truncate text-xs text-woka dark:text-woka-light">Siap {{ jam($schedule->delivery->ready_at) }} · {{ $schedule->delivery->location }}</p>
+                    @endif
                 </div>
                 <div class="shrink-0 text-end text-xs">
                     @if ($receipt)

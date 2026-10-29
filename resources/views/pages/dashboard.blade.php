@@ -59,6 +59,9 @@ new #[Title('Beranda')] class extends Component {
         @endif
     </header>
 
+    @if ($user->isParticipant())
+        @include('dashboard.meal-ready')
+    @endif
     @include('dashboard.evaluations')
 
     @switch($role)
@@ -76,6 +79,9 @@ new #[Title('Beranda')] class extends Component {
             @break
         @case(Role::Leader)
             @includeIf('dashboard.leader')
+            @break
+        @case(Role::Vendor)
+            @include('dashboard.vendor')
             @break
         @default
             @includeIf('dashboard.admin')

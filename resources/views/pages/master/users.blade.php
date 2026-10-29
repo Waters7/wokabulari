@@ -43,7 +43,7 @@ new #[Title('Pengguna & Tim')] class extends Component {
 
     protected function findModel(int $id): Model
     {
-        return User::query()->whereDoesntHave('roles', fn ($q) => $q->whereIn('name', [Role::Participant->value, Role::Guardian->value]))->findOrFail($id);
+        return User::query()->whereDoesntHave('roles', fn ($q) => $q->whereIn('name', [Role::Participant->value, Role::Guardian->value, Role::Vendor->value]))->findOrFail($id);
     }
 
     protected function fillFrom(Model $model): array
@@ -95,12 +95,12 @@ new #[Title('Pengguna & Tim')] class extends Component {
         return [
             'users' => User::query()
                 ->with(['roles', 'staffUnits'])
-                ->whereDoesntHave('roles', fn ($q) => $q->whereIn('name', [Role::Participant->value, Role::Guardian->value]))
+                ->whereDoesntHave('roles', fn ($q) => $q->whereIn('name', [Role::Participant->value, Role::Guardian->value, Role::Vendor->value]))
                 ->when($this->role, fn (Builder $q) => $q->role($this->role))
                 ->search($this->search)
                 ->orderBy('name')
                 ->paginate(25),
-            'roleOptions' => collect(Role::cases())->reject(fn (Role $r) => in_array($r, [Role::Participant, Role::Guardian], true)),
+            'roleOptions' => collect(Role::cases())->reject(fn (Role $r) => in_array($r, [Role::Participant, Role::Guardian, Role::Vendor], true)),
             'units' => StaffUnit::cases(),
         ];
     }

@@ -10,6 +10,7 @@ const modules = {
     face: () => import('./modules/face.js'),
     qr: () => import('./modules/qr-scanner.js'),
     charts: () => import('./modules/charts.js'),
+    shareCard: () => import('./modules/share-card.js'),
 };
 
 window.Wokabulari = {
@@ -128,6 +129,53 @@ document.addEventListener('alpine:init', () => {
         },
         destroy() {
             this.handle?.stop();
+        },
+    }));
+
+    // Kartu lencana untuk dibagikan: <div x-data="badgeShare({...})"> dengan x-ref canvas & template ikon.
+    window.Alpine.data('badgeShare', (card) => ({
+        format: 'story',
+        showName: card.showName ?? true,
+        busy: true,
+        canShare: false,
+        error: null,
+        async init() {
+            this.$watch('format', () => this.render());
+            this.$watch('showName', () => this.render());
+            await this.render();
+        },
+        async render() {
+            this.busy = true;
+            try {
+                const { drawBadgeCard } = await window.Wokabulari.load('shareCard');
+                const svg = this.$refs.icon.innerHTML.trim();
+                await drawBadgeCard(this.$refs.canvas, card, svg, this.format, this.showName);
+                this.canShare = Boolean(navigator.canShare?.({ files: [new File([''], 'x.png', { type: 'image/png' })] }));
+                this.error = null;
+            } catch (e) {
+                this.error = 'Gambar belum bisa dibuat. Coba muat ulang halaman.';
+            } finally {
+                this.busy = false;
+            }
+        },
+        async blob() {
+            const { toBlob } = await window.Wokabulari.load('shareCard');
+
+            return toBlob(this.$refs.canvas);
+        },
+        async share() {
+            const file = new File([await this.blob()], card.fileName, { type: 'image/png' });
+            try {
+                await navigator.share({ files: [file], text: card.shareText });
+            } catch (e) {
+                // Dibatalkan pengguna: tidak perlu pesan.
+            }
+        },
+        async download() {
+            const url = URL.createObjectURL(await this.blob());
+            const link = Object.assign(document.createElement('a'), { href: url, download: card.fileName });
+            link.click();
+            setTimeout(() => URL.revokeObjectURL(url), 1000);
         },
     }));
 

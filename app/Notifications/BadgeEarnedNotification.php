@@ -20,11 +20,11 @@ class BadgeEarnedNotification extends WokabulariNotification
 
     public function body(): string
     {
-        return ($this->badge->description ?? '').' Mantap, pertahankan!';
+        return ($this->badge->description ?? '').' Mantap, pertahankan! Ketuk untuk membagikannya.';
     }
 
     public function url(): ?string
     {
-        return Route::has('points.index') ? route('points.index') : null;
+        return Route::has('points.index') ? route('points.index', ['bagikan' => $this->badge->id]) : null;
     }
 }

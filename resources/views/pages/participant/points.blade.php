@@ -5,7 +5,9 @@ use App\Models\PointTransaction;
 use App\Services\Gamification\LevelService;
 use App\Services\Gamification\PointService;
 use Flux\Flux;
+use Illuminate\Support\Str;
 use Livewire\Attributes\Title;
+use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -14,10 +16,59 @@ new #[Title('Poin & lencana')] class extends Component {
 
     public bool $anonymous = false;
 
+    /** Lencana yang sedang dibagikan (dari tombol Bagikan atau notifikasi lencana baru). */
+    #[Url(as: 'bagikan')]
+    public ?int $shareId = null;
+
+    public bool $showShare = false;
+
     public function mount(): void
     {
         $this->authorize('viewAny', PointTransaction::class);
         $this->anonymous = (bool) auth()->user()->leaderboard_anonymous;
+        $this->share($this->shareId);
+    }
+
+    /** Hanya lencana yang sudah diraih sendiri yang bisa dibagikan. */
+    public function share(?int $badgeId): void
+    {
+        $owned = $badgeId && auth()->user()->badges()->whereKey($badgeId)->exists();
+        $this->shareId = $owned ? $badgeId : null;
+        $this->showShare = $owned;
+    }
+
+    public function updatedShowShare(bool $value): void
+    {
+        if (! $value) {
+            $this->shareId = null;
+        }
+    }
+
+    /** Isi kartu bagikan: tanpa data sensitif, hanya nama (opsional), kelas, dan lencana. */
+    protected function shareCard(?Badge $badge, int $total, LevelService $levels): ?array
+    {
+        if (! $badge) {
+            return null;
+        }
+
+        $user = auth()->user();
+        $level = $levels->forPoints($total);
+
+        return [
+            'badge' => $badge->name,
+            'description' => $badge->description,
+            'earned' => 'Diraih '.tanggal($badge->pivot->earned_at),
+            'name' => $user->name,
+            'showName' => ! $user->leaderboard_anonymous,
+            'classroom' => $user->activeClassroom()?->name,
+            'level' => ($level ? 'Level '.$level->name.' · ' : '').angka($total).' poin',
+            'program' => 'SMK Go Global · '.setting('program.organizer'),
+            'tagline' => 'Kaya Kosakata, Torang Go Global!',
+            'hashtags' => '#SMKGoGlobal #Wokabulari',
+            'logo' => asset('images/brand/icon-512.png'),
+            'fileName' => 'lencana-'.Str::slug($badge->name).'.png',
+            'shareText' => 'Aku baru meraih lencana "'.$badge->name.'" di Wokabulari! Kaya Kosakata, Torang Go Global! #SMKGoGlobal #Wokabulari',
+        ];
     }
 
     public function updatedAnonymous(bool $value): void
@@ -39,6 +90,8 @@ new #[Title('Poin & lencana')] class extends Component {
             'streak' => $user->streak,
             'badges' => Badge::query()->where('is_active', true)->orderBy('id')->get()->map(fn (Badge $b) => ['badge' => $b, 'earned' => $owned->get($b->id)?->pivot?->earned_at]),
             'transactions' => PointTransaction::query()->where('user_id', $user->id)->latest('created_at')->latest('id')->paginate(15),
+            'shareBadge' => $shareBadge = $this->shareId ? $owned->get($this->shareId) : null,
+            'shareCard' => $this->shareCard($shareBadge, $total, $levels),
         ];
     }
 }; ?>
@@ -78,6 +131,9 @@ new #[Title('Poin & lencana')] class extends Component {
                 </span>
                 <p class="mt-2 text-sm font-semibold leading-tight">{{ $badge->name }}</p>
                 <p class="mt-1 text-xs text-hutan/60 dark:text-santan/60">{{ $earned ? 'Diraih '.tanggal($earned) : $badge->description }}</p>
+                @if ($earned)
+                    <flux:button size="xs" variant="ghost" icon="share" class="mt-2" wire:click="share({{ $badge->id }})">Bagikan</flux:button>
+                @endif
             </div>
         @endforeach
     </div>
@@ -104,4 +160,39 @@ new #[Title('Poin & lencana')] class extends Component {
         @endforelse
     </x-card>
     <div class="mt-3">{{ $transactions->links() }}</div>
+
+    <flux:modal wire:model.self="showShare" class="w-full max-w-md">
+        @if ($shareCard)
+            <div x-data="badgeShare(@js($shareCard))" wire:key="share-{{ $shareBadge->id }}" class="space-y-4" data-test="badge-share">
+                <div>
+                    <flux:heading size="lg">Bagikan lencana</flux:heading>
+                    <flux:text class="mt-1">Pamerkan "{{ $shareBadge->name }}" ke Instagram, WhatsApp, atau TikTok.</flux:text>
+                </div>
+                {{-- Ikon lencana dibaca skrip untuk digambar di kartu. --}}
+                <template x-ref="icon"><flux:icon :name="$shareBadge->icon ?? 'trophy'" variant="solid" /></template>
+
+                <div class="flex flex-wrap items-center gap-3">
+                    <div class="inline-flex rounded-lg bg-zinc-100 p-1 text-sm dark:bg-hutan-800" role="radiogroup" aria-label="Ukuran gambar">
+                        <button type="button" @click="format = 'story'" :class="format === 'story' ? 'bg-woka text-white' : 'text-hutan/70 dark:text-santan/70'" class="min-h-9 rounded-md px-3 font-semibold">Story 9:16</button>
+                        <button type="button" @click="format = 'square'" :class="format === 'square' ? 'bg-woka text-white' : 'text-hutan/70 dark:text-santan/70'" class="min-h-9 rounded-md px-3 font-semibold">Kotak 1:1</button>
+                    </div>
+                    <label class="flex min-h-9 items-center gap-2 text-sm">
+                        <input type="checkbox" x-model="showName" class="size-4 rounded border-zinc-300 text-woka focus:ring-woka"> Tampilkan nama
+                    </label>
+                </div>
+
+                <div class="relative flex justify-center rounded-xl bg-zinc-50 p-2 dark:bg-hutan-950">
+                    <canvas x-ref="canvas" class="max-h-[50vh] w-auto max-w-full rounded-lg shadow" aria-label="Pratinjau kartu lencana"></canvas>
+                    <span :class="busy ? 'flex' : 'hidden'" class="absolute inset-0 hidden items-center justify-center rounded-xl bg-white/70 text-xs text-hutan/70 dark:bg-hutan-950/70 dark:text-santan/70">Menyiapkan gambar…</span>
+                </div>
+                <p x-show="error" x-text="error" class="text-sm text-red-600"></p>
+
+                <div class="flex flex-wrap justify-end gap-2">
+                    <flux:button variant="ghost" icon="arrow-down-tray" x-on:click="download()">Unduh gambar</flux:button>
+                    <flux:button variant="primary" icon="share" x-show="canShare" x-on:click="share()">Bagikan</flux:button>
+                </div>
+                <p class="text-xs text-hutan/50 dark:text-santan/50">Gambar dibuat di HP ngana dan tidak diunggah ke server. Tanpa tombol Bagikan? Unduh lalu unggah dari galeri.</p>
+            </div>
+        @endif
+    </flux:modal>
 </div>

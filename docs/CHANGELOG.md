@@ -3,6 +3,10 @@
 Versi ditampilkan di halaman login dan menu aplikasi (`config/wokabulari.php` → `version`).
 Aturan penomoran: **patch** (1.0.x) perbaikan, **minor** (1.x.0) fitur baru, **major** (x.0.0) perubahan besar.
 
+## 1.11.0 — 2 November 2026
+
+- **Konfirmasi otomatis absen asrama** (Pengaturan Sistem → Asrama): bila dinyalakan, absen malam mandiri yang lolos verifikasi wajah & lokasi langsung **terkonfirmasi** (bertanda "otomatis" di halaman Absen Malam), dan absen yang masih menunggu saat tombol dinyalakan ikut dikonfirmasi. Bila dimatikan (bawaan), pengelola asrama mengonfirmasi manual seperti sebelumnya. Apel manual & penandaan tetap bisa dilakukan di kedua mode.
+
 ## 1.10.0 — 2 November 2026
 
 - **Tim pengajar/tim kerja penerima konsumsi:** di Pengguna & Tim, aktifkan *Menerima konsumsi*. Akun tersebut mendapat menu **Konsumsi Saya**, menandatangani penerimaan makan/snack sama seperti peserta, diberi tahu saat makanan siap, dan ikut dihitung di porsi, Monitor Makan (berlabel *Tim pengajar/kerja*), serta laporan konsumsi (lembar *Per penerima*). Jenis konsumsinya diatur tim konsumsi lewat tombol **Penerima konsumsi** di Jadwal Makan (bawaan: snack pagi, makan siang, snack sore).

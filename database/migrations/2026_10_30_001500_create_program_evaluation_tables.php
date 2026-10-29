@@ -2,12 +2,23 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
+    /** Urut dari anak ke induk (kunci asing). */
+    protected const TABLES = ['evaluation_answers', 'evaluation_responses', 'evaluation_questions', 'batch_program_evaluation', 'program_evaluations'];
+
     public function up(): void
     {
+        // Sisa percobaan migrasi yang gagal di MySQL (DDL tidak bisa di-rollback): hapus hanya tabel yang masih kosong.
+        foreach (self::TABLES as $name) {
+            if (Schema::hasTable($name) && DB::table($name)->doesntExist()) {
+                Schema::drop($name);
+            }
+        }
+
         // Survei/evaluasi (SPEC 3.21): dibuat tim kerja, ditujukan ke peserta & pengajar angkatan tertentu.
         Schema::create('program_evaluations', function (Blueprint $table) {
             $table->id();
@@ -33,7 +44,8 @@ return new class extends Migration
             $table->id();
             $table->foreignId('program_evaluation_id')->constrained()->cascadeOnDelete();
             $table->foreignId('batch_id')->constrained()->cascadeOnDelete();
-            $table->unique(['program_evaluation_id', 'batch_id']);
+            // Nama indeks eksplisit: batas MySQL 64 karakter.
+            $table->unique(['program_evaluation_id', 'batch_id'], 'batch_program_evaluation_unique');
         });
 
         Schema::create('evaluation_questions', function (Blueprint $table) {
@@ -60,7 +72,7 @@ return new class extends Migration
             $table->foreignId('batch_id')->nullable()->constrained()->nullOnDelete();
             $table->timestamp('submitted_at');
             $table->timestamps();
-            $table->unique(['program_evaluation_id', 'respondent_hash']);
+            $table->unique(['program_evaluation_id', 'respondent_hash'], 'evaluation_responses_respondent_unique');
         });
 
         Schema::create('evaluation_answers', function (Blueprint $table) {
@@ -69,16 +81,14 @@ return new class extends Migration
             $table->foreignId('evaluation_question_id')->constrained()->cascadeOnDelete();
             $table->text('value')->nullable();
             $table->unsignedTinyInteger('score')->nullable();
-            $table->unique(['evaluation_response_id', 'evaluation_question_id']);
+            $table->unique(['evaluation_response_id', 'evaluation_question_id'], 'evaluation_answers_question_unique');
         });
     }
 
     public function down(): void
     {
-        Schema::dropIfExists('evaluation_answers');
-        Schema::dropIfExists('evaluation_responses');
-        Schema::dropIfExists('evaluation_questions');
-        Schema::dropIfExists('batch_program_evaluation');
-        Schema::dropIfExists('program_evaluations');
+        foreach (self::TABLES as $name) {
+            Schema::dropIfExists($name);
+        }
     }
 };

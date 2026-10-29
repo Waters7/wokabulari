@@ -3,6 +3,10 @@
 Versi ditampilkan di halaman login dan menu aplikasi (`config/wokabulari.php` → `version`).
 Aturan penomoran: **patch** (1.0.x) perbaikan, **minor** (1.x.0) fitur baru, **major** (x.0.0) perubahan besar.
 
+## 1.3.1 — 30 Oktober 2026
+
+- Perbaikan pemasangan: nama indeks tabel survei dipersingkat (batas 64 karakter MySQL); migrasi membersihkan sisa tabel kosong dari percobaan yang gagal.
+
 ## 1.3.0 — 30 Oktober 2026
 
 - **Survei & Evaluasi:** tim kerja membuat survei (templat *Sarana & prasarana* atau *Evaluasi program*, bisa diubah), memilih **angkatan**, responden **peserta** dan/atau **tim pengajar**, mode anonim, jadwal buka, dan **tenggat**. Responden diberi tahu saat survei dibuka dan diingatkan menjelang tenggat.

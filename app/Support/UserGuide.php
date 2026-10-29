@@ -189,6 +189,7 @@ class UserGuide
                 'topics' => [
                     ['title' => 'Absen malam', 'steps' => [
                         'Peserta absen sendiri pada jendela waktu malam; konfirmasi atau tandai manual di Absen Malam.',
+                        'Bila Konfirmasi otomatis absen asrama dinyalakan di Pengaturan Sistem, absen mandiri yang lolos verifikasi langsung terkonfirmasi (bertanda "otomatis"); Anda tinggal menangani yang ditolak atau belum absen.',
                         'Peserta yang tidak hadir ditandai; wali bisa diberi tahu otomatis (sesuai pengaturan).',
                     ]],
                     ['title' => 'Izin keluar', 'steps' => [
@@ -265,7 +266,7 @@ class UserGuide
                 'intro' => 'Mengelola pengaturan sistem dan hak akses; memiliki semua akses admin program.',
                 'topics' => [
                     ['title' => 'Sistem', 'steps' => [
-                        'Pengaturan Sistem: radius & ambang verifikasi wajah, jam bawaan absen, aturan asrama, batas unggah, dan predikat nilai.',
+                        'Pengaturan Sistem: radius & ambang verifikasi wajah, jam bawaan absen, aturan asrama (termasuk Konfirmasi otomatis absen asrama), batas unggah, dan predikat nilai.',
                         'Role & Hak Akses: atur izin tiap role. Perubahan berlaku langsung untuk semua pengguna role tersebut.',
                         'Log Audit: telusuri siapa mengubah apa dan kapan.',
                     ]],

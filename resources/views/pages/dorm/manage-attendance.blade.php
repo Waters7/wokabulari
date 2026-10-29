@@ -116,6 +116,7 @@ new #[Title('Absen asrama malam')] class extends Component {
             'counts' => $counts,
             'pastCurfew' => $dormitory && now()->gt($dormitory->curfewAt(CarbonImmutable::parse($this->date))),
             'noteUser' => $this->noteUserId ? User::query()->find($this->noteUserId) : null,
+            'autoConfirm' => \App\Actions\Dorm\ConfirmDormAttendance::autoEnabled(),
         ];
     }
 }; ?>
@@ -126,6 +127,12 @@ new #[Title('Absen asrama malam')] class extends Component {
             <flux:input type="date" wire:model.live="date" size="sm" class="max-w-40" aria-label="Tanggal" />
         </x-slot:actions>
     </x-page-header>
+
+    @if ($autoConfirm)
+        <flux:callout icon="bolt" color="green" class="mb-3" data-test="dorm-auto-confirm"
+                      heading="Konfirmasi otomatis aktif"
+                      text="Absen mandiri yang lolos verifikasi wajah & lokasi langsung terkonfirmasi. Apel manual dan penandaan tetap bisa dilakukan. Matikan di Pengaturan Sistem untuk konfirmasi manual." />
+    @endif
 
     <div class="-mx-4 mb-3 flex gap-2 overflow-x-auto px-4 pb-1">
         @foreach ($dormitories as $item)
@@ -191,6 +198,8 @@ new #[Title('Absen asrama malam')] class extends Component {
                                         @endif
                                         @if ($attendance?->confirmer)
                                             <span>· {{ $attendance->confirmer->name }}</span>
+                                        @elseif ($attendance?->status === \App\Enums\DormAttendanceStatus::Confirmed && $attendance->confirmed_at)
+                                            <span>· otomatis</span>
                                         @endif
                                     </div>
                                 </div>

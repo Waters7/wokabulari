@@ -13,6 +13,7 @@ use InvalidArgumentException;
 
 /**
  * Konfirmasi pengelola asrama: per orang, per kamar sekaligus, atau apel manual (SPEC 3.15).
+ * Bila pengaturan "konfirmasi otomatis" aktif, absen mandiri yang lolos verifikasi langsung dikonfirmasi sistem.
  */
 class ConfirmDormAttendance
 {
@@ -63,6 +64,38 @@ class ConfirmDormAttendance
                 $attendance->update(['status' => DormAttendanceStatus::Confirmed, 'confirmed_by' => $by->id, 'confirmed_at' => now()]);
                 event(new DormAttendanceConfirmed($attendance));
             })
+            ->count());
+    }
+
+    /** Pengaturan sistem dorm.auto_confirm. */
+    public static function autoEnabled(): bool
+    {
+        return (bool) setting('dorm.auto_confirm');
+    }
+
+    /** Konfirmasi oleh sistem: confirmed_by kosong menandakan otomatis. */
+    public function auto(DormAttendance $attendance): DormAttendance
+    {
+        if ($attendance->status !== DormAttendanceStatus::PendingConfirmation) {
+            return $attendance;
+        }
+
+        $attendance->update(['status' => DormAttendanceStatus::Confirmed, 'confirmed_by' => null, 'confirmed_at' => now()]);
+        event(new DormAttendanceConfirmed($attendance));
+
+        return $attendance;
+    }
+
+    /**
+     * Saat konfirmasi otomatis dinyalakan: absen mandiri yang masih menunggu (hari ini & kemarin) ikut dikonfirmasi.
+     */
+    public function autoConfirmPending(): int
+    {
+        return DB::transaction(fn () => DormAttendance::query()
+            ->where('status', DormAttendanceStatus::PendingConfirmation)
+            ->whereDate('date', '>=', today()->subDay())
+            ->get()
+            ->each(fn (DormAttendance $attendance) => $this->auto($attendance))
             ->count());
     }
 

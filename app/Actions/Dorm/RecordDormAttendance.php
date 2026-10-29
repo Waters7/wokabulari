@@ -14,13 +14,15 @@ use Throwable;
 
 /**
  * Absen asrama malam: selfie + verifikasi wajah + geofence asrama, dalam jendela waktu (SPEC 3.15).
- * Hasil valid berstatus "menunggu konfirmasi" sampai pengelola asrama mengonfirmasi.
+ * Hasil valid berstatus "menunggu konfirmasi" sampai pengelola asrama mengonfirmasi, atau langsung
+ * terkonfirmasi bila pengaturan sistem "Konfirmasi otomatis absen asrama" aktif.
  */
 class RecordDormAttendance
 {
     public function __construct(
         protected FaceMatcher $faces,
         protected ImageService $images,
+        protected ConfirmDormAttendance $confirm,
     ) {}
 
     /**
@@ -121,6 +123,10 @@ class RecordDormAttendance
         ]);
         $attendance->attempts = ($attendance->attempts ?? 0) + 1;
         $attendance->save();
+
+        if ($rejection === null && ConfirmDormAttendance::autoEnabled()) {
+            $this->confirm->auto($attendance);
+        }
 
         return $attendance;
     }

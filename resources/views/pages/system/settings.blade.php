@@ -1,5 +1,6 @@
 <?php
 
+use App\Actions\Dorm\ConfirmDormAttendance;
 use App\Http\Requests\SettingsRequest;
 use App\Services\SettingService;
 use Flux\Flux;
@@ -18,8 +19,9 @@ new #[Title('Pengaturan sistem')] class extends Component {
         $this->values = Arr::undot(Arr::only($settings->all(), array_keys(config('wokabulari.settings'))));
     }
 
-    public function save(SettingService $settings): void
+    public function save(SettingService $settings, ConfirmDormAttendance $confirm): void
     {
+        $wasAuto = (bool) $settings->get('dorm.auto_confirm');
         $flat = Arr::dot($this->values);
         // Array (jenis izin) jangan dipecah per indeks.
         $flat = collect($flat)->reject(fn ($v, $k) => str_starts_with($k, 'exit.guardian_required_types.'))->all();
@@ -31,7 +33,7 @@ new #[Title('Pengaturan sistem')] class extends Component {
             throw ValidationException::withMessages(collect($validator->errors()->messages())->mapWithKeys(fn ($m, $k) => ["values.{$k}" => $m])->all());
         }
 
-        foreach (['session.validate_location', 'dorm.notify_guardian_absent', 'leader.weekly_email'] as $bool) {
+        foreach (['session.validate_location', 'dorm.notify_guardian_absent', 'dorm.auto_confirm', 'leader.weekly_email'] as $bool) {
             $flat[$bool] = (bool) ($flat[$bool] ?? false);
         }
         foreach (['attendance.default_radius_m', 'attendance.max_gps_accuracy_m', 'session.code_duration_minutes', 'exit.max_per_week', 'exit.min_hours_before', 'files.max_upload_mb', 'retention.selfie_days_after_batch'] as $int) {
@@ -43,7 +45,14 @@ new #[Title('Pengaturan sistem')] class extends Component {
 
         $settings->setMany(Arr::only($flat, array_keys(config('wokabulari.settings'))));
 
-        Flux::toast(variant: 'success', text: 'Pengaturan tersimpan.');
+        // Baru dinyalakan: absen mandiri yang masih menunggu ikut dikonfirmasi.
+        $confirmed = ! $wasAuto && $flat['dorm.auto_confirm'] ? $confirm->autoConfirmPending() : 0;
+        if ($wasAuto !== $flat['dorm.auto_confirm']) {
+            activity('asrama')->causedBy(auth()->user())->withProperties(['otomatis' => $flat['dorm.auto_confirm'], 'dikonfirmasi' => $confirmed])
+                ->log($flat['dorm.auto_confirm'] ? 'Menyalakan konfirmasi otomatis absen asrama' : 'Mematikan konfirmasi otomatis absen asrama');
+        }
+
+        Flux::toast(variant: 'success', text: 'Pengaturan tersimpan.'.($confirmed ? ' '.$confirmed.' absen asrama yang menunggu ikut dikonfirmasi otomatis.' : ''));
     }
 }; ?>
 
@@ -82,6 +91,8 @@ new #[Title('Pengaturan sistem')] class extends Component {
                     <flux:input wire:model="values.dorm.curfew" type="time" label="Jam malam" />
                 </div>
                 <flux:switch class="mt-3" wire:model="values.dorm.notify_guardian_absent" label="Kabari wali bila anak belum absen asrama" />
+                <flux:switch class="mt-3" wire:model="values.dorm.auto_confirm" label="Konfirmasi otomatis absen asrama"
+                             description="Aktif: absen malam mandiri yang lolos verifikasi wajah & lokasi langsung terkonfirmasi. Mati: pengelola asrama mengonfirmasi manual." />
             </x-card>
 
             <x-card title="Izin keluar asrama">

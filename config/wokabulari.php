@@ -6,7 +6,7 @@ return [
     | Versi aplikasi (semver). Naikkan setiap rilis dan catat di docs/CHANGELOG.md:
     | patch (1.0.x) untuk perbaikan, minor (1.x.0) untuk fitur baru, major untuk perubahan besar.
     */
-    'version' => '1.11.0',
+    'version' => '1.12.0',
 
     /*
     |--------------------------------------------------------------------------

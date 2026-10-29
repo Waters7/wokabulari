@@ -270,3 +270,8 @@ Acuan: DOCKER.md bagian C–D
 ### Tambahan — 2 Nov 2026 (v1.11.0)
 - Tombol **Konfirmasi otomatis absen asrama** di Pengaturan Sistem; mati = pengelola asrama mengonfirmasi manual.
 - Test: 314 lulus. Dicek di 360px: Pengaturan Sistem (kartu Asrama).
+
+### Tambahan — 2 Nov 2026 (v1.12.0)
+- Admin program ikut menyetujui izin keluar asrama.
+- Pengaturan Sistem: panel **Penyimpanan & cadangan** (disk VPS, pemakaian Wokabulari) dan tombol **Buat cadangan sekarang** dengan daftar unduhan.
+- Test: 319 lulus. Dicek di 360px: Pengaturan Sistem (panel penyimpanan, cadangan dibuat & diunduh di lokal).

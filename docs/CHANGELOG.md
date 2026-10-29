@@ -3,6 +3,12 @@
 Versi ditampilkan di halaman login dan menu aplikasi (`config/wokabulari.php` → `version`).
 Aturan penomoran: **patch** (1.0.x) perbaikan, **minor** (1.x.0) fitur baru, **major** (x.0.0) perubahan besar.
 
+## 1.12.0 — 2 November 2026
+
+- **Izin keluar asrama juga disetujui admin program:** admin program kini bisa menyetujui/menolak izin di Asrama → Izin Keluar (bersama pengelola asrama) dan ikut diberi tahu saat ada izin yang perlu ditinjau.
+- **Penyimpanan & cadangan** (Pengaturan Sistem): pemakaian disk VPS (terpakai, total, sisa; peringatan bila sisa < 15%) dan rincian yang dipakai Wokabulari (database, berkas privat, berkas publik, cadangan, log), tombol **Perbarui**.
+- **Tombol Buat cadangan sekarang:** membuat ZIP berisi dump database + berkas privat & publik di antrean; pemberi perintah diberi tahu saat siap. Daftar 5 cadangan terbaru bisa **diunduh** atau dihapus (hanya super admin). Cadangan harian otomatis lewat `scripts/backup.sh` tetap berjalan.
+
 ## 1.11.0 — 2 November 2026
 
 - **Konfirmasi otomatis absen asrama** (Pengaturan Sistem → Asrama): bila dinyalakan, absen malam mandiri yang lolos verifikasi wajah & lokasi langsung **terkonfirmasi** (bertanda "otomatis" di halaman Absen Malam), dan absen yang masih menunggu saat tombol dinyalakan ikut dikonfirmasi. Bila dimatikan (bawaan), pengelola asrama mengonfirmasi manual seperti sebelumnya. Apel manual & penandaan tetap bisa dilakukan di kedua mode.

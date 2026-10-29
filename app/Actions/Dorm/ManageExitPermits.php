@@ -4,6 +4,7 @@ namespace App\Actions\Dorm;
 
 use App\Enums\ExitPermitStatus;
 use App\Enums\ExitPermitType;
+use App\Enums\Role;
 use App\Enums\StaffUnit;
 use App\Events\ExitPermitReturnedLate;
 use App\Models\DormExitPermit;
@@ -80,7 +81,7 @@ class ManageExitPermits
 
         $guardianRequired
             ? Notification::send($guardians, new ExitPermitNotification($permit, 'guardian_needed'))
-            : Notification::send($this->managers(), new ExitPermitNotification($permit, 'review_needed'));
+            : Notification::send($this->approvers(), new ExitPermitNotification($permit, 'review_needed'));
 
         return $permit;
     }
@@ -107,7 +108,7 @@ class ManageExitPermits
         ]);
 
         if ($approve) {
-            Notification::send($this->managers(), new ExitPermitNotification($permit, 'review_needed'));
+            Notification::send($this->approvers(), new ExitPermitNotification($permit, 'review_needed'));
         } else {
             $permit->user->notify(new ExitPermitNotification($permit, 'rejected'));
         }
@@ -234,5 +235,13 @@ class ManageExitPermits
     protected function managers()
     {
         return User::query()->inUnits(StaffUnit::Dormitory)->get();
+    }
+
+    /** Penyetuju izin keluar: pengelola asrama + admin program. */
+    protected function approvers()
+    {
+        return $this->managers()
+            ->merge(User::query()->active()->role(Role::ProgramAdmin->value)->get())
+            ->unique('id')->values();
     }
 }

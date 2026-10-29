@@ -63,7 +63,7 @@ new #[Title('Izin keluar asrama')] class extends Component {
         }
 
         $this->showForm = false;
-        Flux::toast(variant: 'success', text: $permit->guardian_required ? 'Pengajuan terkirim ke wali untuk disetujui dulu.' : 'Pengajuan terkirim ke pengelola asrama.');
+        Flux::toast(variant: 'success', text: $permit->guardian_required ? 'Pengajuan terkirim ke wali untuk disetujui dulu.' : 'Pengajuan terkirim ke pengelola asrama & admin program.');
     }
 
     public function cancel(int $id, ManageExitPermits $permits): void
@@ -173,7 +173,7 @@ new #[Title('Izin keluar asrama')] class extends Component {
                 @endforeach
             </flux:select>
             @if (in_array($form['type'] ?? '', $guardianTypes, true))
-                <flux:callout icon="user-group" color="sky" text="Jenis ini perlu persetujuan wali dulu (bila wali sudah terhubung), lalu diteruskan ke pengelola asrama." />
+                <flux:callout icon="user-group" color="sky" text="Jenis ini perlu persetujuan wali dulu (bila wali sudah terhubung), lalu diteruskan ke pengelola asrama/admin program." />
             @endif
             <flux:textarea wire:model="form.reason" label="Alasan" rows="2" />
             <flux:input wire:model="form.destination" label="Tujuan" placeholder="Rumah keluarga di Tomohon" />

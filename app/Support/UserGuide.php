@@ -91,7 +91,7 @@ class UserGuide
                     ]],
                     ['title' => 'Asrama (bagi yang tinggal di asrama)', 'steps' => [
                         'Absen Asrama setiap malam pada jam yang ditentukan.',
-                        'Izin Keluar diajukan beberapa jam sebelumnya; pulang/menginap perlu persetujuan wali. Tunjukkan QR izin ke petugas saat keluar dan kembali.',
+                        'Izin Keluar diajukan beberapa jam sebelumnya dan disetujui pengelola asrama atau admin program; pulang/menginap perlu persetujuan wali dulu. Tunjukkan QR izin ke petugas saat keluar dan kembali.',
                         'Sampaikan kerusakan atau kebutuhan kamar di Keluhan Asrama.',
                     ]],
                     ['title' => 'Poin, rating, dan survei', 'steps' => [
@@ -234,6 +234,7 @@ class UserGuide
                     ]],
                     ['title' => 'Kegiatan dan poin', 'steps' => [
                         'Kelola Pengumuman untuk semua, per role, kelas, atau asrama.',
+                        'Setujui atau tolak Izin Keluar asrama (bersama pengelola asrama) di Asrama → Izin Keluar.',
                         'Survei & Evaluasi: pakai templat sarana prasarana, pilih angkatan & responden, tentukan tenggat, lalu lihat hasilnya.',
                         'Komponen Poin: ubah poin aturan otomatis, tambah komponen, dan setujui/tolak pengajuan pengajar. Level & lencana di Gamifikasi.',
                     ]],

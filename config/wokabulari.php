@@ -120,6 +120,8 @@ return [
             'gamification.manage', 'point.award', 'evaluation.manage', 'evaluation.results',
             'announcement.manage', 'certificate.manage',
             'report.view', 'report.export', 'health.view-stats', 'dashboard.leader',
+            // Ikut menyetujui izin keluar asrama bersama pengelola asrama.
+            'dorm-exit.approve',
         ],
         'teacher' => [
             'participant.view', 'attendance.approve', 'session.manage', 'material.manage',

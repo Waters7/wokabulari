@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\QuestionTemplateController;
+use App\Http\Controllers\VocabularyTemplateController;
 use Illuminate\Support\Facades\Route;
 
 // Rute pengajar
@@ -31,4 +32,5 @@ Route::prefix('kelola')->name('manage.')->group(function () {
     Route::livewire('absen', 'pages::manage.attendance')->name('attendance.index')->middleware('can:attendance.approve');
     Route::livewire('izin', 'pages::manage.leave')->name('leave.index')->middleware('can:leave.approve');
     Route::livewire('kosakata', 'pages::manage.words')->name('words.index')->middleware('can:word.manage');
+    Route::get('kosakata/template', VocabularyTemplateController::class)->name('words.template')->middleware('can:word.manage');
 });

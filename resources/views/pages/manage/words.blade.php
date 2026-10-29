@@ -1,6 +1,9 @@
 <?php
 
+use App\Actions\Vocabulary\ImportVocabulary;
+use App\Http\Requests\VocabularyImportRequest;
 use App\Http\Requests\VocabularyWordRequest;
+use App\Imports\FirstSheetRowsImport;
 use App\Models\Language;
 use App\Models\VocabularyWord;
 use App\Services\DailyVocabulary;
@@ -10,10 +13,13 @@ use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Title;
 use Livewire\Attributes\Url;
 use Livewire\Component;
+use Livewire\WithFileUploads;
 use Livewire\WithPagination;
+use Maatwebsite\Excel\Excel as ExcelType;
+use Maatwebsite\Excel\Facades\Excel;
 
 new #[Title('Bank kosakata')] class extends Component {
-    use WithPagination;
+    use WithFileUploads, WithPagination;
 
     #[Url(as: 'bahasa')]
     public ?int $languageId = null;
@@ -27,6 +33,15 @@ new #[Title('Bank kosakata')] class extends Component {
 
     /** @var array<string, mixed> */
     public array $form = [];
+
+    public bool $showImport = false;
+
+    public ?int $importLanguageId = null;
+
+    public $importFile = null;
+
+    /** @var array{created: int, updated: int, errors: list<string>}|null */
+    public ?array $importResult = null;
 
     public function mount(): void
     {
@@ -93,6 +108,40 @@ new #[Title('Bank kosakata')] class extends Component {
         Flux::toast(variant: 'success', text: 'Kata "'.$attributes['word'].'" tersimpan.');
     }
 
+    public function openImport(): void
+    {
+        $this->authorize('create', VocabularyWord::class);
+        $this->resetErrorBag();
+        $this->importLanguageId = $this->languageId;
+        $this->importFile = null;
+        $this->importResult = null;
+        $this->showImport = true;
+    }
+
+    public function import(ImportVocabulary $import): void
+    {
+        $this->authorize('create', VocabularyWord::class);
+        $this->resetErrorBag();
+
+        $validator = Validator::make(['language_id' => $this->importLanguageId, 'file' => $this->importFile], VocabularyImportRequest::rulesFor(), [], VocabularyImportRequest::attributesFor());
+        if ($validator->fails()) {
+            throw ValidationException::withMessages(collect($validator->errors()->messages())->mapWithKeys(fn ($m, $k) => [($k === 'file' ? 'importFile' : 'importLanguageId') => $m])->all());
+        }
+
+        // Hanya lembar pertama dibaca; lembar "Petunjuk" di templat diabaikan.
+        $reader = new FirstSheetRowsImport;
+        $csv = in_array(strtolower($this->importFile->getClientOriginalExtension()), ['csv', 'txt'], true);
+        Excel::import($reader, $this->importFile->getRealPath(), null, $csv ? ExcelType::CSV : ExcelType::XLSX);
+
+        $language = Language::query()->findOrFail($this->importLanguageId);
+        $this->importResult = $import->handle($language, $reader->rows(), auth()->user());
+        $this->importFile = null;
+        $this->languageId = $language->id;
+        $this->resetPage();
+
+        Flux::toast(variant: 'success', text: $this->importResult['created'].' kata baru, '.$this->importResult['updated'].' diperbarui.');
+    }
+
     public function delete(int $id): void
     {
         $word = VocabularyWord::query()->findOrFail($id);
@@ -122,8 +171,9 @@ new #[Title('Bank kosakata')] class extends Component {
         <x-cjk-fonts />
     @endif
 
-    <x-page-header title="Bank kosakata" subtitle="Kata untuk kartu kosakata harian peserta: 5 kata per hari, bergilir otomatis sesuai urutan.">
+    <x-page-header title="Bank kosakata" subtitle="Kata untuk kartu kosakata harian peserta: 5 kata per hari, bergilir otomatis sesuai urutan. Tambah satu per satu atau import dari Excel.">
         <x-slot:actions>
+            <flux:button icon="arrow-up-tray" wire:click="openImport">Import Excel</flux:button>
             <flux:button variant="primary" icon="plus" wire:click="create">Tambah kata</flux:button>
         </x-slot:actions>
     </x-page-header>
@@ -168,6 +218,43 @@ new #[Title('Bank kosakata')] class extends Component {
         @endforelse
     </x-card>
     <div class="mt-3">{{ $words->links() }}</div>
+
+    <flux:modal wire:model.self="showImport" class="w-full max-w-lg">
+        <form wire:submit="import" class="space-y-4">
+            <div>
+                <flux:heading size="lg">Import bank kosakata</flux:heading>
+                <flux:text class="mt-1">
+                    Kolom: <strong>kata, cara_baca, arti, topik, contoh, arti_contoh, urutan, aktif</strong> (kata & arti wajib).
+                    Kata yang sudah ada di bahasa ini diperbarui, bukan digandakan.
+                </flux:text>
+            </div>
+            <flux:select wire:model.live="importLanguageId" label="Bahasa">
+                @foreach ($languages as $option)
+                    <flux:select.option :value="$option->id">{{ $option->name }}</flux:select.option>
+                @endforeach
+            </flux:select>
+            <flux:button size="sm" icon="arrow-down-tray" :href="route('manage.words.template', ['bahasa' => $importLanguageId])">Unduh template</flux:button>
+            <div>
+                <flux:input type="file" wire:model="importFile" accept=".xlsx,.xls,.csv" label="Berkas Excel/CSV" />
+                <flux:error name="importFile" />
+            </div>
+            @if ($importResult)
+                <flux:callout icon="check-circle" color="green" data-test="vocab-import-result"
+                              :heading="$importResult['created'].' kata baru, '.$importResult['updated'].' diperbarui'" />
+                @if ($importResult['errors'] !== [])
+                    <div class="max-h-40 space-y-1 overflow-y-auto">
+                        @foreach ($importResult['errors'] as $error)
+                            <p class="text-sm text-rica">{{ $error }}</p>
+                        @endforeach
+                    </div>
+                @endif
+            @endif
+            <div class="flex justify-end gap-2">
+                <flux:modal.close><flux:button variant="ghost">Tutup</flux:button></flux:modal.close>
+                <flux:button type="submit" variant="primary" wire:loading.attr="disabled" wire:target="import,importFile">Import</flux:button>
+            </div>
+        </form>
+    </flux:modal>
 
     <flux:modal wire:model.self="showForm" class="w-full max-w-md">
         <form wire:submit="save" class="space-y-4">

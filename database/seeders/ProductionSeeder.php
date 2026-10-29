@@ -24,7 +24,7 @@ class ProductionSeeder extends Seeder
             Language::query()->updateOrCreate(['code' => $language['code']], $language);
         }
 
-        foreach (['GamificationSeeder'] as $seeder) {
+        foreach (['GamificationSeeder', 'VocabularySeeder'] as $seeder) {
             if (class_exists($class = __NAMESPACE__.'\\'.$seeder)) {
                 $this->call($class);
             }

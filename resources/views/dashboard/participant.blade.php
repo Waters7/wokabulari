@@ -1,4 +1,4 @@
-{{-- Beranda peserta: level & streak, peserta terbaik minggu ini. --}}
+{{-- Beranda peserta: pengingat biodata, kosakata hari ini, level & streak, peserta terbaik minggu ini. --}}
 @php
     $points = app(\App\Services\Gamification\PointService::class);
     $me = auth()->user();
@@ -20,6 +20,8 @@
             <flux:icon.chevron-right class="size-4 shrink-0 text-hutan/40" />
         </a>
     @endif
+
+    @include('dashboard.vocabulary')
 
     <a href="{{ route('points.index') }}" wire:navigate class="block transition hover:opacity-90">
         <x-gamification.level-card :progress="$progress" :streak="$me->streak" :week="$weekPoints" />

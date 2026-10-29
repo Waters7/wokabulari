@@ -208,7 +208,7 @@ class Navigation
             'Pendampingan' => [
                 ['label' => 'Absen Harian', 'icon' => 'camera', 'route' => 'manage.attendance.index', 'can' => 'attendance.approve'],
                 ['label' => 'Izin / Sakit Peserta', 'icon' => 'document-check', 'route' => 'manage.leave.index', 'can' => 'leave.approve'],
-                ['label' => 'Kata Hari Ini', 'icon' => 'language', 'route' => 'manage.words.index', 'can' => 'word.manage'],
+                ['label' => 'Bank Kosakata', 'icon' => 'language', 'route' => 'manage.words.index', 'can' => 'word.manage'],
             ],
             'Konsumsi' => [
                 ['label' => 'Input Konsumsi', 'short' => 'Input', 'icon' => 'truck', 'route' => 'meals.deliveries.index', 'match' => ['meals.deliveries.*'], 'can' => 'meal.manage'],

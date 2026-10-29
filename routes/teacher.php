@@ -30,4 +30,5 @@ Route::prefix('mengajar')->name('teach.')->group(function () {
 Route::prefix('kelola')->name('manage.')->group(function () {
     Route::livewire('absen', 'pages::manage.attendance')->name('attendance.index')->middleware('can:attendance.approve');
     Route::livewire('izin', 'pages::manage.leave')->name('leave.index')->middleware('can:leave.approve');
+    Route::livewire('kosakata', 'pages::manage.words')->name('words.index')->middleware('can:word.manage');
 });

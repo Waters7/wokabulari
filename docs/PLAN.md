@@ -243,3 +243,12 @@ Acuan: DOCKER.md bagian C–D
 - Hasil: partisipasi per kelompok, Indeks Kepuasan 0–100, rata-rata per aspek (terendah di atas), sebaran jawaban, daftar saran; dapat dilihat pimpinan (read-only). Sasaran & pertanyaan terkunci setelah ada jawaban.
 - Kelas bisa punya beberapa pengajar (tim pengajar) dengan akses setara; pengajar utama tetap tercatat.
 - Test: 264 lulus. Dicek di 360px: daftar & pengisian survei, editor survei, hasil.
+
+### Fase 12 & 13 (sebagian) + permintaan tambahan — 31 Okt 2026 (v1.7.0)
+- Input konsumsi pindah ke **tim konsumsi** (vendor dipilih per input); snack hanya ditambah bila tersedia; role vendor dicabut (akun lama dinonaktifkan).
+- **Master Komponen Poin**: aturan otomatis per kategori + komponen tambahan; pengajuan komponen oleh pengajar (setujui/tolak) dan pemberian poin ke peserta kelas; poin baru *Isi tanda terima konsumsi*.
+- **Panduan Penggunaan** per role.
+- **Dashboard Eksekutif** (pimpinan & admin program, cache 5 menit): angka utama, catatan keputusan, tren & sebaran kehadiran, perbandingan antarkelas, tren/sumber nilai, predikat, konsumsi (dipesan/diterima/tanda terima, serapan per jenis), perlu perhatian, drill-down per peserta. Belum: N-Gain pretest–posttest, kinerja pengajar, ringkasan eksekutif PDF & email mingguan.
+- **Pusat Laporan**: absen harian, absen per sesi, konsumsi diterima, input konsumsi, rekap nilai (harian/mingguan/bulanan, filter angkatan & kelas) dengan unduh Excel. Belum: PDF berkop, ekspor sebagai Job, laporan asrama/izin/rating/keluhan/kesehatan/evaluasi/poin/akses materi.
+- **Biodata peserta** di menu profil dengan persentase kelengkapan dan pengingat di beranda.
+- Test: 296 lulus. Dicek di 360px: input konsumsi, komponen poin, poin peserta, panduan, dashboard eksekutif (filter, grafik, drill-down), pusat laporan, biodata.

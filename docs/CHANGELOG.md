@@ -3,6 +3,14 @@
 Versi ditampilkan di halaman login dan menu aplikasi (`config/wokabulari.php` → `version`).
 Aturan penomoran: **patch** (1.0.x) perbaikan, **minor** (1.x.0) fitur baru, **major** (x.0.0) perubahan besar.
 
+## 1.7.0 — 31 Oktober 2026
+
+- **Input konsumsi oleh tim konsumsi** (Konsumsi → *Input Konsumsi*): vendor dipilih per input, beserta jumlah (pcs/dos), menu, jam siap, tempat, dan foto. Makan utama selalu tampil per hari; **snack ditambahkan tim hanya bila tersedia** dan tidak ikut "Salin ke minggu depan". Akun login vendor dihapus dari alur (akun lama dinonaktifkan). Notifikasi jam & tempat makanan siap tetap jalan.
+- **Master Komponen Poin** (Program → Komponen Poin): poin absen harian, kode sesi, **tanda terima konsumsi** (baru, +2), absen asrama, tugas, quiz, dll. bisa diubah; komponen tambahan bisa ditambah. **Pengajar mengajukan komponen** (mis. tugas proyek, juara quiz), admin menyetujui/menolak, lalu pengajar memberi poin ke peserta kelasnya di Mengajar → *Poin Peserta*.
+- **Panduan Penggunaan** (Bantuan): langkah per role — peserta, wali, pengajar, tim konsumsi, asrama, kesehatan, admin program, pimpinan, super admin.
+- **Dashboard Eksekutif** (pimpinan & admin program): angka utama, catatan untuk keputusan, tren kehadiran harian, sebaran status absen, perbandingan antarkelas, tren & sumber nilai, predikat, porsi dipesan/diterima/tanda terima, serapan per jenis konsumsi, daftar *Perlu perhatian*, dan grafik per peserta.
+- **Pusat Laporan**: absen harian (siapa hadir), absen per sesi, konsumsi diterima, input konsumsi tim, dan rekap nilai — harian/mingguan/bulanan, filter angkatan & kelas, **unduh Excel**.
+- **Biodata peserta** (menu profil → *Biodata*): tempat & tanggal lahir, jenis kelamin (sekali isi), alamat, sekolah & kelas, golongan darah, alergi, riwayat penyakit, kontak darurat, ukuran baju, target ujian; ada persentase kelengkapan dan pengingat di beranda. Admin melihatnya di detail peserta.
 ## 1.6.0 — 31 Oktober 2026
 
 - **Akun Vendor Makanan:** dibuat tim konsumsi di Master → Vendor → *Akun login* (login pakai No. HP, wajib ganti kata sandi di awal; bisa reset/nonaktifkan).

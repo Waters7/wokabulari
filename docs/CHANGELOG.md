@@ -3,6 +3,11 @@
 Versi ditampilkan di halaman login dan menu aplikasi (`config/wokabulari.php` → `version`).
 Aturan penomoran: **patch** (1.0.x) perbaikan, **minor** (1.x.0) fitur baru, **major** (x.0.0) perubahan besar.
 
+## 1.5.0 — 30 Oktober 2026
+
+- **Reset kata sandi massal** di halaman Peserta (centang → menu ⋯ → Reset kata sandi): kembali ke sandi awal dan wajib diganti saat login berikutnya.
+- **Tampilan minimalis** halaman login dan beranda: latar putih, satu kolom, kartu datar, sapaan tanpa banner; logo mitra, versi, dan sidik HaKI tetap ada. Admin, pengajar, dan pimpinan mendapat **Akses cepat** ke menu yang paling sering dipakai.
+
 ## 1.4.0 — 30 Oktober 2026
 
 - **Jadwal absen harian per angkatan** (Master → Angkatan): pilih hari absen (mis. Senin–Jumat), jam dibuka, batas tepat waktu, dan jam ditutup. Di luar jadwal peserta tidak bisa absen dan halaman absen menjelaskan alasannya; daftar angkatan menampilkan jadwalnya.

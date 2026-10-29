@@ -1,11 +1,26 @@
 {{-- Logo penyelenggara & mitra: Poltekkes Kemenkes Manado dan BP3MI Sulawesi Utara --}}
-@props(['compact' => false])
+@props(['compact' => false, 'minimal' => false])
 
 @php
     $bp3miFile = collect(['bp3mi.svg', 'bp3mi.png', 'bp3mi.webp', 'bp3mi.jpg'])
         ->first(fn ($file) => file_exists(public_path('images/logos/'.$file)));
 @endphp
 
+@if ($minimal)
+    {{-- Varian minimalis (halaman login): tanpa bingkai, logo kecil berdampingan. --}}
+    <div {{ $attributes->class('flex flex-col items-center gap-3') }}>
+        <p class="text-[10px] font-semibold uppercase tracking-[0.16em] text-hutan/40 dark:text-santan/40">Diselenggarakan oleh</p>
+        <div class="flex items-center justify-center gap-5 rounded-xl dark:bg-white dark:px-3 dark:py-2">
+            <img src="{{ asset('images/logos/poltekkes.png') }}" alt="Kemenkes Poltekkes Manado" class="h-8 w-auto max-w-[45%] object-contain">
+            <span class="h-6 w-px shrink-0 bg-zinc-200" aria-hidden="true"></span>
+            @if ($bp3miFile)
+                <img src="{{ asset('images/logos/'.$bp3miFile) }}" alt="BP3MI Sulawesi Utara — Kementerian Pelindungan Pekerja Migran Indonesia" class="h-12 w-auto max-w-[55%] object-contain">
+            @else
+                <span class="text-[9px] font-bold uppercase leading-tight text-[#8a6a1f]">BP3MI Sulawesi Utara</span>
+            @endif
+        </div>
+    </div>
+@else
 <div {{ $attributes->class('flex flex-col items-center gap-2') }}>
     <p class="text-[11px] font-semibold uppercase tracking-[0.14em] text-hutan/60 dark:text-santan/60">
         Diselenggarakan oleh
@@ -35,3 +50,4 @@
         @endif
     </div>
 </div>
+@endif

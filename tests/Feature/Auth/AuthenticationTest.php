@@ -5,7 +5,8 @@ use App\Models\User;
 test('halaman login tampil dengan identitas Wokabulari', function () {
     $this->get(route('login'))
         ->assertOk()
-        ->assertSee('Masuk ke Wokabulari')
+        ->assertSee('Kaya Kosakata, Torang Go Global!')
+        ->assertSee('images/brand/logo-horizontal.svg', false)
         ->assertSee('images/logos/poltekkes.png', false);
 });
 

@@ -2,33 +2,62 @@
 
 use App\Enums\Role;
 use App\Support\Greeting;
+use App\Support\Navigation;
 use Livewire\Attributes\Title;
 use Livewire\Component;
 
 new #[Title('Beranda')] class extends Component {
-    public function with(): array
+    /** Menu yang paling sering dipakai per peran, diurutkan lebih dulu (hanya yang boleh diakses). */
+    protected const PRIORITY = [
+        'teach.sessions.index', 'teach.grading', 'manage.attendance.index', 'teach.assignments.index',
+        'master.participants', 'master.classrooms', 'manage.evaluations.index', 'manage.announcements',
+        'leader.dashboard', 'reports.index', 'manage.leave.index', 'meals.ratings', 'manage.teacher-ratings',
+    ];
+
+    /**
+     * @param  list<array{heading: string, items: list<array<string, mixed>>}>  $groups
+     * @return list<array<string, mixed>>
+     */
+    protected function shortcuts(array $groups): array
+    {
+        $items = collect($groups)->flatMap(fn (array $group) => $group['items'])
+            ->reject(fn (array $item) => $item['route'] === 'dashboard')
+            ->unique('route');
+
+        return $items->sortBy(fn (array $item) => array_search($item['route'], self::PRIORITY, true) === false ? 100 : array_search($item['route'], self::PRIORITY, true))
+            ->take(6)->values()->all();
+    }
+
+    public function with(Navigation $navigation): array
     {
         $user = auth()->user();
+        $role = $user->primaryRole();
 
         return [
             'user' => $user,
-            'role' => $user->primaryRole(),
+            'role' => $role,
             'greeting' => Greeting::forNow($user->name),
             'tagline' => Greeting::tagline(),
+            // Peran tanpa bottom nav (admin, pengajar, pimpinan) mendapat akses cepat ke menu utamanya.
+            'shortcuts' => $role?->usesBottomNav() ? [] : $this->shortcuts($navigation->sidebar($user)),
         ];
     }
 }; ?>
 
-<div class="space-y-5">
-    <section class="relative overflow-hidden rounded-3xl bg-kemenkes p-5 text-hutan sm:p-7">
-        <div aria-hidden="true" class="pointer-events-none absolute -end-6 -top-8 select-none font-display text-[7rem] font-extrabold leading-none text-white/25">A中あÄ</div>
-        <p class="text-sm font-semibold text-hutan/80">{{ tanggal_panjang(now()) }}</p>
-        <h1 class="mt-1 font-display text-2xl font-extrabold sm:text-3xl">{{ $greeting }}</h1>
-        <p class="mt-1 text-hutan/80">{{ $tagline }}</p>
+{{-- Beranda minimalis: sapaan tanpa banner, kartu datar, aksen warna seperlunya. --}}
+<div class="mx-auto max-w-3xl space-y-6">
+    <header class="pt-1">
+        <p class="text-sm text-hutan/55 dark:text-santan/55">{{ tanggal_panjang(now()) }}</p>
+        <h1 class="mt-1 font-display text-2xl font-extrabold tracking-tight sm:text-3xl">{{ $greeting }}</h1>
+        <p class="mt-0.5 text-sm text-hutan/60 dark:text-santan/60">{{ $tagline }}</p>
         @if (session('status'))
-            <p class="mt-3 inline-flex rounded-full bg-white/40 px-3 py-1 text-sm font-semibold">{{ session('status') }}</p>
+            <p class="mt-3 flex items-center gap-1.5 text-sm font-medium text-woka dark:text-woka-light">
+                <flux:icon.check-circle class="size-4 shrink-0" /> {{ session('status') }}
+            </p>
         @endif
-    </section>
+    </header>
+
+    @include('dashboard.evaluations')
 
     @switch($role)
         @case(Role::Participant)
@@ -50,6 +79,20 @@ new #[Title('Beranda')] class extends Component {
             @includeIf('dashboard.admin')
     @endswitch
 
-    @include('dashboard.evaluations')
+    @if ($shortcuts)
+        <section>
+            <h2 class="mb-2 text-xs font-semibold uppercase tracking-[0.12em] text-hutan/45 dark:text-santan/45">Akses cepat</h2>
+            <div class="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                @foreach ($shortcuts as $item)
+                    <a href="{{ $item['url'] }}" wire:navigate wire:key="sc-{{ $item['route'] }}"
+                       class="flex min-w-0 items-center gap-2.5 rounded-2xl bg-white px-3 py-3 text-sm font-medium ring-1 ring-zinc-200/70 transition hover:ring-woka-200 dark:bg-hutan-900 dark:ring-hutan-800">
+                        <flux:icon :name="$item['icon']" class="size-5 shrink-0 text-woka dark:text-woka-light" />
+                        <span class="min-w-0 truncate">{{ $item['label'] }}</span>
+                    </a>
+                @endforeach
+            </div>
+        </section>
+    @endif
+
     @include('dashboard.announcements')
 </div>

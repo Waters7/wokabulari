@@ -10,16 +10,14 @@
 @if ($pendingSurveys->isNotEmpty())
     @php($next = $pendingSurveys->first())
     <a href="{{ route($pendingSurveys->count() === 1 ? 'evaluations.fill' : 'evaluations.index', $pendingSurveys->count() === 1 ? $next : []) }}" wire:navigate
-       class="mt-4 flex items-center gap-3 rounded-2xl bg-kunyit/30 p-4 ring-1 ring-kunyit transition hover:bg-kunyit/40" data-test="survey-reminder">
-        <span class="flex size-11 shrink-0 items-center justify-center rounded-xl bg-white text-woka dark:bg-hutan-900">
-            <flux:icon.clipboard-document-list class="size-6" />
-        </span>
+       class="flex items-center gap-3 rounded-2xl border-s-4 border-kunyit bg-white px-4 py-3 ring-1 ring-zinc-200/70 transition hover:ring-woka-200 dark:bg-hutan-900 dark:ring-hutan-800" data-test="survey-reminder">
+        <flux:icon.clipboard-document-list class="size-5 shrink-0 text-woka dark:text-woka-light" />
         <span class="min-w-0 flex-1">
-            <span class="block font-semibold leading-tight">
+            <span class="block truncate font-semibold">
                 {{ $pendingSurveys->count() === 1 ? 'Isi survei: '.$next->title : $pendingSurveys->count().' survei menunggu diisi' }}
             </span>
-            <span class="block text-xs text-hutan/70 dark:text-santan/70">Tenggat terdekat {{ tanggal_jam($next->closes_at) }}</span>
+            <span class="block text-xs text-hutan/50 dark:text-santan/50">Tenggat {{ tanggal_jam($next->closes_at) }}</span>
         </span>
-        <flux:icon.chevron-right class="size-5 shrink-0" />
+        <flux:icon.chevron-right class="size-4 shrink-0 text-hutan/40" />
     </a>
 @endif

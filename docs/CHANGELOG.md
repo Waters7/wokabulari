@@ -3,6 +3,14 @@
 Versi ditampilkan di halaman login dan menu aplikasi (`config/wokabulari.php` → `version`).
 Aturan penomoran: **patch** (1.0.x) perbaikan, **minor** (1.x.0) fitur baru, **major** (x.0.0) perubahan besar.
 
+## 1.3.0 — 30 Oktober 2026
+
+- **Survei & Evaluasi:** tim kerja membuat survei (templat *Sarana & prasarana* atau *Evaluasi program*, bisa diubah), memilih **angkatan**, responden **peserta** dan/atau **tim pengajar**, mode anonim, jadwal buka, dan **tenggat**. Responden diberi tahu saat survei dibuka dan diingatkan menjelang tenggat.
+- Peserta & pengajar mengisi di menu **Survei** (pengingat juga di beranda); peserta mendapat +20 poin.
+- Hasil survei: partisipasi, Indeks Kepuasan 0–100, nilai per aspek (prioritas perbaikan di atas), sebaran jawaban, dan daftar saran; pimpinan bisa melihat.
+- **Kelas dengan lebih dari satu pengajar:** pengajar utama + pengajar lain; semua pengajar kelas punya akses yang sama dan dinilai peserta masing-masing.
+- Tombol Keluar ganda di kanan atas dihapus (Keluar ada di menu profil).
+
 ## 1.2.0 — 26 Oktober 2026
 
 - **Assign kelas massal:** di halaman Peserta, centang banyak peserta (atau "Pilih semua hasil" dari filter, mis. *Belum punya kelas*), lalu pindahkan ke satu kelas atau **bagi rata** ke beberapa kelas dengan pratinjau.

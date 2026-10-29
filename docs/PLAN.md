@@ -91,7 +91,7 @@ Acuan: SPEC 3.20
 
 ## Fase 11 — Evaluasi, Pengumuman, Notifikasi, Sertifikat
 Acuan: SPEC 3.21, 3.22, 3.25
-- [ ] Form builder evaluasi + mode anonim + hasil
+- [x] Form builder evaluasi + mode anonim + hasil (survei sarana & prasarana; syarat unduh sertifikat menyusul bersama modul sertifikat)
 - [x] Pengumuman bersasaran, pusat notifikasi, channel WhatsApp (interface + driver log)
 - [ ] Word of the Day
 - [ ] Sertifikat PDF + QR verifikasi publik
@@ -235,3 +235,11 @@ Acuan: DOCKER.md bagian C–D
 - Pusat notifikasi & channel WhatsApp (interface + driver log) sudah tersedia sejak fase sebelumnya.
 - Palet warna mengikuti identitas Kemenkes & logo BP3MI resmi di halaman login.
 - Test: 210 lulus. Dicek di 360px: daftar pengumuman (filter, buka, tanda dibaca), form pengajar, beranda.
+
+### Fase 11 (sebagian) — 30 Okt 2026
+- Menu **Survei & Evaluasi** untuk tim kerja: form builder (skala 1–5, pilihan ganda, isian) dengan templat *Sarana & prasarana* dan *Evaluasi program*, aspek per pertanyaan, pertanyaan khusus peserta/pengajar, mode anonim (hash HMAC), jadwal buka & tenggat.
+- Sasaran: satu atau beberapa **angkatan**, untuk **peserta** dan/atau **tim pengajar** angkatan tersebut. Pemberitahuan saat terbit/dibuka dan pengingat menjelang tenggat (`app:evaluation-notifications`, tiap 15 menit).
+- Peserta & pengajar: halaman Survei (perlu diisi / riwayat), pengisian sekali per survei, pengingat di beranda; peserta mendapat +20 poin.
+- Hasil: partisipasi per kelompok, Indeks Kepuasan 0–100, rata-rata per aspek (terendah di atas), sebaran jawaban, daftar saran; dapat dilihat pimpinan (read-only). Sasaran & pertanyaan terkunci setelah ada jawaban.
+- Kelas bisa punya beberapa pengajar (tim pengajar) dengan akses setara; pengajar utama tetap tercatat.
+- Test: 264 lulus. Dicek di 360px: daftar & pengisian survei, editor survei, hasil.

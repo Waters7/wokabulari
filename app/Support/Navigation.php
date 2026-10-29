@@ -121,7 +121,8 @@ class Navigation
             return false;
         }
 
-        if (isset($item['can']) && ! $user->can($item['can'])) {
+        // 'can' boleh daftar permission: cukup salah satu.
+        if (isset($item['can']) && ! collect((array) $item['can'])->contains(fn (string $permission) => $user->can($permission))) {
             return false;
         }
 
@@ -180,7 +181,7 @@ class Navigation
             ],
             'Aktivitas' => [
                 ['label' => 'Rating Mingguan', 'icon' => 'star', 'route' => 'ratings.index', 'match' => ['ratings.*'], 'roles' => $participant],
-                ['label' => 'Evaluasi Program', 'icon' => 'clipboard-document-list', 'route' => 'evaluations.index', 'match' => ['evaluations.*'], 'roles' => [Role::Participant, Role::Teacher, Role::Guardian]],
+                ['label' => 'Survei', 'icon' => 'clipboard-document-list', 'route' => 'evaluations.index', 'match' => ['evaluations.*'], 'roles' => [Role::Participant, Role::Teacher]],
                 ['label' => 'Peringkat', 'icon' => 'trophy', 'route' => 'leaderboard', 'roles' => [Role::Participant, Role::Teacher, Role::ProgramAdmin, Role::Leader, Role::SuperAdmin]],
                 ['label' => 'Poin & Lencana', 'icon' => 'sparkles', 'route' => 'points.index', 'roles' => $participant],
                 ['label' => 'Sertifikat', 'icon' => 'academic-cap', 'route' => 'certificates.mine', 'roles' => $participant],
@@ -237,7 +238,7 @@ class Navigation
             ],
             'Kegiatan Program' => [
                 ['label' => 'Kelola Pengumuman', 'icon' => 'megaphone', 'route' => 'manage.announcements', 'can' => 'announcement.manage'],
-                ['label' => 'Evaluasi Program', 'icon' => 'clipboard-document-list', 'route' => 'manage.evaluations.index', 'match' => ['manage.evaluations.*'], 'can' => 'evaluation.manage'],
+                ['label' => 'Survei & Evaluasi', 'icon' => 'clipboard-document-list', 'route' => 'manage.evaluations.index', 'match' => ['manage.evaluations.*'], 'can' => ['evaluation.manage', 'evaluation.results']],
                 ['label' => 'Sertifikat', 'icon' => 'academic-cap', 'route' => 'manage.certificates', 'can' => 'certificate.manage'],
                 ['label' => 'Gamifikasi', 'icon' => 'sparkles', 'route' => 'manage.gamification', 'can' => 'gamification.manage'],
             ],

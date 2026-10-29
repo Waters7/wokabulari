@@ -28,6 +28,7 @@ Route::middleware(['auth', 'active'])->group(function () {
                 require __DIR__.'/teacher.php';
                 require __DIR__.'/staff.php';
                 require __DIR__.'/guardian.php';
+                require __DIR__.'/evaluation.php';
                 require __DIR__.'/admin.php';
                 require __DIR__.'/leader.php';
             });

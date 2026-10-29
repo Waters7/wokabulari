@@ -63,7 +63,8 @@ class AppServiceProvider extends ServiceProvider
     {
         // Super admin mendapat semua akses, kecuali kemampuan yang sengaja dibatasi untuknya.
         Gate::before(function (User $user, string $ability) {
-            if ($ability === 'updateLoginEmail') {
+            // updateLoginEmail: email admin diatur server; respondSurvey: admin bukan responden survei.
+            if (in_array($ability, ['updateLoginEmail', 'respondSurvey'], true)) {
                 return null;
             }
 

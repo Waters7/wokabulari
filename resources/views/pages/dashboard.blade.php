@@ -50,5 +50,6 @@ new #[Title('Beranda')] class extends Component {
             @includeIf('dashboard.admin')
     @endswitch
 
+    @include('dashboard.evaluations')
     @include('dashboard.announcements')
 </div>

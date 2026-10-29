@@ -20,3 +20,4 @@ Schedule::command('app:close-dorm-night')->dailyAt('00:05');
 Schedule::command('app:update-streaks')->dailyAt('00:05');
 Schedule::command('app:weekly-champions')->mondays()->at('06:00');
 Schedule::command('app:publish-announcements')->everyFiveMinutes()->withoutOverlapping();
+Schedule::command('app:evaluation-notifications')->everyFifteenMinutes()->withoutOverlapping();

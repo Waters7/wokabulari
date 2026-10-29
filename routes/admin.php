@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ParticipantTemplateController;
+use App\Models\ProgramEvaluation;
 use Illuminate\Support\Facades\Route;
 
 // Data master & program (admin program, super admin; pimpinan read-only untuk peserta)
@@ -23,6 +24,12 @@ Route::prefix('master')->name('master.')->group(function () {
 // Kegiatan program
 Route::prefix('kelola')->name('manage.')->group(function () {
     Route::livewire('gamifikasi', 'pages::manage.gamification')->name('gamification')->middleware('can:gamification.manage');
+
+    // Survei/evaluasi: dibuat tim kerja; hasil juga bisa dilihat pimpinan (read-only).
+    Route::livewire('survei', 'pages::manage.evaluations')->name('evaluations.index')->middleware('can:viewAny,'.ProgramEvaluation::class);
+    Route::livewire('survei/baru', 'pages::manage.evaluation-form')->name('evaluations.create')->middleware('can:create,'.ProgramEvaluation::class);
+    Route::livewire('survei/{evaluation}/ubah', 'pages::manage.evaluation-form')->name('evaluations.edit')->middleware('can:update,evaluation');
+    Route::livewire('survei/{evaluation}', 'pages::manage.evaluation-results')->name('evaluations.show')->middleware('can:view,evaluation');
 });
 
 // Sistem (super admin)

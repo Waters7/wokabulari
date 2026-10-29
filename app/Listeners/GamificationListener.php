@@ -8,6 +8,7 @@ use App\Events\AssignmentGraded;
 use App\Events\AssignmentSubmitted;
 use App\Events\DailyAttendanceRecorded;
 use App\Events\DormAttendanceConfirmed;
+use App\Events\EvaluationSubmitted;
 use App\Events\ExitPermitReturnedLate;
 use App\Events\ParticipantMarkedAbsent;
 use App\Events\PointsAwarded;
@@ -104,6 +105,12 @@ class GamificationListener
 
         // Sekali per minggu, berapa pun jumlah rating yang diisi.
         $this->points->award($rating->user, PointEvent::WeeklyRating, ['rating_week', (int) $rating->week_start->format('oW')], at: $rating->created_at);
+    }
+
+    public function handleEvaluationSubmitted(EvaluationSubmitted $event): void
+    {
+        // Sekali per survei; hanya peserta yang mendapat poin (PointService).
+        $this->points->award($event->user, PointEvent::ProgramEvaluation, $event->evaluation, description: 'Survei: '.$event->evaluation->title);
     }
 
     public function handleAbsent(ParticipantMarkedAbsent $event): void

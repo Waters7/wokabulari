@@ -3,6 +3,10 @@
 Versi ditampilkan di halaman login dan menu aplikasi (`config/wokabulari.php` → `version`).
 Aturan penomoran: **patch** (1.0.x) perbaikan, **minor** (1.x.0) fitur baru, **major** (x.0.0) perubahan besar.
 
+## 1.9.0 — 31 Oktober 2026
+
+- **Import Bank Kosakata dari Excel/CSV** (Pendampingan → Bank Kosakata → *Import Excel*): pilih bahasa, **unduh templat** (lembar *Kosakata* berisi contoh sesuai bahasa + lembar *Petunjuk*), isi lalu unggah. Kolom: kata, cara_baca, arti, topik, contoh, arti_contoh, urutan, aktif (kata & arti wajib). Kata yang sudah ada di bahasa itu diperbarui, bukan digandakan; baris bermasalah dilewati dan dilaporkan per nomor baris.
+
 ## 1.8.0 — 31 Oktober 2026
 
 - **Bagikan lencana ke media sosial:** di Poin & Lencana (atau dari notifikasi lencana baru), peserta membuat kartu bergaya Wokabulari — format *Story 9:16* atau *Kotak 1:1*, nama bisa disembunyikan — lalu **Bagikan** langsung ke Instagram/WhatsApp/TikTok dari HP atau **Unduh gambar**. Gambar dibuat di HP, tidak diunggah ke server.

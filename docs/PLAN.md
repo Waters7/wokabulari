@@ -257,3 +257,7 @@ Acuan: DOCKER.md bagian C–D
 - Kartu **bagikan lencana** (Story 9:16 / Kotak 1:1) dibuat di HP, bagikan langsung atau unduh; notifikasi lencana membuka kartu.
 - **Kosakata hari ini** di beranda peserta (5 kartu geser, ketuk untuk arti, tombol dengar), bank awal Mandarin 122 kata; halaman **Bank Kosakata** untuk pengajar & admin program.
 - Test: 300 lulus. Dicek di 360px: beranda peserta (kartu kosakata, geser & balik kartu), modal bagikan lencana (kedua format), bank kosakata.
+
+### Tambahan — 31 Okt 2026 (v1.9.0)
+- **Import Bank Kosakata** (Excel/CSV) dengan templat per bahasa & lembar petunjuk; kata yang ada diperbarui, baris salah dilaporkan.
+- Test: 303 lulus. Dicek di 360px: Bank Kosakata dan modal import.

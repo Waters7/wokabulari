@@ -29,6 +29,12 @@ class BatchRequest extends FormRequest
             'attendance_target' => ['required', 'integer', 'between:1,100'],
             'passing_score' => ['required', 'numeric', 'between:0,100'],
             'is_active' => ['boolean'],
+            // Jadwal absen harian angkatan
+            'attendance_days' => ['required', 'array', 'min:1'],
+            'attendance_days.*' => ['integer', 'between:1,7', 'distinct'],
+            'attendance_opens_at' => ['required', 'date_format:H:i'],
+            'attendance_late_after' => ['required', 'date_format:H:i', 'after_or_equal:attendance_opens_at'],
+            'attendance_closes_at' => ['nullable', 'date_format:H:i', 'after:attendance_late_after'],
         ];
     }
 }

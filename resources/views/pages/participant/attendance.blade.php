@@ -4,6 +4,7 @@ use App\Actions\Attendance\RecordDailyAttendance;
 use App\Enums\AttendanceStatus;
 use App\Http\Requests\DailyAttendanceRequest;
 use App\Models\DailyAttendance;
+use App\Support\AttendanceSchedule;
 use Flux\Flux;
 use Illuminate\Support\Facades\Validator;
 use Livewire\Attributes\Computed;
@@ -59,11 +60,21 @@ new #[Title('Absen harian')] class extends Component {
     public function with(): array
     {
         $user = auth()->user();
+        $classroom = $user->activeClassroom();
+        $schedule = AttendanceSchedule::forBatch($classroom?->batch);
+        $now = now();
 
         return [
-            'classroom' => $user->activeClassroom(),
+            'classroom' => $classroom,
             'needsFace' => config('wokabulari.face_verification_enabled') && ! $user->profile?->hasFaceReference(),
-            'lateAfter' => setting('attendance.late_after'),
+            'schedule' => $schedule,
+            // Status jadwal hari ini: off (bukan hari absen), early (belum dibuka), closed (sudah ditutup), open.
+            'window' => match (true) {
+                ! $schedule->isScheduledDay($now) => 'off',
+                $now->lt($schedule->opensOn($now)) => 'early',
+                ($closes = $schedule->closesOn($now)) && $now->gt($closes) => 'closed',
+                default => 'open',
+            },
         ];
     }
 }; ?>
@@ -99,6 +110,15 @@ new #[Title('Absen harian')] class extends Component {
         </x-card>
     @elseif (! $classroom)
         <x-empty-state icon="building-library" title="Belum terdaftar di kelas" description="Hubungi admin program agar ngana dimasukkan ke kelas." />
+    @elseif ($window === 'off')
+        <x-empty-state icon="calendar-days" title="Hari ini tidak ada absen harian"
+                       :description="'Jadwal absen angkatan ngana: '.$schedule->daysLabel().'. Absen berikutnya '.tanggal($schedule->nextScheduledDay(now()), 'l, j M').', '.jam($schedule->opensAt).' WITA.'" />
+    @elseif ($window === 'early')
+        <x-empty-state icon="clock" title="Absen belum dibuka"
+                       :description="'Absen harian dibuka pukul '.jam($schedule->opensAt).' WITA ('.$schedule->hoursLabel().').'" />
+    @elseif ($window === 'closed')
+        <x-empty-state icon="lock-closed" title="Absen hari ini sudah ditutup"
+                       :description="'Ditutup pukul '.jam($schedule->closesAt).' WITA. Hubungi pengajar bila ada kendala.'" />
     @elseif ($needsFace)
         <flux:callout icon="face-smile" color="amber" heading="Daftarkan wajah dulu" text="Sebelum absen pertama, daftarkan wajah referensi (sekali saja)." />
         <flux:button class="mt-3 w-full" variant="primary" icon="face-smile" :href="route('face.enroll')" wire:navigate>Daftarkan wajah</flux:button>
@@ -108,7 +128,7 @@ new #[Title('Absen harian')] class extends Component {
                 <flux:icon.map-pin class="size-6 shrink-0 text-woka" />
                 <div>
                     <p class="font-semibold">{{ $classroom->label() }}</p>
-                    <p class="text-hutan/60 dark:text-santan/60">{{ $classroom->location?->name ?? 'Lokasi kelas' }} · tepat waktu sebelum {{ jam($lateAfter) }} WITA</p>
+                    <p class="text-hutan/60 dark:text-santan/60">{{ $classroom->location?->name ?? 'Lokasi kelas' }} · tepat waktu s.d. {{ jam($schedule->lateAfter) }}{{ $schedule->closesAt ? ', ditutup '.jam($schedule->closesAt) : '' }} WITA</p>
                 </div>
             </div>
         </x-card>

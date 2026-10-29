@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Casts\DateOnly;
+use App\Support\AttendanceSchedule;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -15,7 +16,10 @@ class Batch extends Model
 {
     use HasFactory, LogsActivity, SoftDeletes;
 
-    protected $fillable = ['name', 'start_date', 'end_date', 'attendance_target', 'passing_score', 'is_active'];
+    protected $fillable = [
+        'name', 'start_date', 'end_date', 'attendance_target', 'passing_score', 'is_active',
+        'attendance_days', 'attendance_opens_at', 'attendance_late_after', 'attendance_closes_at',
+    ];
 
     protected function casts(): array
     {
@@ -25,7 +29,14 @@ class Batch extends Model
             'attendance_target' => 'integer',
             'passing_score' => 'float',
             'is_active' => 'boolean',
+            'attendance_days' => 'array',
         ];
+    }
+
+    /** Jadwal absen harian angkatan (bawaan dari pengaturan sistem). */
+    public function attendanceSchedule(): AttendanceSchedule
+    {
+        return AttendanceSchedule::forBatch($this);
     }
 
     public function getActivitylogOptions(): LogOptions

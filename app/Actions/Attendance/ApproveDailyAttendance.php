@@ -6,6 +6,7 @@ use App\Enums\AttendanceStatus;
 use App\Events\DailyAttendanceRecorded;
 use App\Models\DailyAttendance;
 use App\Models\User;
+use App\Support\AttendanceSchedule;
 use Carbon\CarbonInterface;
 use Illuminate\Support\Carbon;
 use InvalidArgumentException;
@@ -33,7 +34,7 @@ class ApproveDailyAttendance
 
         $attendance->fill([
             'status' => $status,
-            'checked_in_at' => $attendance->checked_in_at ?? Carbon::parse($date)->setTimeFromTimeString((string) setting('attendance.late_after')),
+            'checked_in_at' => $attendance->checked_in_at ?? AttendanceSchedule::forBatch($participant->activeClassroom()?->batch)->lateAfterOn(Carbon::parse($date)),
             'approved_by' => $approver->id,
             'approval_note' => trim($note),
         ]);

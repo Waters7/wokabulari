@@ -3,6 +3,7 @@
 use App\Http\Requests\BatchRequest;
 use App\Livewire\Concerns\WithCrudModal;
 use App\Models\Batch;
+use App\Support\AttendanceSchedule;
 use Illuminate\Database\Eloquent\Model;
 use Livewire\Attributes\Title;
 use Livewire\Component;
@@ -24,7 +25,40 @@ new #[Title('Angkatan')] class extends Component {
             'attendance_target' => 80,
             'passing_score' => 70,
             'is_active' => true,
+            ...$this->scheduleForm(AttendanceSchedule::forBatch(null)),
         ];
+    }
+
+    /** @return array<string, mixed> */
+    protected function scheduleForm(AttendanceSchedule $schedule): array
+    {
+        return [
+            'attendance_days' => array_map('strval', $schedule->days),
+            'attendance_opens_at' => $schedule->opensAt,
+            'attendance_late_after' => $schedule->lateAfter,
+            'attendance_closes_at' => $schedule->closesAt ?? '',
+        ];
+    }
+
+    protected function fillFrom(Model $model): array
+    {
+        return [
+            'name' => $model->name,
+            'start_date' => $model->start_date?->toDateString(),
+            'end_date' => $model->end_date?->toDateString(),
+            'attendance_target' => $model->attendance_target,
+            'passing_score' => $model->passing_score,
+            'is_active' => $model->is_active,
+            ...$this->scheduleForm($model->attendanceSchedule()),
+        ];
+    }
+
+    protected function persist(array $data, ?Model $model): void
+    {
+        $data['attendance_days'] = collect($data['attendance_days'])->map(fn ($day) => (int) $day)->sort()->values()->all();
+        $data['attendance_closes_at'] = filled($data['attendance_closes_at'] ?? null) ? $data['attendance_closes_at'] : null;
+
+        ($model ?? new Batch)->fill($data)->save();
     }
 
     protected function formRules(): array
@@ -34,7 +68,11 @@ new #[Title('Angkatan')] class extends Component {
 
     protected function labels(): array
     {
-        return ['name' => 'nama angkatan', 'attendance_target' => 'target kehadiran', 'passing_score' => 'nilai minimal lulus'];
+        return [
+            'name' => 'nama angkatan', 'attendance_target' => 'target kehadiran', 'passing_score' => 'nilai minimal lulus',
+            'attendance_days' => 'hari absen', 'attendance_opens_at' => 'jam dibuka',
+            'attendance_late_after' => 'batas tepat waktu', 'attendance_closes_at' => 'jam ditutup',
+        ];
     }
 
     protected function deleteBlockedReason(Model $model): ?string
@@ -69,13 +107,15 @@ new #[Title('Angkatan')] class extends Component {
         <div class="table-scroll">
             <table>
                 <thead>
-                    <tr><th>Nama</th><th>Periode</th><th>Target hadir</th><th>Nilai lulus</th><th>Kelas</th><th>Status</th><th></th></tr>
+                    <tr><th>Nama</th><th>Periode</th><th>Absen harian</th><th>Target hadir</th><th>Nilai lulus</th><th>Kelas</th><th>Status</th><th></th></tr>
                 </thead>
                 <tbody>
                     @foreach ($batches as $batch)
                         <tr wire:key="batch-{{ $batch->id }}">
                             <td class="font-semibold">{{ $batch->name }}</td>
                             <td>{{ tanggal($batch->start_date) }} – {{ tanggal($batch->end_date) }}</td>
+                            @php($schedule = $batch->attendanceSchedule())
+                            <td class="min-w-40 text-sm">{{ $schedule->daysLabel() }}<span class="block text-xs text-hutan/60 dark:text-santan/60">{{ $schedule->hoursLabel() }}</span></td>
                             <td>{{ $batch->attendance_target }}%</td>
                             <td>{{ angka($batch->passing_score) }}</td>
                             <td>{{ $batch->classrooms_count }}</td>
@@ -106,6 +146,24 @@ new #[Title('Angkatan')] class extends Component {
                 <flux:input wire:model="form.passing_score" type="number" step="0.01" min="0" max="100" label="Nilai minimal lulus" required />
             </div>
             <flux:switch wire:model="form.is_active" label="Angkatan aktif" />
+
+            <fieldset class="space-y-3 rounded-2xl border border-woka-100 p-4 dark:border-hutan-800">
+                <legend class="px-1 text-sm font-semibold">Absen harian (daily check-in)</legend>
+                <flux:checkbox.group wire:model="form.attendance_days" label="Hari absen" description="Di luar hari ini peserta tidak perlu dan tidak bisa absen harian.">
+                    <div class="grid grid-cols-4 gap-2 sm:grid-cols-7">
+                        @foreach (AttendanceSchedule::DAYS as $number => $day)
+                            <flux:checkbox :value="(string) $number" :label="mb_substr($day, 0, 3)" />
+                        @endforeach
+                    </div>
+                </flux:checkbox.group>
+                <flux:error name="form.attendance_days" />
+                <div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                    <flux:input wire:model="form.attendance_opens_at" type="time" label="Dibuka" required />
+                    <flux:input wire:model="form.attendance_late_after" type="time" label="Tepat waktu s.d." required />
+                    <flux:input wire:model="form.attendance_closes_at" type="time" label="Ditutup (opsional)"
+                                description="Kosong: tetap bisa absen (terlambat) sampai akhir hari." />
+                </div>
+            </fieldset>
 
             <div class="flex justify-end gap-2">
                 <flux:modal.close><flux:button variant="ghost">Batal</flux:button></flux:modal.close>

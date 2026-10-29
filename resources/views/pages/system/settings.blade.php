@@ -63,8 +63,8 @@ new #[Title('Pengaturan sistem')] class extends Component {
                     <flux:input wire:model="values.attendance.default_radius_m" type="number" label="Radius bawaan (m)" />
                     <flux:input wire:model="values.attendance.max_gps_accuracy_m" type="number" label="Akurasi GPS maks. (m)" />
                     <flux:input wire:model="values.attendance.face_threshold" type="number" step="0.01" label="Ambang kemiripan wajah" description="Jarak Euclidean; makin kecil makin ketat (bawaan 0,5)." />
-                    <flux:input wire:model="values.attendance.open_from" type="time" label="Absen dibuka" />
-                    <flux:input wire:model="values.attendance.late_after" type="time" label="Batas terlambat" />
+                    <flux:input wire:model="values.attendance.open_from" type="time" label="Absen dibuka (bawaan)" description="Dipakai bila angkatan belum mengatur jadwal absennya sendiri (Master → Angkatan)." />
+                    <flux:input wire:model="values.attendance.late_after" type="time" label="Batas terlambat (bawaan)" />
                 </div>
             </x-card>
 

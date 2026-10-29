@@ -8,6 +8,7 @@ use App\Models\DailyAttendance;
 use App\Models\User;
 use App\Services\FaceMatcher;
 use App\Services\ImageService;
+use App\Support\AttendanceSchedule;
 use Carbon\CarbonInterface;
 use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
@@ -42,14 +43,24 @@ class RecordDailyAttendance
             throw new InvalidArgumentException('Ngana so absen hari ini ('.$existing->status->label().').');
         }
 
-        $openFrom = $now->copy()->setTimeFromTimeString((string) setting('attendance.open_from'));
-        if ($now->lt($openFrom)) {
-            throw new InvalidArgumentException('Absen harian dibuka mulai pukul '.jam($openFrom).' WITA.');
-        }
-
         $classroom = $user->activeClassroom();
         if (! $classroom) {
             throw new InvalidArgumentException('Ngana belum terdaftar di kelas aktif. Hubungi admin program.');
+        }
+
+        // Jadwal absen diatur per angkatan (hari & jam); divalidasi di server.
+        $schedule = AttendanceSchedule::forBatch($classroom->batch);
+
+        if (! $schedule->isScheduledDay($now)) {
+            throw new InvalidArgumentException('Hari ini tidak ada absen harian ('.$schedule->daysLabel().').');
+        }
+
+        if ($now->lt($schedule->opensOn($now))) {
+            throw new InvalidArgumentException('Absen harian dibuka mulai pukul '.jam($schedule->opensAt).' WITA.');
+        }
+
+        if (($closes = $schedule->closesOn($now)) && $now->gt($closes)) {
+            throw new InvalidArgumentException('Absen harian sudah ditutup pukul '.jam($schedule->closesAt).' WITA. Hubungi pengajar bila ada kendala.');
         }
 
         $profile = $user->profile;
@@ -113,8 +124,7 @@ class RecordDailyAttendance
             $selfiePath = $this->images->storeDataUri($payload['selfie'], 'selfies/'.$now->format('Y/m'), 480, 70);
         }
 
-        $lateAfter = $now->copy()->setTimeFromTimeString((string) setting('attendance.late_after'));
-        $status = $rejection ? AttendanceStatus::Rejected : ($now->gt($lateAfter) ? AttendanceStatus::Late : AttendanceStatus::Present);
+        $status = $rejection ? AttendanceStatus::Rejected : ($now->gt($schedule->lateAfterOn($now)) ? AttendanceStatus::Late : AttendanceStatus::Present);
 
         $attendance = DB::transaction(function () use ($user, $now, $existing, $selfiePath, $faceDistance, $latitude, $longitude, $accuracy, $distance, $status, $rejection, $payload) {
             $attendance = $existing ?? new DailyAttendance(['user_id' => $user->id, 'date' => $now->toDateString(), 'attempts' => 0]);

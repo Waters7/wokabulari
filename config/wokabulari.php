@@ -6,7 +6,7 @@ return [
     | Versi aplikasi (semver). Naikkan setiap rilis dan catat di docs/CHANGELOG.md:
     | patch (1.0.x) untuk perbaikan, minor (1.x.0) untuk fitur baru, major untuk perubahan besar.
     */
-    'version' => '1.9.1',
+    'version' => '1.10.0',
 
     /*
     |--------------------------------------------------------------------------
@@ -35,6 +35,8 @@ return [
     */
     'meals' => [
         'non_resident_types' => ['morning_snack', 'lunch', 'afternoon_snack'],
+        // Tim pengajar/tim kerja yang ditandai menerima konsumsi (diatur tim konsumsi).
+        'staff_types' => ['morning_snack', 'lunch', 'afternoon_snack'],
     ],
 
     /*

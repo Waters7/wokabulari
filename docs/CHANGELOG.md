@@ -3,6 +3,11 @@
 Versi ditampilkan di halaman login dan menu aplikasi (`config/wokabulari.php` → `version`).
 Aturan penomoran: **patch** (1.0.x) perbaikan, **minor** (1.x.0) fitur baru, **major** (x.0.0) perubahan besar.
 
+## 1.10.0 — 2 November 2026
+
+- **Tim pengajar/tim kerja penerima konsumsi:** di Pengguna & Tim, aktifkan *Menerima konsumsi*. Akun tersebut mendapat menu **Konsumsi Saya**, menandatangani penerimaan makan/snack sama seperti peserta, diberi tahu saat makanan siap, dan ikut dihitung di porsi, Monitor Makan (berlabel *Tim pengajar/kerja*), serta laporan konsumsi (lembar *Per penerima*). Jenis konsumsinya diatur tim konsumsi lewat tombol **Penerima konsumsi** di Jadwal Makan (bawaan: snack pagi, makan siang, snack sore).
+- **Kehadiran & laporan mengajar:** pengajar otomatis **tercatat hadir** di sesi bila ia membuat kode kehadiran dan ada peserta yang masuk (halaman sesi menampilkan statusnya). **Laporan mengajar** tiap pengajar — jumlah sesi, hadir, kode tanpa peserta, tidak tercatat, jam mengajar, rata-rata peserta hadir, plus rincian per sesi — tersedia di Pusat Laporan (filter pengajar) dan untuk pengajar sendiri di Mengajar → **Laporan Mengajar**, dengan unduh Excel.
+
 ## 1.9.1 — 31 Oktober 2026
 
 - Perbaikan pemasangan: daftar kata Mandarin awal dipindah ke `database/vocabulary/` (folder `database/data/` sengaja tidak ikut image Docker), dan migrasi bank kosakata aman diulang bila tabelnya sudah terbuat dari percobaan yang gagal.

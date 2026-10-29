@@ -261,3 +261,8 @@ Acuan: DOCKER.md bagian C–D
 ### Tambahan — 31 Okt 2026 (v1.9.0)
 - **Import Bank Kosakata** (Excel/CSV) dengan templat per bahasa & lembar petunjuk; kata yang ada diperbarui, baris salah dilaporkan.
 - Test: 303 lulus. Dicek di 360px: Bank Kosakata dan modal import.
+
+### Tambahan — 2 Nov 2026 (v1.10.0)
+- Tim pengajar/tim kerja yang ditandai **Menerima konsumsi** menandatangani penerimaan seperti peserta (menu Konsumsi Saya, monitor, porsi, notifikasi, laporan).
+- **Kehadiran mengajar** otomatis (kode sesi + ada peserta) dan **Laporan Mengajar** per pengajar di Pusat Laporan & halaman pengajar, unduh Excel.
+- Test: 311 lulus. Dicek di 360px: Laporan Mengajar (pengajar), Konsumsi Saya.

@@ -42,6 +42,7 @@ new #[Title('Jadwal makan')] class extends Component {
     public function saveNonResident(SetNonResidentMealTypes $setTypes): void
     {
         abort_unless(auth()->user()->can('meal.manage'), 403);
+        $this->resetErrorBag('nonResidentTypes');
 
         $validator = Validator::make(['types' => $this->nonResidentTypes], NonResidentMealsRequest::rulesFor());
         if ($validator->fails()) {

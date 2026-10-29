@@ -160,7 +160,7 @@ class Navigation
         return [
             'Utama' => [
                 ['label' => 'Beranda', 'icon' => 'home', 'route' => 'dashboard'],
-                ['label' => 'Dashboard Pimpinan', 'short' => 'Pimpinan', 'icon' => 'presentation-chart-line', 'route' => 'leader.dashboard', 'match' => ['leader.*'], 'can' => 'dashboard.leader'],
+                ['label' => 'Dashboard Eksekutif', 'short' => 'Eksekutif', 'icon' => 'presentation-chart-line', 'route' => 'leader.dashboard', 'match' => ['leader.dashboard'], 'can' => 'dashboard.leader'],
                 ['label' => 'Pengumuman', 'icon' => 'megaphone', 'route' => 'announcements.index', 'match' => ['announcements.*']],
             ],
             'Kelas Saya' => [
@@ -246,7 +246,7 @@ class Navigation
                 ['label' => 'Gamifikasi', 'icon' => 'sparkles', 'route' => 'manage.gamification', 'can' => 'gamification.manage'],
             ],
             'Laporan' => [
-                ['label' => 'Pusat Laporan', 'icon' => 'document-arrow-down', 'route' => 'reports.index', 'match' => ['reports.*'], 'can' => 'report.view'],
+                ['label' => 'Pusat Laporan', 'icon' => 'document-arrow-down', 'route' => 'reports.index', 'match' => ['reports.*'], 'can' => ['attendance.view-all', 'meal.monitor']],
                 ['label' => 'Rekap Rating Pengajar', 'icon' => 'star', 'route' => 'manage.teacher-ratings', 'can' => 'rating.view-names'],
                 ['label' => 'Profil Peserta 360°', 'icon' => 'identification', 'route' => 'leader.participants', 'match' => ['leader.participants', 'leader.participant'], 'can' => 'dashboard.leader'],
             ],

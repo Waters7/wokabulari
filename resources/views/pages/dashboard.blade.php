@@ -10,7 +10,7 @@ new #[Title('Beranda')] class extends Component {
     /** Menu yang paling sering dipakai per peran, diurutkan lebih dulu (hanya yang boleh diakses). */
     protected const PRIORITY = [
         'teach.sessions.index', 'teach.grading', 'manage.attendance.index', 'teach.assignments.index',
-        'meals.monitor', 'dorm.manage.attendance', 'health.index',
+        'meals.deliveries.index', 'meals.monitor', 'dorm.manage.attendance', 'health.index',
         'master.participants', 'master.classrooms', 'manage.evaluations.index', 'manage.announcements',
         'leader.dashboard', 'reports.index', 'manage.leave.index', 'meals.ratings', 'manage.teacher-ratings',
     ];

@@ -115,7 +115,7 @@ return [
             'rating.view-vendor', 'rating.view-teacher', 'rating.view-names',
             'gamification.manage', 'point.award', 'evaluation.manage', 'evaluation.results',
             'announcement.manage', 'certificate.manage',
-            'report.view', 'report.export', 'health.view-stats',
+            'report.view', 'report.export', 'health.view-stats', 'dashboard.leader',
         ],
         'teacher' => [
             'participant.view', 'attendance.approve', 'session.manage', 'material.manage',

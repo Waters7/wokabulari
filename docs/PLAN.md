@@ -93,7 +93,7 @@ Acuan: SPEC 3.20
 Acuan: SPEC 3.21, 3.22, 3.25
 - [x] Form builder evaluasi + mode anonim + hasil (survei sarana & prasarana; syarat unduh sertifikat menyusul bersama modul sertifikat)
 - [x] Pengumuman bersasaran, pusat notifikasi, channel WhatsApp (interface + driver log)
-- [ ] Word of the Day
+- [x] Word of the Day (Kosakata hari ini: 5 kartu per hari, v1.8.0)
 - [ ] Sertifikat PDF + QR verifikasi publik
 
 ## Fase 12 — Dashboard
@@ -252,3 +252,8 @@ Acuan: DOCKER.md bagian C–D
 - **Pusat Laporan**: absen harian, absen per sesi, konsumsi diterima, input konsumsi, rekap nilai (harian/mingguan/bulanan, filter angkatan & kelas) dengan unduh Excel. Belum: PDF berkop, ekspor sebagai Job, laporan asrama/izin/rating/keluhan/kesehatan/evaluasi/poin/akses materi.
 - **Biodata peserta** di menu profil dengan persentase kelengkapan dan pengingat di beranda.
 - Test: 296 lulus. Dicek di 360px: input konsumsi, komponen poin, poin peserta, panduan, dashboard eksekutif (filter, grafik, drill-down), pusat laporan, biodata.
+
+### Tambahan — 31 Okt 2026 (v1.8.0)
+- Kartu **bagikan lencana** (Story 9:16 / Kotak 1:1) dibuat di HP, bagikan langsung atau unduh; notifikasi lencana membuka kartu.
+- **Kosakata hari ini** di beranda peserta (5 kartu geser, ketuk untuk arti, tombol dengar), bank awal Mandarin 122 kata; halaman **Bank Kosakata** untuk pengajar & admin program.
+- Test: 300 lulus. Dicek di 360px: beranda peserta (kartu kosakata, geser & balik kartu), modal bagikan lencana (kedua format), bank kosakata.

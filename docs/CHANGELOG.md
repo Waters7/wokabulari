@@ -3,6 +3,12 @@
 Versi ditampilkan di halaman login dan menu aplikasi (`config/wokabulari.php` → `version`).
 Aturan penomoran: **patch** (1.0.x) perbaikan, **minor** (1.x.0) fitur baru, **major** (x.0.0) perubahan besar.
 
+## 1.8.0 — 31 Oktober 2026
+
+- **Bagikan lencana ke media sosial:** di Poin & Lencana (atau dari notifikasi lencana baru), peserta membuat kartu bergaya Wokabulari — format *Story 9:16* atau *Kotak 1:1*, nama bisa disembunyikan — lalu **Bagikan** langsung ke Instagram/WhatsApp/TikTok dari HP atau **Unduh gambar**. Gambar dibuat di HP, tidak diunggah ke server.
+- **Kosakata hari ini** di beranda peserta: 5 kartu kata dari bank bahasa kelasnya, **geser** untuk kartu berikutnya, **ketuk** untuk melihat arti, tombol **Dengar** untuk pelafalan; berganti otomatis tiap hari. Bank awal **Mandarin** (122 kata: sapaan, angka & waktu, tubuh, kesehatan & perawatan, makan, kegiatan); kelas yang bank bahasanya belum diisi sementara melihat Mandarin.
+- **Bank Kosakata** (Pendampingan, pengajar & admin program): tambah/ubah/nonaktifkan kata per bahasa dan lihat 5 kata hari ini.
+
 ## 1.7.0 — 31 Oktober 2026
 
 - **Input konsumsi oleh tim konsumsi** (Konsumsi → *Input Konsumsi*): vendor dipilih per input, beserta jumlah (pcs/dos), menu, jam siap, tempat, dan foto. Makan utama selalu tampil per hari; **snack ditambahkan tim hanya bila tersedia** dan tidak ikut "Salin ke minggu depan". Akun login vendor dihapus dari alur (akun lama dinonaktifkan). Notifikasi jam & tempat makanan siap tetap jalan.

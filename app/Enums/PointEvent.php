@@ -10,6 +10,7 @@ enum PointEvent: string
     case DailyAttendanceOnTime = 'daily_attendance_on_time';
     case SessionCode = 'session_code';
     case DormAttendanceOnTime = 'dorm_attendance_on_time';
+    case MealReceipt = 'meal_receipt';
     case AssignmentOnTime = 'assignment_on_time';
     case AssignmentHighScore = 'assignment_high_score';
     case QuizCompleted = 'quiz_completed';
@@ -19,6 +20,8 @@ enum PointEvent: string
     case Absent = 'absent';
     case LateReturn = 'late_return';
     case Manual = 'manual';
+    /** Komponen tambahan dari master data, diberikan pengajar/admin. */
+    case Custom = 'custom';
 
     public function label(): string
     {
@@ -26,6 +29,7 @@ enum PointEvent: string
             self::DailyAttendanceOnTime => 'Absen harian tepat waktu',
             self::SessionCode => 'Input kode sesi',
             self::DormAttendanceOnTime => 'Absen asrama tepat waktu',
+            self::MealReceipt => 'Isi tanda terima konsumsi',
             self::AssignmentOnTime => 'Tugas tepat waktu',
             self::AssignmentHighScore => 'Nilai tugas ≥ 85',
             self::QuizCompleted => 'Mengerjakan quiz',
@@ -35,6 +39,7 @@ enum PointEvent: string
             self::Absent => 'Alpa',
             self::LateReturn => 'Terlambat kembali ke asrama',
             self::Manual => 'Penyesuaian admin',
+            self::Custom => 'Komponen tambahan',
         };
     }
 
@@ -49,6 +54,7 @@ enum PointEvent: string
             self::DailyAttendanceOnTime => 'camera',
             self::SessionCode => 'qr-code',
             self::DormAttendanceOnTime => 'moon',
+            self::MealReceipt => 'cake',
             self::AssignmentOnTime, self::AssignmentHighScore => 'clipboard-document-check',
             self::QuizCompleted, self::QuizPerfect => 'pencil-square',
             self::WeeklyRating => 'star',
@@ -56,6 +62,7 @@ enum PointEvent: string
             self::Absent => 'x-circle',
             self::LateReturn => 'clock',
             self::Manual => 'adjustments-horizontal',
+            self::Custom => 'sparkles',
         };
     }
 
@@ -66,6 +73,7 @@ enum PointEvent: string
             self::DailyAttendanceOnTime => 10,
             self::SessionCode => 5,
             self::DormAttendanceOnTime => 5,
+            self::MealReceipt => 2,
             self::AssignmentOnTime => 15,
             self::AssignmentHighScore => 10,
             self::QuizCompleted => 20,
@@ -74,8 +82,29 @@ enum PointEvent: string
             self::ProgramEvaluation => 20,
             self::Absent => -10,
             self::LateReturn => -10,
-            self::Manual => 0,
+            self::Manual, self::Custom => 0,
         };
+    }
+
+    /** Kelompok di master data Komponen Poin. */
+    public function category(): PointCategory
+    {
+        return match ($this) {
+            self::DailyAttendanceOnTime, self::SessionCode => PointCategory::Attendance,
+            self::DormAttendanceOnTime => PointCategory::Dorm,
+            self::MealReceipt => PointCategory::Meal,
+            self::AssignmentOnTime, self::AssignmentHighScore => PointCategory::Assignment,
+            self::QuizCompleted, self::QuizPerfect => PointCategory::Quiz,
+            self::WeeklyRating, self::ProgramEvaluation => PointCategory::Engagement,
+            self::Absent, self::LateReturn => PointCategory::Discipline,
+            self::Manual, self::Custom => PointCategory::Other,
+        };
+    }
+
+    /** Event yang tidak punya aturan sendiri di tabel gamification_rules. */
+    public function hasRule(): bool
+    {
+        return ! in_array($this, [self::Manual, self::Custom], true);
     }
 
     /** Aturan pengurang poin nonaktif secara bawaan. */

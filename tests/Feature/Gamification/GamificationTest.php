@@ -210,8 +210,9 @@ test('halaman gamifikasi: admin menyesuaikan poin & aturan; peserta tidak bisa m
     $user = participant();
     $rule = GamificationRule::query()->where('event_key', 'session_code')->first();
 
+    Livewire::actingAs($admin)->test('pages::master.point-components')
+        ->set("rules.{$rule->id}.points", 7)->call('saveRule', $rule->id)->assertHasNoErrors();
     Livewire::actingAs($admin)->test('pages::manage.gamification')
-        ->set("rules.{$rule->id}.points", 7)->call('saveRule', $rule->id)->assertHasNoErrors()
         ->call('openAdjust')->set('adjust.user_id', $user->id)->set('adjust.points', -5)->set('adjust.reason', 'Tidak ikut kerja bakti')
         ->call('saveAdjust')->assertHasNoErrors();
 

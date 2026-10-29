@@ -10,6 +10,7 @@ use App\Events\DailyAttendanceRecorded;
 use App\Events\DormAttendanceConfirmed;
 use App\Events\EvaluationSubmitted;
 use App\Events\ExitPermitReturnedLate;
+use App\Events\MealReceived;
 use App\Events\ParticipantMarkedAbsent;
 use App\Events\PointsAwarded;
 use App\Events\QuizCompleted;
@@ -65,6 +66,16 @@ class GamificationListener
         // Absen mandiri dalam jendela waktu (bukan apel manual).
         if ($attendance->isSelfCheckIn()) {
             $this->points->award($attendance->user, PointEvent::DormAttendanceOnTime, $attendance, at: $attendance->checked_in_at);
+        }
+    }
+
+    public function handleMealReceived(MealReceived $event): void
+    {
+        $receipt = $event->receipt;
+
+        // Hanya tanda tangan peserta sendiri, bukan penerimaan yang diwakilkan petugas.
+        if ($receipt->proxy_by === null) {
+            $this->points->award($receipt->user, PointEvent::MealReceipt, $receipt, at: $receipt->received_at);
         }
     }
 

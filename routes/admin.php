@@ -19,6 +19,7 @@ Route::prefix('master')->name('master.')->group(function () {
     Route::livewire('asrama/{dormitory}', 'pages::master.dormitory-show')->name('dormitories.show')->middleware('can:dormitory.manage');
     Route::livewire('wali', 'pages::master.guardians')->name('guardians')->middleware('can:guardian.verify');
     Route::livewire('vendor', 'pages::master.vendors')->name('vendors')->middleware('can:vendor.manage');
+    Route::livewire('komponen-poin', 'pages::master.point-components')->name('point-components')->middleware('can:gamification.manage');
 });
 
 // Kegiatan program

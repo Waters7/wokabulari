@@ -13,6 +13,7 @@ Route::prefix('mengajar')->name('teach.')->group(function () {
     Route::livewire('tugas', 'pages::teach.assignments')->name('assignments.index')->middleware('can:assignment.manage');
     Route::livewire('tugas/{assignment}', 'pages::teach.assignment-show')->name('assignments.show')->middleware('can:assignment.manage');
 
+    Route::livewire('poin', 'pages::teach.points')->name('points')->middleware('can:point.award');
     Route::livewire('rating-saya', 'pages::teach.ratings')->name('ratings')->middleware('role:teacher');
 
     Route::middleware('can:quiz.manage')->group(function () {

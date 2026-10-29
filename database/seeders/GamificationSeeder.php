@@ -16,12 +16,13 @@ class GamificationSeeder extends Seeder
     public function run(): void
     {
         foreach (PointEvent::cases() as $event) {
-            if ($event === PointEvent::Manual) {
+            if (! $event->hasRule()) {
                 continue;
             }
 
             GamificationRule::query()->firstOrCreate(['event_key' => $event->value], [
                 'name' => $event->label(),
+                'category' => $event->category(),
                 'description' => $event === PointEvent::QuizCompleted ? 'Skor% ÷ 5, maksimum sesuai poin aturan ini' : null,
                 'points' => $event->defaultPoints(),
                 'max_per_day' => match ($event) {

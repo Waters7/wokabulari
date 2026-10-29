@@ -2,6 +2,7 @@
 
 namespace App\Actions\Meals;
 
+use App\Events\MealReceived;
 use App\Models\MealReceipt;
 use App\Models\MealSchedule;
 use App\Models\User;
@@ -46,7 +47,7 @@ class ReceiveMeal
 
         $path = $this->images->storeSignature($signatureDataUri, 'signatures/'.$schedule->date->format('Y/m'));
 
-        return MealReceipt::query()->create([
+        $receipt = MealReceipt::query()->create([
             'meal_schedule_id' => $schedule->id,
             'user_id' => $participant->id,
             'signature_path' => $path,
@@ -56,5 +57,9 @@ class ReceiveMeal
             'proxy_by' => $proxy?->id,
             'note' => $note ? trim($note) : null,
         ]);
+
+        event(new MealReceived($receipt));
+
+        return $receipt;
     }
 }

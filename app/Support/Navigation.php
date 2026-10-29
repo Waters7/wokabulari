@@ -202,6 +202,7 @@ class Navigation
                 ['label' => 'Bank Soal', 'icon' => 'rectangle-stack', 'route' => 'teach.questions.index', 'match' => ['teach.questions.*'], 'can' => 'quiz.manage'],
                 ['label' => 'Perlu Dinilai', 'icon' => 'inbox-stack', 'route' => 'teach.grading', 'can' => 'quiz.manage'],
                 ['label' => 'Penilaian Periodik', 'icon' => 'document-chart-bar', 'route' => 'teach.assessments.index', 'match' => ['teach.assessments.*'], 'can' => 'assessment.manage'],
+                ['label' => 'Poin Peserta', 'icon' => 'sparkles', 'route' => 'teach.points', 'can' => 'point.award'],
                 ['label' => 'Rating Saya', 'icon' => 'star', 'route' => 'teach.ratings', 'roles' => $teacher],
             ],
             'Pendampingan' => [
@@ -236,6 +237,7 @@ class Navigation
                 ['label' => 'Lokasi', 'icon' => 'map-pin', 'route' => 'master.locations', 'can' => 'location.manage'],
                 ['label' => 'Asrama & Kamar', 'icon' => 'home-modern', 'route' => 'master.dormitories', 'match' => ['master.dormitories*'], 'can' => 'dormitory.manage'],
                 ['label' => 'Bahasa', 'icon' => 'language', 'route' => 'master.languages', 'can' => 'batch.manage'],
+                ['label' => 'Komponen Poin', 'icon' => 'calculator', 'route' => 'master.point-components', 'can' => 'gamification.manage'],
             ],
             'Kegiatan Program' => [
                 ['label' => 'Kelola Pengumuman', 'icon' => 'megaphone', 'route' => 'manage.announcements', 'can' => 'announcement.manage'],

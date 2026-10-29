@@ -5,12 +5,14 @@ namespace App\Services\Gamification;
 use App\Enums\PointEvent;
 use App\Events\PointsAwarded;
 use App\Models\GamificationRule;
+use App\Models\PointAward;
 use App\Models\PointTransaction;
 use App\Models\User;
 use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Str;
 
 /**
  * Pencatatan poin gamifikasi. Idempoten: satu event untuk referensi yang sama hanya tercatat sekali
@@ -26,7 +28,7 @@ class PointService
 
     public function rule(PointEvent $event): ?GamificationRule
     {
-        $this->rules ??= GamificationRule::query()->get()->keyBy(fn (GamificationRule $r) => $r->event_key->value);
+        $this->rules ??= GamificationRule::query()->whereNotNull('event_key')->get()->keyBy(fn (GamificationRule $r) => $r->event_key->value);
 
         return $this->rules->get($event->value);
     }
@@ -85,6 +87,47 @@ class PointService
             ]);
         } catch (UniqueConstraintViolationException) {
             // Event yang sama terproses bersamaan: cukup sekali.
+            return null;
+        }
+
+        event(new PointsAwarded($transaction));
+
+        return $transaction;
+    }
+
+    /**
+     * Poin komponen tambahan untuk satu peserta (dari satu pemberian). Idempoten per pemberian;
+     * batas per hari mengikuti komponen.
+     */
+    public function awardComponent(User $user, PointAward $award, User $by): ?PointTransaction
+    {
+        $component = $award->component;
+
+        if (! $user->isParticipant() || ! $component->isAwardable() || $award->points === 0) {
+            return null;
+        }
+
+        if ($component->max_per_day) {
+            $today = PointTransaction::query()->where('user_id', $user->id)->where('event_key', PointEvent::Custom->value)
+                ->where('reference_type', $award->getMorphClass())
+                ->whereIn('reference_id', PointAward::query()->where('gamification_rule_id', $component->id)->select('id'))
+                ->whereBetween('created_at', [now()->startOfDay(), now()->endOfDay()])->count();
+            if ($today >= $component->max_per_day) {
+                return null;
+            }
+        }
+
+        try {
+            $transaction = PointTransaction::query()->create([
+                'user_id' => $user->id,
+                'event_key' => PointEvent::Custom,
+                'points' => $award->points,
+                'reference_type' => $award->getMorphClass(),
+                'reference_id' => $award->id,
+                'description' => Str::limit($award->description(), 250),
+                'created_by' => $by->id,
+            ]);
+        } catch (UniqueConstraintViolationException) {
             return null;
         }
 

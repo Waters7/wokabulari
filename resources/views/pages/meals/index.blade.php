@@ -47,7 +47,9 @@ new #[Title('Konsumsi')] class extends Component {
 <div class="mx-auto max-w-2xl" wire:poll.60s>
     <x-page-header title="Konsumsi" subtitle="{{ tanggal_panjang(today()) }}">
         <x-slot:actions>
-            <flux:button :href="route('ratings.index')" wire:navigate icon="star" size="sm">Rating mingguan</flux:button>
+            @if (auth()->user()->isParticipant())
+                <flux:button :href="route('ratings.index')" wire:navigate icon="star" size="sm">Rating mingguan</flux:button>
+            @endif
         </x-slot:actions>
     </x-page-header>
 

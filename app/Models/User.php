@@ -29,11 +29,12 @@ class User extends Authenticatable
 
     protected $fillable = [
         'name', 'email', 'username', 'phone', 'password', 'photo_path',
-        'is_active', 'must_change_password', 'leaderboard_anonymous', 'consented_at', 'consent_version', 'last_login_at',
+        'is_active', 'receives_meals', 'must_change_password', 'leaderboard_anonymous', 'consented_at', 'consent_version', 'last_login_at',
     ];
 
     protected $attributes = [
         'is_active' => true,
+        'receives_meals' => false,
         'must_change_password' => false,
         'leaderboard_anonymous' => false,
     ];
@@ -50,6 +51,7 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'is_active' => 'boolean',
+            'receives_meals' => 'boolean',
             'must_change_password' => 'boolean',
             'leaderboard_anonymous' => 'boolean',
             'consented_at' => 'datetime',
@@ -219,6 +221,12 @@ class User extends Authenticatable
     public function isParticipant(): bool
     {
         return $this->hasRole(Role::Participant->value);
+    }
+
+    /** Penerima konsumsi: peserta, atau tim pengajar/tim kerja yang ditandai menerima konsumsi. */
+    public function receivesMeals(): bool
+    {
+        return $this->is_active && ($this->receives_meals || $this->isParticipant());
     }
 
     /** Peserta yang tinggal di asrama (bawaan ya bila profil belum ada). */

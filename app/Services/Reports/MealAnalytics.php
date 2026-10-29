@@ -30,15 +30,18 @@ class MealAnalytics
     public function compute(ReportFilter $filter): array
     {
         $participants = $filter->participants();
-        $ids = $filter->participantIds();
+        // Tim pengajar/tim kerja penerima konsumsi ikut dihitung bila laporan tidak dibatasi satu kelas.
+        $staff = $filter->classroomId ? collect() : $this->roster->staff();
+        $ids = [...$filter->participantIds(), ...$staff->pluck('id')->map(fn ($id) => (int) $id)->all()];
         $residentCount = $participants->filter(fn (User $user) => $user->profile?->lives_in_dorm !== false)->count();
 
         $schedules = MealSchedule::query()->with(['vendor', 'delivery.reporter', 'receipts' => fn ($q) => $q->whereIn('user_id', $ids)->with('proxy:id,name')->orderBy('received_at')])
             ->withCount('receipts as receipts_total')
             ->whereDateBetween('date', $filter->from->toDateString(), $filter->to->toDateString())
             ->orderBy('date')->orderBy('starts_at')->get()
-            ->map(function (MealSchedule $schedule) use ($participants, $residentCount) {
-                $eligible = $this->roster->servesNonResidents($schedule->meal_type) ? $participants->count() : $residentCount;
+            ->map(function (MealSchedule $schedule) use ($participants, $residentCount, $staff) {
+                $eligible = ($this->roster->servesNonResidents($schedule->meal_type) ? $participants->count() : $residentCount)
+                    + ($this->roster->servesStaff($schedule->meal_type) ? $staff->count() : 0);
                 $received = $schedule->receipts->count();
 
                 return [
@@ -93,6 +96,7 @@ class MealAnalytics
             'types' => $types,
             'vendors' => $vendors,
             'participants' => collect($perParticipant),
+            'staff' => $staff,
             'totals' => [
                 'ordered' => (int) $schedules->sum(fn ($r) => $r['schedule']->portions_ordered),
                 'delivered' => (int) $schedules->sum(fn ($r) => $r['delivered'] ?? 0),

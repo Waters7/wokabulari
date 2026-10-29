@@ -28,7 +28,7 @@ new #[Title('Pengguna & Tim')] class extends Component {
 
     protected function defaults(): array
     {
-        return ['name' => '', 'email' => '', 'username' => '', 'phone' => '', 'roles' => [Role::Teacher->value], 'units' => [], 'password' => '', 'is_active' => true];
+        return ['name' => '', 'email' => '', 'username' => '', 'phone' => '', 'roles' => [Role::Teacher->value], 'units' => [], 'password' => '', 'is_active' => true, 'receives_meals' => false];
     }
 
     protected function formRules(): array
@@ -57,6 +57,7 @@ new #[Title('Pengguna & Tim')] class extends Component {
             'units' => $model->staffUnits->map(fn ($u) => $u->unit->value)->all(),
             'password' => '',
             'is_active' => $model->is_active,
+            'receives_meals' => $model->receives_meals,
         ];
     }
 
@@ -75,6 +76,7 @@ new #[Title('Pengguna & Tim')] class extends Component {
                 'username' => $data['username'] ?: null,
                 'phone' => Phone::normalize($data['phone'] ?? null),
                 'is_active' => (bool) $data['is_active'],
+                'receives_meals' => (bool) ($data['receives_meals'] ?? false),
             ]);
 
             if (filled($data['password'] ?? null)) {
@@ -144,7 +146,10 @@ new #[Title('Pengguna & Tim')] class extends Component {
                                 <x-status-badge :status="$unit->unit" />
                             @endforeach
                         </td>
-                        <td><flux:badge size="sm" :color="$user->is_active ? 'green' : 'zinc'">{{ $user->is_active ? 'Aktif' : 'Nonaktif' }}</flux:badge></td>
+                        <td class="space-x-1 whitespace-nowrap">
+                            <flux:badge size="sm" :color="$user->is_active ? 'green' : 'zinc'">{{ $user->is_active ? 'Aktif' : 'Nonaktif' }}</flux:badge>
+                            @if ($user->receives_meals)<flux:badge size="sm" color="orange" icon="cake">Konsumsi</flux:badge>@endif
+                        </td>
                         <td class="whitespace-nowrap text-end">
                             <flux:button size="sm" variant="ghost" icon="pencil-square" wire:click="edit({{ $user->id }})" aria-label="Ubah" />
                             @unless ($user->is(auth()->user()))
@@ -191,6 +196,7 @@ new #[Title('Pengguna & Tim')] class extends Component {
             @endif
 
             <flux:switch wire:model="form.is_active" label="Akun aktif" />
+            <flux:switch wire:model="form.receives_meals" label="Menerima konsumsi" description="Ikut tanda tangan penerimaan makan/snack seperti peserta (jenis konsumsi diatur tim konsumsi)." />
             <flux:text class="text-xs">Kata sandi yang diisi admin wajib diganti pengguna saat login berikutnya.</flux:text>
 
             <div class="flex justify-end gap-2">

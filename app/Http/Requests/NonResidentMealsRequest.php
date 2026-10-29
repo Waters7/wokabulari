@@ -28,6 +28,9 @@ class NonResidentMealsRequest extends FormRequest
         return [
             'types' => ['present', 'array'],
             'types.*' => ['distinct', Rule::enum(MealType::class)],
+            // Jenis konsumsi tim pengajar/tim kerja penerima konsumsi (opsional, boleh kosong).
+            'staff_types' => ['sometimes', 'array'],
+            'staff_types.*' => ['distinct', Rule::enum(MealType::class)],
         ];
     }
 }

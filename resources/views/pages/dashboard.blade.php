@@ -59,7 +59,7 @@ new #[Title('Beranda')] class extends Component {
         @endif
     </header>
 
-    @if ($user->isParticipant())
+    @if ($user->receivesMeals())
         @include('dashboard.meal-ready')
     @endif
     @include('dashboard.evaluations')

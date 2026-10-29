@@ -14,6 +14,7 @@ enum ReportType: string
     case MealReceipts = 'meal_receipts';
     case MealDeliveries = 'meal_deliveries';
     case Scores = 'scores';
+    case Teaching = 'teaching';
 
     public function label(): string
     {
@@ -23,6 +24,7 @@ enum ReportType: string
             self::MealReceipts => 'Konsumsi diterima',
             self::MealDeliveries => 'Input konsumsi',
             self::Scores => 'Rekap nilai',
+            self::Teaching => 'Laporan mengajar',
         };
     }
 
@@ -31,9 +33,10 @@ enum ReportType: string
         return match ($this) {
             self::DailyAttendance => 'Siapa saja hadir, terlambat, izin, sakit, atau tidak absen.',
             self::SessionAttendance => 'Kehadiran tiap sesi kelas beserta rincian per peserta.',
-            self::MealReceipts => 'Tanda terima konsumsi peserta per jadwal dan per peserta.',
+            self::MealReceipts => 'Tanda terima konsumsi peserta & tim penerima konsumsi, per jadwal dan per penerima.',
             self::MealDeliveries => 'Makanan yang diinput tim konsumsi per vendor (dasar pembayaran vendor).',
             self::Scores => 'Rata-rata nilai sesi, tugas, quiz, dan penilaian periodik per peserta.',
+            self::Teaching => 'Kehadiran & jam mengajar tiap pengajar. Hadir bila pengajar membuat kode sesi dan ada peserta yang hadir.',
         };
     }
 
@@ -45,6 +48,7 @@ enum ReportType: string
             self::MealReceipts => 'pencil',
             self::MealDeliveries => 'truck',
             self::Scores => 'chart-bar',
+            self::Teaching => 'presentation-chart-bar',
         };
     }
 
@@ -54,6 +58,7 @@ enum ReportType: string
             self::DailyAttendance, self::SessionAttendance => 'green',
             self::MealReceipts, self::MealDeliveries => 'orange',
             self::Scores => 'sky',
+            self::Teaching => 'indigo',
         };
     }
 

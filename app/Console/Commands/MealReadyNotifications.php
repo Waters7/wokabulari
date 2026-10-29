@@ -29,7 +29,7 @@ class MealReadyNotifications extends Command
             $schedule = $delivery->schedule;
 
             // Hanya penerima jenis konsumsi ini (aturan peserta tidak asrama) yang belum mengambil.
-            $recipients = $roster->participants($schedule->meal_type)
+            $recipients = $roster->recipients($schedule->meal_type)
                 ->reject(fn ($participant) => $schedule->receipts->contains('user_id', $participant->id))
                 ->values();
 

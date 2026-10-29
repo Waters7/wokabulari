@@ -24,12 +24,13 @@ class ReportBuilder
         protected AttendanceAnalytics $attendance,
         protected ScoreAnalytics $scores,
         protected MealAnalytics $meals,
+        protected TeachingAnalytics $teaching,
     ) {}
 
     /**
      * @return Report
      */
-    public function build(ReportType $type, ReportPeriod $period, CarbonImmutable $date, ?int $batchId, ?int $classroomId): array
+    public function build(ReportType $type, ReportPeriod $period, CarbonImmutable $date, ?int $batchId, ?int $classroomId, ?int $teacherId = null): array
     {
         [$from, $to] = $period->range($date);
         $filter = ReportFilter::make($from, $to, $batchId, $classroomId);
@@ -40,6 +41,7 @@ class ReportBuilder
             ReportType::MealReceipts => $this->mealReceipts($filter),
             ReportType::MealDeliveries => $this->mealDeliveries($filter),
             ReportType::Scores => $this->scoreRecap($filter, $period),
+            ReportType::Teaching => $this->teachingReport($filter, $teacherId),
         };
 
         return ['title' => $type->label(), 'period' => $period->periodLabel($date)] + $report;
@@ -162,7 +164,9 @@ class ReportBuilder
     protected function mealReceipts(ReportFilter $filter): array
     {
         $data = $this->meals->compute($filter);
-        $names = $filter->participants()->keyBy('id');
+        // Penerima = peserta + tim pengajar/tim kerja yang ditandai menerima konsumsi.
+        $recipients = $filter->participants()->concat($data['staff'])->values();
+        $names = $recipients->keyBy('id');
         $types = MealType::cases();
 
         $detail = [];
@@ -180,6 +184,7 @@ class ReportBuilder
                 ['label' => 'Jadwal', 'value' => (string) $data['schedules']->count()],
                 ['label' => 'Tanda terima', 'value' => angka($data['totals']['received'])],
                 ['label' => 'Diwakilkan', 'value' => angka($data['totals']['proxied'])],
+                ['label' => 'Tim penerima', 'value' => angka($data['staff']->count())],
                 ['label' => 'Serapan', 'value' => $this->percent($data['totals']['rate'])],
             ],
             'sheets' => [
@@ -192,12 +197,13 @@ class ReportBuilder
                     ])->values()->all(),
                 ],
                 [
-                    'title' => 'Per peserta',
-                    'headings' => ['No', 'Nama', 'Kelas', ...array_map(fn (MealType $t) => $t->label(), $types), 'Total'],
-                    'rows' => $filter->participants()->values()->map(function (User $user, int $i) use ($data, $types) {
+                    'title' => 'Per penerima',
+                    'headings' => ['No', 'Nama', 'Kelas / tim', ...array_map(fn (MealType $t) => $t->label(), $types), 'Total'],
+                    'rows' => $recipients->map(function (User $user, int $i) use ($data, $types) {
                         $counts = $data['participants'][$user->id] ?? [];
+                        $group = $data['staff']->contains('id', $user->id) ? $user->role_label : ReportFilter::classLabel($user);
 
-                        return [$i + 1, $user->name, ReportFilter::classLabel($user), ...array_map(fn (MealType $t) => $counts[$t->value] ?? 0, $types), array_sum($counts)];
+                        return [$i + 1, $user->name, $group, ...array_map(fn (MealType $t) => $counts[$t->value] ?? 0, $types), array_sum($counts)];
                     })->all(),
                 ],
                 [
@@ -293,6 +299,42 @@ class ReportBuilder
                 ['label' => 'Di bawah '.angka($passing), 'value' => (string) $scored->filter(fn ($row) => $row['overall'] < $passing)->count()],
             ],
             'sheets' => $sheets,
+        ];
+    }
+
+    protected function teachingReport(ReportFilter $filter, ?int $teacherId): array
+    {
+        $rows = $this->teaching->rows($filter, $teacherId);
+        $summary = $this->teaching->perTeacher($rows);
+        $hours = fn (float $value) => round($value, 2);
+
+        return [
+            'summary' => [
+                ['label' => 'Pengajar', 'value' => (string) $summary->count()],
+                ['label' => 'Sesi', 'value' => (string) $summary->sum('sessions')],
+                ['label' => 'Hadir mengajar', 'value' => (string) $summary->sum('present')],
+                ['label' => 'Tidak tercatat', 'value' => (string) $summary->sum('not_recorded')],
+                ['label' => 'Jam mengajar', 'value' => $this->number($summary->sum('hours') ?: null)],
+            ],
+            'sheets' => [
+                [
+                    'title' => 'Rekap per pengajar',
+                    'headings' => ['No', 'Pengajar', 'NIP', 'Kelas', 'Sesi', 'Hadir', 'Kode tanpa peserta', 'Tidak tercatat', 'Jam mengajar', 'Rata-rata peserta hadir'],
+                    'rows' => $summary->values()->map(fn (array $row, int $i) => [
+                        $i + 1, $row['teacher']->name, $row['teacher']->username, $row['classes'], $row['sessions'], $row['present'],
+                        $row['no_participants'], $row['not_recorded'], $hours($row['hours']), $row['avg_attended'],
+                    ])->all(),
+                ],
+                [
+                    'title' => 'Rincian sesi',
+                    'headings' => ['Tanggal', 'Jam', 'Kelas', 'Topik', 'Pengajar', 'Status', 'Kode dibuat', 'Peserta hadir', 'Peserta kelas', 'Jam dihitung'],
+                    'rows' => $rows->map(fn (array $row) => [
+                        tanggal($row['session']->date, 'D, j M Y'), $row['session']->timeRange(), $row['session']->classroom->name, $row['session']->topic,
+                        $row['teacher']->name, $row['status']->label(), $row['code_at'] ? jam($row['code_at']) : null,
+                        $row['attended'], $row['expected'], $hours($row['hours']),
+                    ])->all(),
+                ],
+            ],
         ];
     }
 

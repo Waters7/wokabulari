@@ -99,7 +99,7 @@ new #[Title('Monitor makan')] class extends Component {
         $schedules = MealSchedule::query()->with(['vendor', 'delivery'])->onDate($date)->orderBy('starts_at')->get();
         $schedule = $this->schedule($schedules);
         // Total mengikuti jenis konsumsi (peserta tidak asrama hanya untuk jenis tertentu).
-        $participants = $roster->participants($schedule?->meal_type);
+        $participants = $roster->recipients($schedule?->meal_type);
         $receipts = $schedule
             ? MealReceipt::query()->with('proxy')->where('meal_schedule_id', $schedule->id)->latest('received_at')->get()->keyBy('user_id')
             : collect();
@@ -120,6 +120,7 @@ new #[Title('Monitor makan')] class extends Component {
             'pending' => $pending,
             'recent' => $receipts->take(8)->map(fn ($r) => $r->setRelation('user', $participants->firstWhere('id', $r->user_id) ?? $r->user)),
             'flags' => $flags,
+            'staffIds' => $roster->staff($schedule?->meal_type)->pluck('id')->all(),
             'specials' => SpecialMealRequest::query()->with(['user.currentRoomAssignment.room.dormitory'])->whereDate('date', $date)
                 ->orderByRaw("case status when 'pending' then 0 when 'prepared' then 1 else 2 end")->get(),
             'proxyUser' => $this->proxyUserId ? $participants->firstWhere('id', $this->proxyUserId) : null,
@@ -129,7 +130,7 @@ new #[Title('Monitor makan')] class extends Component {
 }; ?>
 
 <div wire:poll.5s>
-    <x-page-header title="Monitor makan" subtitle="Porsi diterima vs total peserta, diperbarui otomatis.">
+    <x-page-header title="Monitor makan" subtitle="Porsi diterima vs total penerima (peserta & tim yang menerima konsumsi), diperbarui otomatis.">
         <x-slot:actions>
             <flux:input type="date" wire:model.live="date" size="sm" class="max-w-40" aria-label="Tanggal" />
         </x-slot:actions>
@@ -216,6 +217,9 @@ new #[Title('Monitor makan')] class extends Component {
                                 <div class="min-w-0 flex-1">
                                     <p class="truncate font-semibold">{{ $participant->name }}</p>
                                     <div class="flex flex-wrap items-center gap-1 text-xs text-hutan/60 dark:text-santan/60">
+                                        @if (in_array($participant->id, $staffIds, true))
+                                            <flux:badge size="sm" color="indigo">Tim pengajar/kerja</flux:badge>
+                                        @endif
                                         @if ($room = $participant->currentRoomAssignment?->room)
                                             <span>{{ $room->dormitory?->name }} · {{ $room->number }}</span>
                                         @endif
@@ -232,7 +236,7 @@ new #[Title('Monitor makan')] class extends Component {
                                 @endif
                             </div>
                         @empty
-                            <p class="px-4 py-6 text-center text-sm text-hutan/60 dark:text-santan/60">Semua peserta so ambil makanan. Mantap!</p>
+                            <p class="px-4 py-6 text-center text-sm text-hutan/60 dark:text-santan/60">Semua penerima so ambil makanan. Mantap!</p>
                         @endforelse
                     </x-card>
                 </div>

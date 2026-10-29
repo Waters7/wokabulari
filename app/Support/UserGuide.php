@@ -131,6 +131,7 @@ class UserGuide
                         'Buka Sesi Belajar, jadwalkan sesi (bisa beberapa sekaligus), lalu Mulai sesi saat kelas dimulai.',
                         'Tampilkan kode kehadiran (mode proyektor) agar peserta memasukkannya di HP; kode berganti otomatis.',
                         'Tandai manual peserta yang hadir tanpa HP, izin, atau sakit, lalu Akhiri sesi.',
+                        'Kehadiran mengajar Anda tercatat otomatis bila Anda membuat kode sesi dan ada peserta yang masuk. Rekap sesi & jam mengajar ada di Mengajar → Laporan Mengajar (bisa diunduh Excel).',
                         'Absen harian peserta yang perlu ditinjau ada di Pendampingan → Absen Harian.',
                     ]],
                     ['title' => 'Penilaian sesi dan periodik', 'steps' => [
@@ -151,6 +152,7 @@ class UserGuide
                         'Tinjau pengajuan Izin / Sakit peserta kelas Anda.',
                         'Kirim pengumuman ke kelas lewat Kelola Pengumuman.',
                         'Lihat rating mingguan dari peserta di Rating Saya dan isi Survei yang ditujukan ke pengajar.',
+                        'Bila akun Anda ditandai menerima konsumsi, tanda tangan penerimaan makan/snack di Konsumsi Saya, sama seperti peserta.',
                     ]],
                 ],
             ],
@@ -161,7 +163,7 @@ class UserGuide
                 'topics' => [
                     ['title' => 'Jadwal makan', 'steps' => [
                         'Konsumsi → Jadwal Makan: atur rencana per hari (vendor, menu, jam ambil, porsi). Salin ke minggu depan untuk makan utama.',
-                        'Atur jenis konsumsi peserta tidak asrama lewat tombol Peserta tidak asrama.',
+                        'Atur jenis konsumsi peserta tidak asrama dan tim pengajar/tim kerja penerima konsumsi lewat tombol Penerima konsumsi.',
                     ]],
                     ['title' => 'Input konsumsi saat makanan datang', 'steps' => [
                         'Buka Input Konsumsi, pilih Input pada sarapan/makan siang/makan malam hari itu.',
@@ -171,7 +173,7 @@ class UserGuide
                         'Salah input? Buka lagi dan Ubah (sampai 7 hari ke belakang).',
                     ]],
                     ['title' => 'Monitor dan penerimaan diwakilkan', 'steps' => [
-                        'Monitor Makan menampilkan porsi diterima vs total dan daftar peserta yang belum mengambil (yang izin/sakit ditandai).',
+                        'Monitor Makan menampilkan porsi diterima vs total dan daftar penerima yang belum mengambil (yang izin/sakit ditandai; tim pengajar/kerja diberi label).',
                         'Untuk peserta sakit atau di kamar, catat penerimaan diwakilkan dengan tanda tangan petugas dan catatan.',
                         'Teruskan daftar Alergi & Pantangan ke vendor; pantau Rekap Rating Vendor tiap minggu.',
                     ]],
@@ -222,7 +224,7 @@ class UserGuide
                         'Angkatan: tanggal program, target kehadiran, nilai lulus, serta hari & jam absen harian.',
                         'Lokasi: titik dan radius kampus/asrama untuk validasi absen. Bahasa dan Asrama & Kamar sesuai kebutuhan.',
                         'Kelas: pilih angkatan, bahasa, pengajar utama, dan pengajar lain.',
-                        'Pengguna & Tim: buat akun pengajar, tim kerja (pilih unit), dan pimpinan; satu akun boleh punya beberapa role.',
+                        'Pengguna & Tim: buat akun pengajar, tim kerja (pilih unit), dan pimpinan; satu akun boleh punya beberapa role. Aktifkan Menerima konsumsi untuk tim yang ikut makan bersama peserta.',
                     ]],
                     ['title' => 'Peserta', 'steps' => [
                         'Impor peserta dari templat Excel atau tambah satu per satu (wajib kontak orang tua/wali).',
@@ -236,7 +238,7 @@ class UserGuide
                     ]],
                     ['title' => 'Memantau dan melapor', 'steps' => [
                         'Dashboard Eksekutif: grafik kehadiran, nilai, dan konsumsi dengan filter angkatan, kelas, dan rentang tanggal, serta daftar peserta yang perlu perhatian.',
-                        'Pusat Laporan: absen harian, absen per sesi, konsumsi, input konsumsi, dan rekap nilai mingguan/bulanan; unduh Excel.',
+                        'Pusat Laporan: absen harian, absen per sesi, konsumsi, input konsumsi, rekap nilai, dan laporan mengajar tiap pengajar; unduh Excel.',
                     ]],
                 ],
             ],

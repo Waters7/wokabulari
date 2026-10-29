@@ -4,6 +4,9 @@ use App\Http\Controllers\CharterController;
 use App\Http\Controllers\MaterialFileController;
 use Illuminate\Support\Facades\Route;
 
+// Konsumsi: peserta dan tim yang ditandai menerima konsumsi.
+Route::livewire('konsumsi', 'pages::meals.index')->name('meals.index')->middleware('can:receive,App\Models\MealSchedule');
+
 // Rute peserta
 Route::middleware('role:participant')->group(function () {
     Route::livewire('kelas-saya', 'pages::participant.hub')->name('participant.class');
@@ -21,7 +24,6 @@ Route::middleware('role:participant')->group(function () {
     Route::livewire('quiz', 'pages::participant.quizzes')->name('quizzes.index');
     Route::livewire('quiz/hasil/{attempt}', 'pages::participant.quiz-result')->name('quizzes.result');
     Route::livewire('quiz/{quiz}/kerjakan', 'pages::participant.quiz-take')->name('quizzes.take');
-    Route::livewire('konsumsi', 'pages::meals.index')->name('meals.index');
     Route::livewire('rating', 'pages::ratings.index')->name('ratings.index');
     Route::livewire('asrama/absen', 'pages::dorm.attendance')->name('dorm.attendance');
     Route::livewire('asrama/izin-keluar', 'pages::dorm.exits')->name('dorm.exit.index');

@@ -45,6 +45,7 @@ class StaffUserRequest extends FormRequest
             'units.*' => [Rule::enum(StaffUnit::class)],
             'password' => [$user ? 'nullable' : 'required', 'string', 'min:8'],
             'is_active' => ['boolean'],
+            'receives_meals' => ['boolean'],
         ];
     }
 }

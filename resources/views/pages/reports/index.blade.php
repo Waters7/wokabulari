@@ -4,7 +4,9 @@ use App\Enums\ReportPeriod;
 use App\Enums\ReportType;
 use App\Exports\ReportExport;
 use App\Models\Batch;
+use App\Enums\Role;
 use App\Models\Classroom;
+use App\Models\User;
 use App\Services\Reports\ReportBuilder;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Str;
@@ -31,6 +33,10 @@ new #[Title('Pusat laporan')] class extends Component {
 
     #[Url(as: 'kelas')]
     public ?int $classroomId = null;
+
+    /** Khusus laporan mengajar. */
+    #[Url(as: 'pengajar')]
+    public ?int $teacherId = null;
 
     public function mount(): void
     {
@@ -72,7 +78,8 @@ new #[Title('Pusat laporan')] class extends Component {
         $type = ReportType::from($this->type);
         abort_unless($type->allows(auth()->user()), 403);
 
-        return $builder->build($type, ReportPeriod::from($this->period), CarbonImmutable::parse($this->date), $this->batchId, $this->classroomId);
+        return $builder->build($type, ReportPeriod::from($this->period), CarbonImmutable::parse($this->date), $this->batchId, $this->classroomId,
+            $type === ReportType::Teaching ? $this->teacherId : null);
     }
 
     /** @return list<string> */
@@ -85,6 +92,7 @@ new #[Title('Pusat laporan')] class extends Component {
         return array_values(array_filter([
             Batch::query()->find($this->batchId)?->name ?? 'Semua angkatan',
             Classroom::query()->find($this->classroomId)?->name,
+            $this->type === ReportType::Teaching->value && $this->teacherId ? 'Pengajar: '.User::query()->find($this->teacherId)?->name : null,
         ]));
     }
 
@@ -114,6 +122,7 @@ new #[Title('Pusat laporan')] class extends Component {
             'scoped' => $type !== ReportType::MealDeliveries,
             'batches' => Batch::query()->orderByDesc('start_date')->get(['id', 'name']),
             'classrooms' => Classroom::query()->when($this->batchId, fn ($q) => $q->where('batch_id', $this->batchId))->orderBy('name')->get(['id', 'name']),
+            'teachers' => $type === ReportType::Teaching ? User::query()->role(Role::Teacher->value)->orderBy('name')->get(['id', 'name']) : collect(),
         ];
     }
 }; ?>
@@ -163,6 +172,14 @@ new #[Title('Pusat laporan')] class extends Component {
                     <flux:select.option value="">Semua kelas</flux:select.option>
                     @foreach ($classrooms as $classroom)
                         <flux:select.option :value="$classroom->id">{{ $classroom->name }}</flux:select.option>
+                    @endforeach
+                </flux:select>
+            @endif
+            @if ($current === ReportType::Teaching)
+                <flux:select wire:model.live="teacherId" label="Pengajar" class="w-full sm:w-48">
+                    <flux:select.option value="">Semua pengajar</flux:select.option>
+                    @foreach ($teachers as $teacher)
+                        <flux:select.option :value="$teacher->id">{{ $teacher->name }}</flux:select.option>
                     @endforeach
                 </flux:select>
             @endif

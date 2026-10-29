@@ -49,6 +49,46 @@ class MealRoster
             ->get();
     }
 
+    /**
+     * Tim pengajar/tim kerja yang ditandai menerima konsumsi (bukan peserta); bila jenisnya diberikan,
+     * hanya untuk jenis yang diatur tim konsumsi.
+     *
+     * @return Collection<int, User>
+     */
+    public function staff(?MealType $type = null): Collection
+    {
+        if ($type && ! $this->servesStaff($type)) {
+            return collect();
+        }
+
+        return User::query()->where('receives_meals', true)->active()
+            ->whereDoesntHave('roles', fn ($q) => $q->where('name', Role::Participant->value))
+            ->with('roles')->orderBy('name')->get();
+    }
+
+    /**
+     * Semua penerima konsumsi: peserta + tim yang ditandai menerima konsumsi.
+     *
+     * @return Collection<int, User>
+     */
+    public function recipients(?MealType $type = null): Collection
+    {
+        return $this->participants($type)->concat($this->staff($type))->sortBy('name', SORT_NATURAL | SORT_FLAG_CASE)->values();
+    }
+
+    /** Jenis konsumsi untuk tim pengajar/tim kerja penerima konsumsi. @return list<MealType> */
+    public function staffTypes(): array
+    {
+        $values = $this->settings->get('meals.staff_types', config('wokabulari.meals.staff_types', []));
+
+        return array_values(array_filter(array_map(fn ($value) => MealType::tryFrom((string) $value), (array) $values)));
+    }
+
+    public function servesStaff(MealType $type): bool
+    {
+        return in_array($type, $this->staffTypes(), true);
+    }
+
     /** Jenis konsumsi untuk peserta tidak asrama. @return list<MealType> */
     public function nonResidentTypes(): array
     {
@@ -62,10 +102,14 @@ class MealRoster
         return in_array($type, $this->nonResidentTypes(), true);
     }
 
-    /** Apakah peserta berhak atas jenis konsumsi ini. */
-    public function isEligible(User $participant, MealType $type): bool
+    /** Apakah pengguna berhak atas jenis konsumsi ini (peserta: aturan tidak asrama; tim: jenis konsumsi tim). */
+    public function isEligible(User $user, MealType $type): bool
     {
-        return $participant->livesInDorm() || $this->servesNonResidents($type);
+        if (! $user->isParticipant()) {
+            return $user->receives_meals && $user->is_active && $this->servesStaff($type);
+        }
+
+        return $user->livesInDorm() || $this->servesNonResidents($type);
     }
 
     /**

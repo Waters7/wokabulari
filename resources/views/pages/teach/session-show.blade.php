@@ -64,9 +64,18 @@ new #[Title('Detail sesi')] class extends Component {
             }
         }
 
+        $me = auth()->user();
+        $myCode = $this->session->codes()->where('generated_by', $me->id)->exists();
+
         return [
             'tabs' => $tabs,
-            'canManage' => auth()->user()->can('update', $this->session),
+            'canManage' => $me->can('update', $this->session),
+            // Kehadiran pengajar: membuat kode sesi + ada peserta yang hadir.
+            'teachingStatus' => $me->isTeacher() ? match (true) {
+                $myCode && \App\Services\Reports\TeachingAnalytics::isPresent($this->session, $me) => \App\Enums\TeachingStatus::Present,
+                $myCode => \App\Enums\TeachingStatus::NoParticipants,
+                default => null,
+            } : null,
         ];
     }
 }; ?>
@@ -86,6 +95,13 @@ new #[Title('Detail sesi')] class extends Component {
             @endif
         </x-slot:actions>
     </x-page-header>
+
+    @if ($teachingStatus)
+        <flux:callout class="mb-4" data-test="teaching-status"
+                      :icon="$teachingStatus === \App\Enums\TeachingStatus::Present ? 'check-circle' : 'clock'"
+                      :color="$teachingStatus === \App\Enums\TeachingStatus::Present ? 'green' : 'amber'"
+                      :text="$teachingStatus === \App\Enums\TeachingStatus::Present ? 'Kehadiran mengajar ngana di sesi ini sudah tercatat.' : 'Kode sudah dibuat. Kehadiran mengajar tercatat setelah peserta pertama masuk.'" />
+    @endif
 
     @if ($session->objectives)
         <flux:callout icon="light-bulb" class="mb-4" heading="Tujuan pembelajaran" :text="$session->objectives" />

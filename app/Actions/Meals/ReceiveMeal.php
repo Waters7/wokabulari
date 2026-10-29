@@ -21,12 +21,12 @@ class ReceiveMeal
 
     public function handle(MealSchedule $schedule, User $participant, string $signatureDataUri, ?User $proxy = null, ?string $note = null, ?float $latitude = null, ?float $longitude = null): MealReceipt
     {
-        if (! $participant->isParticipant() || ! $participant->is_active) {
-            throw new InvalidArgumentException('Penerima harus peserta aktif.');
+        if (! $participant->receivesMeals()) {
+            throw new InvalidArgumentException('Penerima harus peserta aktif atau tim yang ditandai menerima konsumsi.');
         }
 
         if (! $this->roster->isEligible($participant, $schedule->meal_type)) {
-            throw new InvalidArgumentException($schedule->meal_type->label().' tidak termasuk konsumsi peserta tidak asrama.');
+            throw new InvalidArgumentException($schedule->meal_type->label().' tidak termasuk konsumsi '.($participant->isParticipant() ? 'peserta tidak asrama' : 'tim pengajar/tim kerja').'.');
         }
 
         if ($proxy) {

@@ -126,6 +126,11 @@ class Navigation
             return false;
         }
 
+        // Konsumsi untuk tim pengajar/tim kerja yang ditandai menerima konsumsi.
+        if (($item['mealStaff'] ?? false) && ($user->isParticipant() || ! $user->receivesMeals())) {
+            return false;
+        }
+
         // Menu asrama hanya untuk peserta yang tinggal di asrama.
         if (($item['resident'] ?? false) && ! $user->livesInDorm()) {
             return false;
@@ -203,7 +208,9 @@ class Navigation
                 ['label' => 'Perlu Dinilai', 'icon' => 'inbox-stack', 'route' => 'teach.grading', 'can' => 'quiz.manage'],
                 ['label' => 'Penilaian Periodik', 'icon' => 'document-chart-bar', 'route' => 'teach.assessments.index', 'match' => ['teach.assessments.*'], 'can' => 'assessment.manage'],
                 ['label' => 'Poin Peserta', 'icon' => 'sparkles', 'route' => 'teach.points', 'can' => 'point.award'],
+                ['label' => 'Laporan Mengajar', 'icon' => 'presentation-chart-bar', 'route' => 'teach.report', 'roles' => $teacher],
                 ['label' => 'Rating Saya', 'icon' => 'star', 'route' => 'teach.ratings', 'roles' => $teacher],
+                ['label' => 'Konsumsi Saya', 'icon' => 'cake', 'route' => 'meals.index', 'mealStaff' => true],
             ],
             'Pendampingan' => [
                 ['label' => 'Absen Harian', 'icon' => 'camera', 'route' => 'manage.attendance.index', 'can' => 'attendance.approve'],

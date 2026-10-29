@@ -9,7 +9,7 @@ class MealSchedulePolicy
 {
     public function viewAny(User $user): bool
     {
-        return $user->can('meal.manage') || $user->can('meal.monitor') || $user->isParticipant();
+        return $user->can('meal.manage') || $user->can('meal.monitor') || $user->receivesMeals();
     }
 
     public function view(User $user, MealSchedule $schedule): bool
@@ -32,10 +32,10 @@ class MealSchedulePolicy
         return $user->can('meal.manage') && ! $schedule->receipts()->exists();
     }
 
-    /** Peserta menandatangani penerimaannya sendiri. */
-    public function receive(User $user, MealSchedule $schedule): bool
+    /** Peserta (dan tim yang ditandai menerima konsumsi) menandatangani penerimaannya sendiri. */
+    public function receive(User $user, ?MealSchedule $schedule = null): bool
     {
-        return $user->isParticipant();
+        return $user->receivesMeals();
     }
 
     /** Petugas konsumsi mencatat penerimaan diwakilkan. */

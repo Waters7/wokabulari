@@ -168,7 +168,7 @@ test('berkas Excel sungguhan terbentuk dengan satu lembar per tabel', function (
     $book = \PhpOffice\PhpSpreadsheet\IOFactory::load($path);
     unlink($path);
 
-    expect($book->getSheetNames())->toBe(['Per jadwal', 'Per peserta', 'Per vendor', 'Rincian tanda terima'])
+    expect($book->getSheetNames())->toBe(['Per jadwal', 'Per penerima', 'Per vendor', 'Rincian tanda terima'])
         ->and($book->getSheet(0)->getCell('A3')->getValue())->toBe('Cakupan: Angkatan uji')
         ->and($book->getSheet(2)->getCell('A7')->getValue())->toBe('Dapur Woku Tinoor');
 });

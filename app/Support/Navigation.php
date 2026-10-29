@@ -255,6 +255,9 @@ class Navigation
                 ['label' => 'Role & Hak Akses', 'icon' => 'shield-check', 'route' => 'system.roles', 'can' => 'role.manage'],
                 ['label' => 'Log Audit', 'icon' => 'finger-print', 'route' => 'system.audit', 'can' => 'audit.view'],
             ],
+            'Bantuan' => [
+                ['label' => 'Panduan Penggunaan', 'short' => 'Panduan', 'icon' => 'question-mark-circle', 'route' => 'guide'],
+            ],
         ];
     }
 }

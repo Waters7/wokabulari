@@ -22,6 +22,7 @@ Route::middleware(['auth', 'active'])->group(function () {
 
             Route::middleware('guardian.contact')->group(function () {
                 Route::livewire('beranda', 'pages::dashboard')->name('dashboard');
+                Route::livewire('panduan', 'pages::guide')->name('guide');
 
                 require __DIR__.'/settings.php';
                 require __DIR__.'/participant.php';

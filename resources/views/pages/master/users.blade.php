@@ -33,7 +33,7 @@ new #[Title('Pengguna & Tim')] class extends Component {
 
     protected function formRules(): array
     {
-        return StaffUserRequest::rulesFor($this->editingId ? User::find($this->editingId) : null);
+        return StaffUserRequest::rulesFor($this->editingId ? User::find($this->editingId) : null, $this->form);
     }
 
     protected function labels(): array
@@ -171,11 +171,15 @@ new #[Title('Pengguna & Tim')] class extends Component {
                 <flux:input wire:model="form.password" label="{{ $editingId ? 'Kata sandi baru (opsional)' : 'Kata sandi awal' }}" type="password" viewable autocomplete="new-password" />
             </div>
 
-            <flux:checkbox.group wire:model.live="form.roles" label="Role">
-                @foreach ($roleOptions as $option)
-                    <flux:checkbox :value="$option->value" :label="$option->label()" />
-                @endforeach
+            <flux:checkbox.group wire:model.live="form.roles" label="Role"
+                                 description="Boleh lebih dari satu, mis. Tim Kerja + Pengajar untuk anggota tim kerja yang juga mengajar.">
+                <div class="grid gap-2 sm:grid-cols-2">
+                    @foreach ($roleOptions as $option)
+                        <flux:checkbox :value="$option->value" :label="$option->label()" />
+                    @endforeach
+                </div>
             </flux:checkbox.group>
+            <flux:error name="form.roles" />
 
             @if (in_array('staff', $form['roles'] ?? [], true))
                 <flux:checkbox.group wire:model="form.units" label="Unit tim kerja">
@@ -183,6 +187,7 @@ new #[Title('Pengguna & Tim')] class extends Component {
                         <flux:checkbox :value="$unit->value" :label="$unit->label()" />
                     @endforeach
                 </flux:checkbox.group>
+                <flux:error name="form.units" />
             @endif
 
             <flux:switch wire:model="form.is_active" label="Akun aktif" />

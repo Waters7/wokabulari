@@ -3,6 +3,10 @@
 Versi ditampilkan di halaman login dan menu aplikasi (`config/wokabulari.php` → `version`).
 Aturan penomoran: **patch** (1.0.x) perbaikan, **minor** (1.x.0) fitur baru, **major** (x.0.0) perubahan besar.
 
+## 1.5.1 — 30 Oktober 2026
+
+- **Pengguna & Tim:** satu akun bisa punya beberapa role, mis. **Tim Kerja + Pengajar**. Unit tim kerja wajib dipilih bila role Tim Kerja dicentang. Profil menampilkan semua role (mis. "Pengajar · Tim Kerja") dan beranda menampilkan akses cepat untuk tugas mengajar maupun unit.
+
 ## 1.5.0 — 30 Oktober 2026
 
 - **Reset kata sandi massal** di halaman Peserta (centang → menu ⋯ → Reset kata sandi): kembali ke sandi awal dan wajib diganti saat login berikutnya.

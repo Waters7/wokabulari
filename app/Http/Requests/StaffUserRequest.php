@@ -20,13 +20,16 @@ class StaffUserRequest extends FormRequest
 
     public function rules(): array
     {
-        return self::rulesFor($this->route('user'));
+        return self::rulesFor($this->route('user'), $this->all());
     }
 
     /**
+     * Pengguna internal boleh punya beberapa role sekaligus (mis. Tim Kerja + Pengajar).
+     *
+     * @param  array<string, mixed>  $data  isian form, untuk aturan unit tim kerja
      * @return array<string, mixed>
      */
-    public static function rulesFor(?User $user = null): array
+    public static function rulesFor(?User $user = null, array $data = []): array
     {
         $roles = collect(Role::cases())->reject(fn (Role $role) => in_array($role, [Role::Participant, Role::Guardian], true))->map->value->all();
 
@@ -37,7 +40,8 @@ class StaffUserRequest extends FormRequest
             'phone' => ['nullable', 'string', 'max:20'],
             'roles' => ['required', 'array', 'min:1'],
             'roles.*' => [Rule::in($roles)],
-            'units' => ['array', 'required_if:roles.*,staff'],
+            // Role Tim Kerja wajib punya minimal satu unit.
+            'units' => ['array', Rule::requiredIf(in_array(Role::Staff->value, (array) ($data['roles'] ?? []), true))],
             'units.*' => [Rule::enum(StaffUnit::class)],
             'password' => [$user ? 'nullable' : 'required', 'string', 'min:8'],
             'is_active' => ['boolean'],

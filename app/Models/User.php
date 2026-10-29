@@ -325,9 +325,15 @@ class User extends Authenticatable
         return Attribute::get(fn () => $this->photo_path ? Storage::disk('public')->url($this->photo_path) : null);
     }
 
+    /** Semua role pengguna sesuai prioritas, mis. "Pengajar · Tim Kerja". */
     protected function roleLabel(): Attribute
     {
-        return Attribute::get(fn () => $this->primaryRole()?->label() ?? 'Pengguna');
+        return Attribute::get(function () {
+            $names = $this->getRoleNames();
+            $labels = collect(self::ROLE_PRIORITY)->filter(fn (Role $role) => $names->contains($role->value))->map->label();
+
+            return $labels->isEmpty() ? 'Pengguna' : $labels->join(' · ');
+        });
     }
 
     public function needsConsent(): bool

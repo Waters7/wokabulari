@@ -10,6 +10,7 @@ new #[Title('Beranda')] class extends Component {
     /** Menu yang paling sering dipakai per peran, diurutkan lebih dulu (hanya yang boleh diakses). */
     protected const PRIORITY = [
         'teach.sessions.index', 'teach.grading', 'manage.attendance.index', 'teach.assignments.index',
+        'meals.monitor', 'dorm.manage.attendance', 'health.index',
         'master.participants', 'master.classrooms', 'manage.evaluations.index', 'manage.announcements',
         'leader.dashboard', 'reports.index', 'manage.leave.index', 'meals.ratings', 'manage.teacher-ratings',
     ];
@@ -39,7 +40,8 @@ new #[Title('Beranda')] class extends Component {
             'greeting' => Greeting::forNow($user->name),
             'tagline' => Greeting::tagline(),
             // Peran tanpa bottom nav (admin, pengajar, pimpinan) mendapat akses cepat ke menu utamanya.
-            'shortcuts' => $role?->usesBottomNav() ? [] : $this->shortcuts($navigation->sidebar($user)),
+            // Juga untuk pengguna dengan beberapa role (mis. tim kerja yang juga pengajar).
+            'shortcuts' => $role?->usesBottomNav() && $user->roles->count() < 2 ? [] : $this->shortcuts($navigation->sidebar($user)),
         ];
     }
 }; ?>

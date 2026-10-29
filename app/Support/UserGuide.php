@@ -270,6 +270,7 @@ class UserGuide
                         'Pengaturan Sistem: radius & ambang verifikasi wajah, jam bawaan absen, aturan asrama (termasuk Konfirmasi otomatis absen asrama), batas unggah, dan predikat nilai.',
                         'Role & Hak Akses: atur izin tiap role. Perubahan berlaku langsung untuk semua pengguna role tersebut.',
                         'Log Audit: telusuri siapa mengubah apa dan kapan.',
+                        'Penyimpanan & cadangan (Pengaturan Sistem): pantau sisa disk VPS dan pemakaian Wokabulari, tekan Buat cadangan sekarang, lalu unduh berkas ZIP-nya dan simpan di luar server.',
                     ]],
                 ],
             ],

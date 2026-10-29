@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\BackupDownloadController;
 use App\Http\Controllers\ParticipantTemplateController;
 use App\Models\ProgramEvaluation;
 use Illuminate\Support\Facades\Route;
@@ -36,6 +37,7 @@ Route::prefix('kelola')->name('manage.')->group(function () {
 // Sistem (super admin)
 Route::prefix('sistem')->name('system.')->group(function () {
     Route::livewire('pengaturan', 'pages::system.settings')->name('settings')->middleware('can:setting.manage');
+    Route::get('cadangan/{name}', BackupDownloadController::class)->name('backups.download')->middleware('can:setting.manage')->where('name', 'wokabulari-[0-9]{8}-[0-9]{6}\.zip');
     Route::livewire('hak-akses', 'pages::system.roles')->name('roles')->middleware('can:role.manage');
     Route::livewire('audit', 'pages::system.audit')->name('audit')->middleware('can:audit.view');
 });

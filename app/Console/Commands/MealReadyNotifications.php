@@ -11,7 +11,7 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Notification;
 
 #[Signature('app:meal-ready-notifications')]
-#[Description('Beri tahu peserta saat makanan dari vendor siap diambil (jam & tempat), sekali per pengantaran.')]
+#[Description('Beri tahu peserta saat makanan yang diinput tim konsumsi siap diambil (jam & tempat), sekali per input.')]
 class MealReadyNotifications extends Command
 {
     public function handle(MealRoster $roster): int

@@ -46,7 +46,7 @@ class MealSchedule extends Model
         return $this->hasMany(MealReceipt::class);
     }
 
-    /** Laporan pengantaran vendor (jam siap, tempat, foto). */
+    /** Input konsumsi tim konsumsi (vendor, jumlah, jam siap, tempat, foto). */
     public function delivery(): HasOne
     {
         return $this->hasOne(MealDelivery::class);

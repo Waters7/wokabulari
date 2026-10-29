@@ -49,7 +49,8 @@ class ManageMealSchedules
     }
 
     /**
-     * Salin semua jadwal satu minggu ke minggu berikutnya (jadwal yang sudah ada dilewati).
+     * Salin jadwal makan utama satu minggu ke minggu berikutnya (jadwal yang sudah ada dilewati).
+     * Snack tidak ikut disalin: tim konsumsi menambahkannya sendiri bila tersedia.
      */
     public function duplicateWeek(CarbonInterface $weekStart, User $by): int
     {
@@ -59,6 +60,10 @@ class ManageMealSchedules
 
         DB::transaction(function () use ($start, $end, $by, &$created) {
             foreach (MealSchedule::query()->whereDateBetween('date', $start->toDateString(), $end->toDateString())->get() as $schedule) {
+                if ($schedule->meal_type->isSnack()) {
+                    continue;
+                }
+
                 $date = $schedule->date->addWeek();
                 $exists = MealSchedule::query()->whereDate('date', $date)->where('meal_type', $schedule->meal_type)->where('vendor_id', $schedule->vendor_id)->exists();
 

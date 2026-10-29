@@ -52,7 +52,6 @@ class Navigation
         $routes = match ($role) {
             Role::Participant => ['dashboard', 'attendance.daily', 'participant.class', 'participant.dorm'],
             Role::Guardian => ['dashboard', 'guardian.child', 'guardian.attendance', 'guardian.approvals'],
-            Role::Vendor => ['dashboard', 'vendor.deliveries.index', 'vendor.deliveries.create'],
             Role::Staff => array_merge(['dashboard'], $this->staffBottomRoutes($user)),
             default => [],
         };
@@ -82,7 +81,7 @@ class Navigation
         $routes = [];
 
         if ($user->hasUnit(StaffUnit::Consumption)) {
-            array_push($routes, 'meals.monitor', 'meals.schedules');
+            array_push($routes, 'meals.deliveries.index', 'meals.monitor');
         }
 
         if ($user->hasUnit(StaffUnit::Dormitory)) {
@@ -162,11 +161,7 @@ class Navigation
             'Utama' => [
                 ['label' => 'Beranda', 'icon' => 'home', 'route' => 'dashboard'],
                 ['label' => 'Dashboard Pimpinan', 'short' => 'Pimpinan', 'icon' => 'presentation-chart-line', 'route' => 'leader.dashboard', 'match' => ['leader.*'], 'can' => 'dashboard.leader'],
-                ['label' => 'Pengumuman', 'icon' => 'megaphone', 'route' => 'announcements.index', 'match' => ['announcements.*'], 'roles' => array_values(array_filter(Role::cases(), fn (Role $r) => $r !== Role::Vendor))],
-            ],
-            'Vendor' => [
-                ['label' => 'Pengantaran', 'icon' => 'truck', 'route' => 'vendor.deliveries.index', 'match' => ['vendor.deliveries.index'], 'roles' => [Role::Vendor]],
-                ['label' => 'Lapor Pengantaran', 'short' => 'Lapor', 'icon' => 'camera', 'route' => 'vendor.deliveries.create', 'roles' => [Role::Vendor]],
+                ['label' => 'Pengumuman', 'icon' => 'megaphone', 'route' => 'announcements.index', 'match' => ['announcements.*']],
             ],
             'Kelas Saya' => [
                 ['label' => 'Absen Harian', 'short' => 'Absen', 'icon' => 'camera', 'route' => 'attendance.daily', 'match' => ['attendance.daily', 'attendance.history'], 'roles' => $participant],
@@ -215,6 +210,7 @@ class Navigation
                 ['label' => 'Kata Hari Ini', 'icon' => 'language', 'route' => 'manage.words.index', 'can' => 'word.manage'],
             ],
             'Konsumsi' => [
+                ['label' => 'Input Konsumsi', 'short' => 'Input', 'icon' => 'truck', 'route' => 'meals.deliveries.index', 'match' => ['meals.deliveries.*'], 'can' => 'meal.manage'],
                 ['label' => 'Monitor Makan', 'short' => 'Monitor', 'icon' => 'signal', 'route' => 'meals.monitor', 'can' => 'meal.monitor'],
                 ['label' => 'Jadwal Makan', 'short' => 'Jadwal', 'icon' => 'calendar-days', 'route' => 'meals.schedules', 'can' => 'meal.manage'],
                 ['label' => 'Alergi & Pantangan', 'icon' => 'exclamation-triangle', 'route' => 'meals.allergies', 'can' => 'meal.monitor'],

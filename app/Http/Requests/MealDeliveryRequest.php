@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Actions\Meals\ReportMealDelivery;
 use App\Enums\DeliveryUnit;
 use App\Enums\MealType;
 use Illuminate\Foundation\Http\FormRequest;
@@ -11,7 +12,7 @@ class MealDeliveryRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()->can('meal.deliver') && $this->user()->isVendor();
+        return $this->user()->can('meal.manage');
     }
 
     public function rules(): array
@@ -20,7 +21,7 @@ class MealDeliveryRequest extends FormRequest
     }
 
     /**
-     * Laporan pengantaran vendor. Jenis & tanggal hanya diisi bila belum ada jadwal dari tim konsumsi.
+     * Input konsumsi oleh tim konsumsi. Jenis & tanggal hanya diisi bila belum ada jadwal.
      *
      * @return array<string, mixed>
      */
@@ -30,7 +31,8 @@ class MealDeliveryRequest extends FormRequest
 
         return [
             'meal_schedule_id' => ['nullable', 'integer', 'exists:meal_schedules,id'],
-            'date' => [$withoutSchedule ? 'required' : 'nullable', 'date', 'after_or_equal:today', 'before_or_equal:+7 days'],
+            'vendor_id' => ['required', 'integer', Rule::exists('vendors', 'id')->where('is_active', true)->whereNull('deleted_at')],
+            'date' => [$withoutSchedule ? 'required' : 'nullable', 'date', 'after_or_equal:-'.ReportMealDelivery::BACKDATE_DAYS.' days', 'before_or_equal:+7 days'],
             'meal_type' => [$withoutSchedule ? 'required' : 'nullable', Rule::enum(MealType::class)],
             'ready_time' => ['required', 'date_format:H:i'],
             'quantity' => ['required', 'integer', 'min:1', 'max:5000'],
@@ -48,7 +50,7 @@ class MealDeliveryRequest extends FormRequest
     public static function attributesFor(): array
     {
         return [
-            'date' => 'tanggal terima', 'meal_type' => 'waktu makan', 'ready_time' => 'jam siap diambil',
+            'vendor_id' => 'vendor', 'date' => 'tanggal terima', 'meal_type' => 'waktu makan', 'ready_time' => 'jam siap diambil',
             'quantity' => 'jumlah', 'unit' => 'satuan', 'menu' => 'menu', 'location' => 'tempat makanan tersedia',
             'menu_photo' => 'foto menu', 'total_photo' => 'foto total makanan',
         ];

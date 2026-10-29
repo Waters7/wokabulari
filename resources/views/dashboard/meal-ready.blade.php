@@ -1,4 +1,4 @@
-{{-- Peserta: makanan yang sudah siap diambil (dari laporan vendor) dan belum diterima. --}}
+{{-- Peserta: makanan yang sudah siap diambil (dari input tim konsumsi) dan belum diterima. --}}
 @php
     $mealMe = auth()->user();
     $mealRoster = app(\App\Services\MealRoster::class);

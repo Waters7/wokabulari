@@ -168,7 +168,7 @@ new #[Title('Monitor makan')] class extends Component {
                         <p class="text-sm text-hutan/60 dark:text-santan/60">{{ $schedule->vendor->name }} · {{ $schedule->windowLabel() }} WITA · dipesan {{ $schedule->portions_ordered }} porsi</p>
                         @if ($delivery = $schedule->delivery)
                             <p class="mt-1 text-sm" data-test="delivery-info">
-                                <span class="font-semibold text-woka dark:text-woka-light">Vendor melaporkan {{ $delivery->quantityLabel() }}</span>
+                                <span class="font-semibold text-woka dark:text-woka-light">Diterima {{ $delivery->quantityLabel() }}</span>
                                 · siap {{ jam($delivery->ready_at) }} · {{ $delivery->location }}
                                 @if ($delivery->notified_at) · peserta diberi tahu {{ jam($delivery->notified_at) }} @endif
                             </p>

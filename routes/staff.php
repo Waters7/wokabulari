@@ -6,6 +6,9 @@ use Illuminate\Support\Facades\Route;
 Route::prefix('konsumsi')->name('meals.')->group(function () {
     Route::livewire('monitor', 'pages::meals.monitor')->name('monitor')->middleware('can:meal.monitor');
     Route::livewire('jadwal', 'pages::meals.schedules')->name('schedules')->middleware('can:meal.manage');
+    // Input konsumsi oleh tim konsumsi (vendor, jumlah, menu, jam siap, tempat, foto).
+    Route::livewire('input', 'pages::meals.deliveries')->name('deliveries.index')->middleware('can:meal.manage');
+    Route::livewire('input/baru', 'pages::meals.delivery-form')->name('deliveries.create')->middleware('can:meal.manage');
     Route::livewire('alergi', 'pages::meals.allergies')->name('allergies')->middleware('can:meal.monitor');
     Route::livewire('rating-vendor', 'pages::meals.ratings')->name('ratings')->middleware('can:rating.view-vendor');
 });

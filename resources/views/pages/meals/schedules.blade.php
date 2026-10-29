@@ -183,7 +183,7 @@ new #[Title('Jadwal makan')] class extends Component {
                 <flux:button icon="adjustments-horizontal" wire:click="$set('showNonResident', true)">Peserta tidak asrama</flux:button>
             @endcan
             <x-confirm-button action="duplicate" label="Salin ke minggu depan" icon="document-duplicate" variant="filled" size="base"
-                              title="Salin jadwal minggu ini?" message="Semua jadwal minggu ini disalin ke minggu berikutnya. Jadwal yang sudah ada tidak ditimpa." confirmLabel="Salin" />
+                              title="Salin jadwal minggu ini?" message="Jadwal makan utama minggu ini disalin ke minggu berikutnya (snack tidak ikut). Jadwal yang sudah ada tidak ditimpa." confirmLabel="Salin" />
             <flux:button variant="primary" icon="plus" wire:click="create">Jadwal baru</flux:button>
         </x-slot:actions>
     </x-page-header>
@@ -212,6 +212,7 @@ new #[Title('Jadwal makan')] class extends Component {
                                         <p class="text-xs text-hutan/60 dark:text-santan/60">{{ $schedule->windowLabel() }} · {{ $schedule->receipts_count }}/{{ $schedule->portions_ordered }} porsi</p>
                                     </div>
                                     <div class="flex shrink-0 flex-col">
+                                        <flux:button size="xs" variant="ghost" icon="truck" :href="route('meals.deliveries.create', ['jadwal' => $schedule->id])" wire:navigate aria-label="Input konsumsi" />
                                         <flux:button size="xs" variant="ghost" icon="pencil-square" wire:click="edit({{ $schedule->id }})" aria-label="Ubah" />
                                         <flux:button size="xs" variant="ghost" icon="trash" wire:click="delete({{ $schedule->id }})" wire:confirm="Hapus jadwal ini?" aria-label="Hapus" />
                                     </div>

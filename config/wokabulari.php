@@ -90,7 +90,7 @@ return [
         'session.manage', 'session.view-all', 'material.manage',
         'assessment.manage', 'assignment.manage', 'quiz.manage',
         'leave.approve', 'word.manage',
-        'meal.manage', 'meal.monitor', 'meal.proxy', 'meal.deliver',
+        'meal.manage', 'meal.monitor', 'meal.proxy',
         'rating.view-vendor', 'rating.view-teacher', 'rating.view-names',
         'dorm-exit.approve', 'dorm-request.handle', 'dorm-inventory.manage',
         'health.view-detail', 'health.handle', 'health.view-stats',
@@ -125,8 +125,6 @@ return [
         'staff' => [],
         'participant' => [],
         'guardian' => [],
-        // Vendor makanan: hanya melapor pengantaran (jumlah, menu, jam siap, foto, tempat).
-        'vendor' => ['meal.deliver'],
     ],
 
     /*

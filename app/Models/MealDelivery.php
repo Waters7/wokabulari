@@ -11,7 +11,7 @@ use Spatie\Activitylog\Models\Concerns\LogsActivity;
 use Spatie\Activitylog\Support\LogOptions;
 
 /**
- * Laporan pengantaran vendor: jumlah, menu, jam siap diambil, tempat, dan foto dokumentasi.
+ * Input konsumsi oleh tim konsumsi: vendor, jumlah, menu, jam siap diambil, tempat, dan foto dokumentasi.
  */
 class MealDelivery extends Model
 {

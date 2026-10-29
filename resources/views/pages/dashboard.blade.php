@@ -80,9 +80,6 @@ new #[Title('Beranda')] class extends Component {
         @case(Role::Leader)
             @includeIf('dashboard.leader')
             @break
-        @case(Role::Vendor)
-            @include('dashboard.vendor')
-            @break
         @default
             @includeIf('dashboard.admin')
     @endswitch

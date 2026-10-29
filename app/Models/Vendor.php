@@ -31,12 +31,6 @@ class Vendor extends Model
         $query->where('is_active', true);
     }
 
-    /** Akun login vendor. */
-    public function accounts(): HasMany
-    {
-        return $this->hasMany(User::class);
-    }
-
     public function schedules(): HasMany
     {
         return $this->hasMany(MealSchedule::class);

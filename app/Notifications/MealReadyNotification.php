@@ -6,7 +6,7 @@ use App\Models\MealDelivery;
 use Illuminate\Support\Str;
 
 /**
- * Makanan siap diambil: jam dan tempat dari laporan vendor.
+ * Makanan siap diambil: jam dan tempat dari input tim konsumsi.
  */
 class MealReadyNotification extends WokabulariNotification
 {

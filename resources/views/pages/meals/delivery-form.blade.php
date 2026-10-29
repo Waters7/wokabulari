@@ -7,6 +7,8 @@ use App\Http\Requests\MealDeliveryRequest;
 use App\Models\Location;
 use App\Models\MealDelivery;
 use App\Models\MealSchedule;
+use App\Models\Vendor;
+use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Title;
@@ -14,16 +16,20 @@ use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 
-new #[Title('Lapor pengantaran')] class extends Component {
+new #[Title('Input konsumsi')] class extends Component {
     use WithFileUploads;
 
-    /** Jadwal dari tim konsumsi (opsional). */
+    /** Jadwal yang sudah ada (opsional). */
     #[Url(as: 'jadwal')]
     public ?int $scheduleId = null;
 
+    #[Url(as: 'tanggal')]
     public string $date = '';
 
+    #[Url(as: 'jenis')]
     public string $meal_type = '';
+
+    public ?int $vendor_id = null;
 
     public string $ready_time = '';
 
@@ -41,33 +47,26 @@ new #[Title('Lapor pengantaran')] class extends Component {
 
     public function mount(): void
     {
-        $user = auth()->user();
-        abort_unless($user->isVendor(), 403);
-
         $schedule = $this->schedule();
         $delivery = $schedule?->delivery;
+        $delivery ? $this->authorize('update', $delivery) : $this->authorize('create', MealDelivery::class);
 
-        if ($delivery) {
-            $this->authorize('update', $delivery);
-        }
-
-        $this->date = ($schedule?->date ?? today())->toDateString();
-        $this->meal_type = $schedule?->meal_type->value ?? $this->guessMealType()->value;
+        $this->date = ($schedule?->date ?? ($this->date ? CarbonImmutable::parse($this->date) : today()))->toDateString();
+        $this->meal_type = $schedule?->meal_type->value ?? (MealType::tryFrom($this->meal_type) ?? $this->guessMealType())->value;
+        $this->vendor_id = $schedule?->vendor_id
+            ?? MealDelivery::query()->latest()->value('vendor_id')
+            ?? Vendor::query()->active()->orderBy('name')->value('id');
         $this->ready_time = ($delivery?->ready_at ?? $schedule?->starts_at)?->format('H:i') ?? now()->addMinutes(15)->format('H:i');
         $this->quantity = $delivery?->quantity ?? $schedule?->portions_ordered;
         $this->unit = $delivery?->unit->value ?? DeliveryUnit::Pcs->value;
         $this->menu = $delivery?->menu ?? (string) $schedule?->menu;
-        // Tempat terakhir yang dipakai vendor ini sebagai bawaan.
-        $this->location = $delivery?->location
-            ?? MealDelivery::query()->where('vendor_id', $user->vendor_id)->latest()->value('location')
-            ?? '';
+        // Tempat terakhir yang dipakai sebagai bawaan.
+        $this->location = $delivery?->location ?? MealDelivery::query()->latest()->value('location') ?? '';
     }
 
     protected function schedule(): ?MealSchedule
     {
-        return $this->scheduleId
-            ? MealSchedule::query()->where('vendor_id', auth()->user()->vendor_id)->with('delivery')->findOrFail($this->scheduleId)
-            : null;
+        return $this->scheduleId ? MealSchedule::query()->with(['delivery', 'vendor'])->findOrFail($this->scheduleId) : null;
     }
 
     /** Waktu makan terdekat dari jam sekarang. */
@@ -75,7 +74,7 @@ new #[Title('Lapor pengantaran')] class extends Component {
     {
         $now = now()->format('H:i');
 
-        return collect(MealType::cases())->first(fn (MealType $type) => $now <= $type->defaultWindow()[1]) ?? MealType::Dinner;
+        return collect(MealType::cases())->reject->isSnack()->first(fn (MealType $type) => $now <= $type->defaultWindow()[1]) ?? MealType::Dinner;
     }
 
     public function save(ReportMealDelivery $report): void
@@ -86,7 +85,7 @@ new #[Title('Lapor pengantaran')] class extends Component {
         $delivery ? $this->authorize('update', $delivery) : $this->authorize('create', MealDelivery::class);
 
         $data = [
-            'meal_schedule_id' => $schedule?->id, 'date' => $this->date, 'meal_type' => $this->meal_type,
+            'meal_schedule_id' => $schedule?->id, 'vendor_id' => $this->vendor_id, 'date' => $this->date, 'meal_type' => $this->meal_type,
             'ready_time' => $this->ready_time, 'quantity' => $this->quantity, 'unit' => $this->unit,
             'menu' => $this->menu, 'location' => $this->location,
             'menu_photo' => $this->menuPhoto, 'total_photo' => $this->totalPhoto,
@@ -105,8 +104,9 @@ new #[Title('Lapor pengantaran')] class extends Component {
             return;
         }
 
-        session()->flash('status', $saved->schedule->meal_type->label().' '.tanggal($saved->schedule->date, 'j M').' tersimpan. Peserta diberi tahu pukul '.jam($saved->ready_at).' WITA.');
-        $this->redirectRoute('vendor.deliveries.index', navigate: true);
+        $notice = $saved->ready_at->isFuture() ? ' Peserta diberi tahu pukul '.jam($saved->ready_at).' WITA.' : '';
+        session()->flash('status', $saved->schedule->meal_type->label().' '.tanggal($saved->schedule->date, 'j M').' dari '.$saved->vendor->name.' tersimpan.'.$notice);
+        $this->redirectRoute('meals.deliveries.index', ['tanggal' => $saved->schedule->date->toDateString()], navigate: true);
     }
 
     public function with(): array
@@ -118,18 +118,25 @@ new #[Title('Lapor pengantaran')] class extends Component {
             'delivery' => $schedule?->delivery,
             'types' => MealType::cases(),
             'units' => DeliveryUnit::cases(),
+            'vendors' => Vendor::query()->active()->orderBy('name')->get(['id', 'name']),
             'places' => Location::query()->orderBy('name')->pluck('name')
-                ->merge(MealDelivery::query()->where('vendor_id', auth()->user()->vendor_id)->distinct()->pluck('location'))
+                ->merge(MealDelivery::query()->distinct()->pluck('location'))
                 ->unique()->values(),
         ];
     }
 }; ?>
 
 <div class="mx-auto max-w-lg">
-    <x-page-header :title="$delivery ? 'Ubah laporan' : 'Lapor pengantaran'" :back="route('vendor.deliveries.index')"
-                   :subtitle="$schedule ? $schedule->meal_type->label().' · '.tanggal($schedule->date, 'l, j M') : 'Isi singkat; peserta diberi tahu saat jam siap.'" />
+    <x-page-header :title="$delivery ? 'Ubah input konsumsi' : 'Input konsumsi'" :back="route('meals.deliveries.index', ['tanggal' => $date])"
+                   :subtitle="$schedule ? $schedule->meal_type->label().' · '.tanggal($schedule->date, 'l, j M') : 'Isi saat makanan datang; peserta diberi tahu pada jam siap.'" />
 
     <form wire:submit="save" class="space-y-5">
+        <flux:select wire:model="vendor_id" label="Vendor" placeholder="Pilih vendor" required>
+            @foreach ($vendors as $vendor)
+                <flux:select.option :value="$vendor->id">{{ $vendor->name }}</flux:select.option>
+            @endforeach
+        </flux:select>
+
         @unless ($schedule)
             <div class="grid grid-cols-2 gap-3">
                 <flux:input wire:model="date" type="date" label="Tanggal terima" required />
@@ -190,6 +197,6 @@ new #[Title('Lapor pengantaran')] class extends Component {
             @endforeach
         </div>
 
-        <flux:button type="submit" variant="primary" class="w-full" icon="paper-airplane">{{ $delivery ? 'Simpan perubahan' : 'Kirim laporan' }}</flux:button>
+        <flux:button type="submit" variant="primary" class="w-full" icon="check">{{ $delivery ? 'Simpan perubahan' : 'Simpan input' }}</flux:button>
     </form>
 </div>

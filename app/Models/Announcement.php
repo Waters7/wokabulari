@@ -73,11 +73,9 @@ class Announcement extends Model
         $roles = $user->getRoleNames()->all();
         $classrooms = self::classroomIdsFor($user);
         $dormitories = self::dormitoryIdsFor($user);
-        // Vendor makanan (pihak luar) hanya melihat pengumuman yang ditujukan ke role vendor.
-        $vendorOnly = $roles === [Role::Vendor->value];
 
-        $query->published()->where(function (Builder $q) use ($roles, $classrooms, $dormitories, $vendorOnly) {
-            $q->where('audience', $vendorOnly ? '__none__' : AnnouncementAudience::All->value)
+        $query->published()->where(function (Builder $q) use ($roles, $classrooms, $dormitories) {
+            $q->where('audience', AnnouncementAudience::All)
                 ->orWhere(fn ($r) => $r->where('audience', AnnouncementAudience::Role)->whereIn('target_role', $roles))
                 ->orWhere(fn ($c) => $c->where('audience', AnnouncementAudience::Classroom)->whereIn('target_id', $classrooms))
                 ->orWhere(fn ($d) => $d->where('audience', AnnouncementAudience::Dormitory)->whereIn('target_id', $dormitories));
@@ -145,7 +143,7 @@ class Announcement extends Model
         $query = User::query()->where('is_active', true);
 
         $users = match ($this->audience) {
-            AnnouncementAudience::All => $query->whereDoesntHave('roles', fn ($r) => $r->where('name', Role::Vendor->value))->get(),
+            AnnouncementAudience::All => $query->get(),
             AnnouncementAudience::Role => $query->role($this->target_role?->value ?? '')->get(),
             AnnouncementAudience::Classroom => $this->classroom
                 ? $this->classroom->participants()->where('is_active', true)->get()

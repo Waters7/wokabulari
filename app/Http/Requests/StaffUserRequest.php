@@ -31,7 +31,7 @@ class StaffUserRequest extends FormRequest
      */
     public static function rulesFor(?User $user = null, array $data = []): array
     {
-        $roles = collect(Role::cases())->reject(fn (Role $role) => in_array($role, [Role::Participant, Role::Guardian, Role::Vendor], true))->map->value->all();
+        $roles = collect(Role::cases())->reject(fn (Role $role) => in_array($role, [Role::Participant, Role::Guardian], true))->map->value->all();
 
         return [
             'name' => ['required', 'string', 'max:150'],

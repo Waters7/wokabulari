@@ -3,6 +3,15 @@
 Versi ditampilkan di halaman login dan menu aplikasi (`config/wokabulari.php` → `version`).
 Aturan penomoran: **patch** (1.0.x) perbaikan, **minor** (1.x.0) fitur baru, **major** (x.0.0) perubahan besar.
 
+## 1.15.0 — 30 Oktober 2026
+
+- **Penilaian periodik lebih sistematis:** alur 4 langkah — (1) kelas & periode, (2) aspek yang dinilai, (3) isi nilai, (4) simpan draf/terbitkan lewat bilah aksi yang selalu terlihat. Ada kemajuan "x/y peserta sudah dinilai", **filter peserta** (cari nama/NIS; Semua, Belum dinilai, Draf, Terbit), tombol *Ke periode ini*, penanda merah untuk nilai yang salah, dan baris kosong tidak lagi dibuat sebagai draf.
+- **Aspek penilaian dipilih pengajar:** tombol *Atur aspek* per kelas (berlaku untuk semua periode; nilai lama tidak hilang). Kelas yang belum memilih memakai aspek bawaan.
+- **Master Data → Aspek Penilaian** (admin program): tambah aspek umum atau khusus satu bahasa (mis. Hanzi), atur sumber saran nilai otomatis, tandai bawaan, nonaktifkan. Tujuh aspek lama beserta seluruh nilainya dipindahkan otomatis.
+- Halaman nilai peserta & wali, grafik perkembangan, dan lencana *Pande Speaking* membaca nilai per aspek dari master baru.
+- **Dokumentasi kelas wajib saat mulai & akhir sesi** (sesi tanggal 31 Oktober 2026 dan seterusnya): pengajar mengambil **foto kamera** (kamera depan/belakang, juga webcam laptop) atau **mengunggah file** (foto/PDF, maks. 10 MB) sebelum *Mulai sesi* dan *Selesai sesi*. Foto disimpan privat; tampil di detail sesi untuk pengajar kelas, admin, dan pimpinan. Bisa diatur di Pengaturan Sistem (aktif/mati dan tanggal mulai berlaku).
+- **Sesi berjalan di dashboard eksekutif:** daftar sesi yang sedang berlangsung (kelas, topik, pengajar, jam mulai, hadir/total peserta, kode aktif, lewat jadwal, foto kelas) beserta ringkasan sesi hari ini; diperbarui otomatis tiap menit dan mengikuti filter angkatan/kelas.
+
 ## 1.14.0 — 3 November 2026
 
 - **Dashboard eksekutif bertab:** *Ringkasan* (angka utama yang bisa diketuk, catatan keputusan, perlu perhatian), *Kehadiran*, *Nilai*, *Konsumsi*, dan *Peserta*. Hanya grafik tab aktif yang dimuat sehingga lebih ringan dan rapi di HP; tab tersimpan di alamat halaman.

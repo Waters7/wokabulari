@@ -284,3 +284,10 @@ Acuan: DOCKER.md bagian C–D
 ### Tambahan — 3 Nov 2026 (v1.14.0)
 - Dashboard eksekutif bertab (Ringkasan, Kehadiran, Nilai, Konsumsi, Peserta) dan tabel peserta yang bisa diurutkan per kolom & difilter.
 - Test: 325 lulus. Dicek di 360px: tab Peserta (urut & filter), tab aktif bergeser ke tampilan.
+
+### Tambahan — 30 Okt 2026 (v1.15.0)
+- Penilaian periodik 4 langkah dengan filter peserta (cari, Belum dinilai/Draf/Terbit), kemajuan penilaian, dan bilah simpan/terbitkan yang selalu terlihat.
+- Master Data → Aspek Penilaian; pengajar memilih aspek per kelas (Atur aspek). Nilai lama dipindah ke tabel `assessment_scores`.
+- Dokumentasi kelas wajib (foto kamera/unggah file) saat mulai & akhir sesi mulai 31 Okt 2026; pengaturan di Pengaturan Sistem.
+- Panel Sesi berjalan di dashboard eksekutif (diperbarui tiap menit).
+- Test: 340 lulus. Dicek di 360px: Penilaian periodik (langkah, filter, Atur aspek), Master Aspek Penilaian, detail sesi (dialog dokumentasi, mulai sesi dengan foto), dashboard eksekutif (Sesi berjalan).

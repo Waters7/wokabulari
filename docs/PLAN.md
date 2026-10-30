@@ -275,3 +275,8 @@ Acuan: DOCKER.md bagian C–D
 - Admin program ikut menyetujui izin keluar asrama.
 - Pengaturan Sistem: panel **Penyimpanan & cadangan** (disk VPS, pemakaian Wokabulari) dan tombol **Buat cadangan sekarang** dengan daftar unduhan.
 - Test: 319 lulus. Dicek di 360px: Pengaturan Sistem (panel penyimpanan, cadangan dibuat & diunduh di lokal).
+
+### Tambahan — 3 Nov 2026 (v1.13.0)
+- Absen harian & asrama terlambat tetap bisa, tercatat Terlambat, dan mengurangi poin (aturan pelanggaran di Komponen Poin); batas absen asrama terlambat di Pengaturan Sistem.
+- Poin & Lencana: total pengurangan minggu ini dan filter Penambahan/Pengurangan.
+- Test: 324 lulus. Dicek di 360px: Poin & Lencana (filter pengurangan).

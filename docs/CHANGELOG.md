@@ -3,6 +3,14 @@
 Versi ditampilkan di halaman login dan menu aplikasi (`config/wokabulari.php` → `version`).
 Aturan penomoran: **patch** (1.0.x) perbaikan, **minor** (1.x.0) fitur baru, **major** (x.0.0) perubahan besar.
 
+## 1.13.0 — 3 November 2026
+
+- **Absen terlambat tetap bisa, tercatat Terlambat, dan poin berkurang:**
+  - Absen harian lewat batas tepat waktu: halaman absen memperingatkan sebelum absen ("tercatat TERLAMBAT, −5 poin") dan menampilkan status Terlambat setelahnya.
+  - Absen asrama lewat jendela absen masih bisa sampai **batas terlambat** (Pengaturan Sistem → Asrama → *Absen terlambat s.d.*, bawaan 23.59), ditandai *Terlambat* di halaman peserta & Absen Malam; pengurangan poin berlaku saat absen dikonfirmasi.
+- **Punishment point di Komponen Poin:** kelompok *Pelanggaran (pengurang poin)* kini berisi **Terlambat absen harian** dan **Terlambat absen asrama** (bawaan −5, aktif, bisa diubah/dimatikan) selain Alpa dan Terlambat kembali ke asrama.
+- **Poin & Lencana peserta:** total *pengurangan minggu ini* dan filter riwayat **Semua / Penambahan / Pengurangan**.
+
 ## 1.12.0 — 2 November 2026
 
 - **Izin keluar asrama juga disetujui admin program:** admin program kini bisa menyetujui/menolak izin di Asrama → Izin Keluar (bersama pengelola asrama) dan ikut diberi tahu saat ada izin yang perlu ditinjau.

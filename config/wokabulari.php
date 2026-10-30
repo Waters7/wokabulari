@@ -6,7 +6,7 @@ return [
     | Versi aplikasi (semver). Naikkan setiap rilis dan catat di docs/CHANGELOG.md:
     | patch (1.0.x) untuk perbaikan, minor (1.x.0) untuk fitur baru, major untuk perubahan besar.
     */
-    'version' => '1.12.0',
+    'version' => '1.13.0',
 
     /*
     |--------------------------------------------------------------------------
@@ -63,6 +63,8 @@ return [
         'dorm.check_window_start' => '20:00',
         'dorm.check_window_end' => '21:30',
         'dorm.curfew' => '22:00',
+        // Setelah jendela absen malam, absen masih bisa sampai jam ini dan tercatat terlambat.
+        'dorm.late_until' => '23:59',
         'dorm.notify_guardian_absent' => true,
         // Konfirmasi otomatis absen asrama mandiri yang lolos verifikasi (mati = dikonfirmasi pengelola asrama).
         'dorm.auto_confirm' => false,

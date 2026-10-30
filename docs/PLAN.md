@@ -280,3 +280,7 @@ Acuan: DOCKER.md bagian C–D
 - Absen harian & asrama terlambat tetap bisa, tercatat Terlambat, dan mengurangi poin (aturan pelanggaran di Komponen Poin); batas absen asrama terlambat di Pengaturan Sistem.
 - Poin & Lencana: total pengurangan minggu ini dan filter Penambahan/Pengurangan.
 - Test: 324 lulus. Dicek di 360px: Poin & Lencana (filter pengurangan).
+
+### Tambahan — 3 Nov 2026 (v1.14.0)
+- Dashboard eksekutif bertab (Ringkasan, Kehadiran, Nilai, Konsumsi, Peserta) dan tabel peserta yang bisa diurutkan per kolom & difilter.
+- Test: 325 lulus. Dicek di 360px: tab Peserta (urut - Dashboard eksekutif bertab (Ringkasan, Kehadiran, Nilai, Konsumsi, Peserta) dan tabel peserta yang bisa diurutkan per kolom & difilter. filter), tab aktif bergeser ke tampilan.

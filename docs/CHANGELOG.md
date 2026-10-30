@@ -3,6 +3,12 @@
 Versi ditampilkan di halaman login dan menu aplikasi (`config/wokabulari.php` → `version`).
 Aturan penomoran: **patch** (1.0.x) perbaikan, **minor** (1.x.0) fitur baru, **major** (x.0.0) perubahan besar.
 
+## 1.14.0 — 3 November 2026
+
+- **Dashboard eksekutif bertab:** *Ringkasan* (angka utama yang bisa diketuk, catatan keputusan, perlu perhatian), *Kehadiran*, *Nilai*, *Konsumsi*, dan *Peserta*. Hanya grafik tab aktif yang dimuat sehingga lebih ringan dan rapi di HP; tab tersimpan di alamat halaman.
+- **Tabel peserta bisa diurutkan & difilter:** klik judul kolom (Peserta, Kehadiran, Terlambat, Tidak absen, Nilai, Status) untuk mengurutkan, klik lagi untuk membalik; filter cari nama/kelas, *Perlu perhatian*, *Kehadiran < target*, *Nilai < batas lulus*, *Sering terlambat*, dan predikat. Kolom baru *Tidak absen* dan label status per peserta.
+- Perbaikan: grafik di bagian bawah dashboard tidak lagi bisa hilang karena susunan template.
+
 ## 1.13.0 — 3 November 2026
 
 - **Absen terlambat tetap bisa, tercatat Terlambat, dan poin berkurang:**

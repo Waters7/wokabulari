@@ -64,6 +64,19 @@ if (! function_exists('angka')) {
     }
 }
 
+if (! function_exists('durasi')) {
+    /**
+     * Lama waktu dalam menit menjadi teks singkat: "45 mnt", "3 j 32 mnt".
+     */
+    function durasi(int $minutes): string
+    {
+        $hours = intdiv(max(0, $minutes), 60);
+        $rest = max(0, $minutes) % 60;
+
+        return $hours > 0 ? trim($hours.' j'.($rest > 0 ? ' '.$rest.' mnt' : '')) : $rest.' mnt';
+    }
+}
+
 if (! function_exists('setting')) {
     /**
      * Ambil nilai pengaturan sistem (tabel settings) dengan nilai bawaan dari config/wokabulari.php.

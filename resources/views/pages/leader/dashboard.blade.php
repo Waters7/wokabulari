@@ -232,6 +232,9 @@ new #[Title('Dashboard eksekutif')] class extends Component {
         </div>
     </div>
 
+    {{-- Sesi kelas yang sedang berjalan (data langsung) --}}
+    <livewire:leader.running-sessions :batch-id="$batchId" :classroom-id="$classroomId" key="running-sessions" />
+
     {{-- Tab grafik --}}
     <div class="-mx-4 mb-4 px-4">
         <div class="flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden" role="tablist" aria-label="Bagian dashboard">

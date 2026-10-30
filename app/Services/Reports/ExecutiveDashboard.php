@@ -64,6 +64,7 @@ class ExecutiveDashboard
                 'class' => ReportFilter::classLabel($row['user']),
                 'attendance' => $row['rate'],
                 'late' => $row['counts']['late'],
+                'absent' => $row['counts']['absent'] + $row['counts']['missing'],
                 'score' => $score['overall'] ?? null,
                 'grade' => $score['grade'] ?? null,
                 'flags' => $flags,

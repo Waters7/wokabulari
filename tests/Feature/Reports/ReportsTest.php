@@ -172,3 +172,27 @@ test('berkas Excel sungguhan terbentuk dengan satu lembar per tabel', function (
         ->and($book->getSheet(0)->getCell('A3')->getValue())->toBe('Cakupan: Angkatan uji')
         ->and($book->getSheet(2)->getCell('A7')->getValue())->toBe('Dapur Woku Tinoor');
 });
+
+test('dashboard eksekutif: tab grafik, urut kolom & filter tabel peserta', function () {
+    $page = Livewire::actingAs(leader())
+        ->withQueryParams(['angkatan' => $this->batch->id, 'dari' => '2026-11-02', 'sampai' => '2026-11-04'])
+        ->test('pages::leader.dashboard')
+        ->assertSee('data-test="exec-kpis"', false)
+        ->call('setTab', 'kehadiran')->assertSee('Kehadiran harian (%)')->assertDontSee('data-test="exec-kpis"', false)
+        ->call('setTab', 'nilai')->assertSee('Tren rata-rata nilai per minggu')
+        ->call('setTab', 'konsumsi')->assertSee('Dapur Woku Tinoor')
+        ->call('setTab', 'peserta')->assertSee('3 dari 3 peserta');
+
+    // Urut nilai: terendah dulu, nilai kosong selalu di akhir; klik lagi membalik arah.
+    $page->call('sortBy', 'score')->assertSet('direction', 'asc')
+        ->assertSeeInOrder(['Brian Lumowa', 'Angel Rondonuwu', 'Cindy Sondakh'])
+        ->call('sortBy', 'score')->assertSet('direction', 'desc')
+        ->assertSeeInOrder(['Angel Rondonuwu', 'Brian Lumowa', 'Cindy Sondakh']);
+
+    $page->set('show', 'low_score')->assertSee('1 dari 3 peserta')->assertSee('Brian Lumowa')->assertDontSee('Angel Rondonuwu')
+        ->call('resetPeopleFilters')->set('grade', 'none')->assertSee('Cindy Sondakh')->assertDontSee('Brian Lumowa')
+        ->call('resetPeopleFilters')->set('search', 'angel')->assertSee('1 dari 3 peserta');
+
+    // Dari ringkasan "Lihat semua" membuka tab Peserta dengan filter perlu perhatian.
+    $page->call('showPeople', 'attention')->assertSet('tab', 'peserta')->assertSet('show', 'attention');
+});

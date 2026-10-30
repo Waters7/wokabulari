@@ -283,4 +283,4 @@ Acuan: DOCKER.md bagian C–D
 
 ### Tambahan — 3 Nov 2026 (v1.14.0)
 - Dashboard eksekutif bertab (Ringkasan, Kehadiran, Nilai, Konsumsi, Peserta) dan tabel peserta yang bisa diurutkan per kolom & difilter.
-- Test: 325 lulus. Dicek di 360px: tab Peserta (urut - Dashboard eksekutif bertab (Ringkasan, Kehadiran, Nilai, Konsumsi, Peserta) dan tabel peserta yang bisa diurutkan per kolom & difilter. filter), tab aktif bergeser ke tampilan.
+- Test: 325 lulus. Dicek di 360px: tab Peserta (urut & filter), tab aktif bergeser ke tampilan.

@@ -55,6 +55,12 @@ class Classroom extends Model
         return $this->belongsToMany(User::class, 'classroom_teacher')->withTimestamps();
     }
 
+    /** Aspek penilaian periodik yang dipilih pengajar (kosong = aspek bawaan). */
+    public function assessmentAspects(): BelongsToMany
+    {
+        return $this->belongsToMany(AssessmentAspect::class, 'classroom_assessment_aspect');
+    }
+
     public function hasTeacher(?User $user): bool
     {
         if (! $user) {

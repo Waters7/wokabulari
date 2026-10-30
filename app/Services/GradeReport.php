@@ -2,8 +2,9 @@
 
 namespace App\Services;
 
-use App\Enums\LanguageAspect;
 use App\Models\Assessment;
+use App\Models\AssessmentAspect;
+use App\Models\AssessmentScore;
 use App\Models\LearningSession;
 use App\Models\SessionNote;
 use App\Models\User;
@@ -32,7 +33,7 @@ class GradeReport
     {
         $assessments = Assessment::query()->published()->where('user_id', $user->id)
             ->when($guardianView, fn ($q) => $q->where('visible_to_guardian', true))
-            ->orderBy('period_start')->get();
+            ->with('scores.aspect')->orderBy('period_start')->get();
 
         $notes = SessionNote::query()->where('user_id', $user->id)
             ->when($guardianView, fn ($q) => $q->where('visible_to_guardian', true))
@@ -60,9 +61,9 @@ class GradeReport
             'max' => 100,
             'data' => [
                 'labels' => $source->map(fn (Assessment $a) => tanggal($a->period_start, 'j M'))->values(),
-                'datasets' => collect(LanguageAspect::periodic())->map(fn (LanguageAspect $aspect) => [
-                    'label' => $aspect->label(),
-                    'data' => $source->map(fn (Assessment $a) => $a->{$aspect->value})->values(),
+                'datasets' => PeriodicAspects::sort($source->flatMap->scores->pluck('aspect')->unique('id'))->map(fn (AssessmentAspect $aspect) => [
+                    'label' => $aspect->name,
+                    'data' => $source->map(fn (Assessment $a) => $a->scores->firstWhere('assessment_aspect_id', $aspect->id)?->score)->values(),
                 ])->values(),
             ],
         ];
@@ -70,17 +71,20 @@ class GradeReport
 
     protected function radarChart(?Assessment $latest): ?array
     {
-        if (! $latest) {
+        $scores = $latest?->orderedScores();
+        if (! $scores || $scores->isEmpty()) {
             return null;
         }
 
+        // Radar butuh minimal 3 aspek; bila kurang, tampil sebagai batang.
         return [
-            'type' => 'radar',
+            'type' => $scores->count() >= 3 ? 'radar' : 'bar',
+            'max' => 100,
             'data' => [
-                'labels' => collect(LanguageAspect::periodic())->map->label(),
+                'labels' => $scores->map(fn (AssessmentScore $s) => $s->aspect->name)->values(),
                 'datasets' => [[
                     'label' => $latest->periodLabel(),
-                    'data' => collect(LanguageAspect::periodic())->map(fn ($a) => $latest->{$a->value})->values(),
+                    'data' => $scores->pluck('score')->values(),
                 ]],
             ],
         ];

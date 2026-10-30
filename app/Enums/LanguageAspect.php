@@ -41,18 +41,6 @@ enum LanguageAspect: string
         };
     }
 
-    /** Kolom aspek pada penilaian periodik (partisipasi digabung ke sikap). */
-    public function assessmentColumn(): string
-    {
-        return $this === self::Participation ? self::Attitude->value : $this->value;
-    }
-
-    /** Tujuh aspek penilaian mingguan/bulanan. @return list<self> */
-    public static function periodic(): array
-    {
-        return [self::Listening, self::Speaking, self::Reading, self::Writing, self::Vocabulary, self::Grammar, self::Attitude];
-    }
-
     /** @return array<string, string> */
     public static function options(): array
     {

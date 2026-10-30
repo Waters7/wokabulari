@@ -12,6 +12,7 @@ use App\Models\Classroom;
 use App\Models\SessionNote;
 use App\Models\SessionScore;
 use App\Services\AssessmentSuggester;
+use App\Services\PeriodicAspects;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Seeder;
 
@@ -81,13 +82,14 @@ class AssessmentDemoSeeder extends Seeder
             foreach ($weeks as $week) {
                 [$start, $end] = PeriodType::Weekly->range($week);
                 $assessments = [];
+                $aspects = app(PeriodicAspects::class)->selected($classroom);
 
                 foreach ($classroom->participants as $pIndex => $participant) {
-                    $values = $suggester->suggest($classroom, $participant->id, $start, $end);
-                    foreach (LanguageAspect::periodic() as $aspect) {
-                        $values[$aspect->value] ??= 65 + (($pIndex * 5 + strlen($aspect->value) * 3) % 30);
+                    $scores = $suggester->suggest($classroom, $participant->id, $start, $end, $aspects);
+                    foreach ($aspects as $aspect) {
+                        $scores[$aspect->id] ??= 65 + (($pIndex * 5 + strlen($aspect->name) * 3) % 30);
                     }
-                    $values['feedback'] = 'Terus semangat blajar! Fokus pada '.collect(LanguageAspect::periodic())->random()->label().' minggu depan.';
+                    $values = ['scores' => $scores, 'feedback' => 'Terus semangat blajar! Fokus pada '.$aspects->random()->name.' minggu depan.'];
                     $assessments[] = $save->save($classroom, $participant, $classroom->teacher, PeriodType::Weekly, $start, $values);
                 }
 

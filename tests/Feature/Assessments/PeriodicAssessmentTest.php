@@ -6,6 +6,7 @@ use App\Enums\LanguageAspect;
 use App\Enums\PeriodType;
 use App\Enums\PublishStatus;
 use App\Models\Assessment;
+use App\Models\AssessmentAspect;
 use App\Models\Classroom;
 use App\Models\LearningSession;
 use App\Models\SessionAssessmentComponent;
@@ -15,6 +16,12 @@ use App\Services\AssessmentSuggester;
 use App\Services\GradeService;
 use Illuminate\Support\Facades\Notification;
 use Livewire\Livewire;
+
+/** Id aspek bawaan berdasarkan kode. */
+function aspectId(string $code): int
+{
+    return AssessmentAspect::query()->where('code', $code)->value('id');
+}
 
 test('predikat mengikuti batas pengaturan', function () {
     $grades = app(GradeService::class);
@@ -38,10 +45,11 @@ test('saran nilai periodik dari rata-rata komponen sesi per aspek', function () 
         app(SaveSessionScore::class)->handle($component, $participant, (string) $score);
     }
 
-    $suggestion = app(AssessmentSuggester::class)->suggest($classroom, $participant->id, $monday, $monday->endOfWeek());
+    $aspects = AssessmentAspect::query()->whereNotNull('code')->get();
+    $suggestion = app(AssessmentSuggester::class)->suggest($classroom, $participant->id, $monday, $monday->endOfWeek(), $aspects);
 
-    expect($suggestion['speaking'])->toBe(70.0)
-        ->and($suggestion['listening'])->toBeNull();
+    expect($suggestion[aspectId('speaking')])->toBe(70.0)
+        ->and($suggestion[aspectId('listening')])->toBeNull();
 });
 
 test('simpan draf menghitung rata-rata & predikat, lalu terbit mengirim notifikasi', function () {
@@ -50,8 +58,11 @@ test('simpan draf menghitung rata-rata & predikat, lalu terbit mengirim notifika
     $participant = $classroom->participants->first();
 
     $assessment = app(SaveAssessment::class)->save($classroom, $participant, $classroom->teacher, PeriodType::Weekly, now(), [
-        'listening' => 80, 'speaking' => 90, 'reading' => '', 'writing' => 70,
-        'vocabulary' => 85, 'grammar' => '75', 'attitude' => 95, 'feedback' => 'Mantap!',
+        'scores' => [
+            aspectId('listening') => 80, aspectId('speaking') => 90, aspectId('reading') => '', aspectId('writing') => 70,
+            aspectId('vocabulary') => 85, aspectId('grammar') => '75', aspectId('attitude') => 95,
+        ],
+        'feedback' => 'Mantap!',
     ]);
 
     expect($assessment->average)->toBe(82.5)
@@ -74,16 +85,16 @@ test('simpan ulang periode yang sama memperbarui baris yang sama', function () {
     $participant = $classroom->participants->first();
     $save = app(SaveAssessment::class);
 
-    $save->save($classroom, $participant, $classroom->teacher, PeriodType::Monthly, now()->startOfMonth()->addDays(3), ['speaking' => 70]);
-    $save->save($classroom, $participant, $classroom->teacher, PeriodType::Monthly, now()->startOfMonth()->addDays(10), ['speaking' => 90]);
+    $save->save($classroom, $participant, $classroom->teacher, PeriodType::Monthly, now()->startOfMonth()->addDays(3), ['scores' => [aspectId('speaking') => 70]]);
+    $save->save($classroom, $participant, $classroom->teacher, PeriodType::Monthly, now()->startOfMonth()->addDays(10), ['scores' => [aspectId('speaking') => 90]]);
 
-    expect(Assessment::count())->toBe(1)->and(Assessment::first()->speaking)->toBe(90.0);
+    expect(Assessment::count())->toBe(1)->and(Assessment::first()->scoreFor('speaking'))->toBe(90.0);
 });
 
 test('nilai di luar 0–100 ditolak', function () {
     $classroom = Classroom::factory()->withParticipants(1)->create();
 
-    app(SaveAssessment::class)->save($classroom, $classroom->participants->first(), $classroom->teacher, PeriodType::Weekly, now(), ['speaking' => 120]);
+    app(SaveAssessment::class)->save($classroom, $classroom->participants->first(), $classroom->teacher, PeriodType::Weekly, now(), ['scores' => [aspectId('speaking') => 120]]);
 })->throws(InvalidArgumentException::class);
 
 test('halaman penilaian periodik: isi saran, simpan, terbitkan', function () {
@@ -93,8 +104,8 @@ test('halaman penilaian periodik: isi saran, simpan, terbitkan', function () {
 
     Livewire::actingAs($classroom->teacher)->test('pages::teach.assessments')
         ->set('classroom', $classroom->id)
-        ->set("rows.{$a->id}.speaking", '88')
-        ->set("rows.{$b->id}.speaking", '72')
+        ->set("rows.{$a->id}.scores.".aspectId('speaking'), '88')
+        ->set("rows.{$b->id}.scores.".aspectId('speaking'), '72')
         ->call('publish')
         ->assertHasNoErrors();
 

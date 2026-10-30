@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Route;
 Route::prefix('master')->name('master.')->group(function () {
     Route::livewire('angkatan', 'pages::master.batches')->name('batches')->middleware('can:batch.manage');
     Route::livewire('bahasa', 'pages::master.languages')->name('languages')->middleware('can:batch.manage');
+    Route::livewire('aspek-penilaian', 'pages::master.assessment-aspects')->name('assessment-aspects')->middleware('can:assessment-aspect.manage');
     Route::livewire('lokasi', 'pages::master.locations')->name('locations')->middleware('can:location.manage');
     Route::livewire('kelas', 'pages::master.classrooms')->name('classrooms')->middleware('can:classroom.manage');
     Route::livewire('kelas/{classroom}', 'pages::master.classroom-show')->name('classrooms.show')->middleware('can:classroom.manage');

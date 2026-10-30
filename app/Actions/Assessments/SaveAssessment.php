@@ -2,27 +2,29 @@
 
 namespace App\Actions\Assessments;
 
-use App\Enums\LanguageAspect;
 use App\Enums\PeriodType;
 use App\Enums\PublishStatus;
 use App\Events\AssessmentPublished;
 use App\Models\Assessment;
+use App\Models\AssessmentAspect;
 use App\Models\Classroom;
 use App\Models\User;
 use App\Services\GradeService;
 use Carbon\CarbonInterface;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
 
 /**
- * Simpan (draf) dan terbitkan penilaian mingguan/bulanan. Rata-rata & predikat dihitung otomatis.
+ * Simpan (draf) dan terbitkan penilaian mingguan/bulanan. Rata-rata & predikat dihitung otomatis
+ * dari semua nilai aspek pada penilaian tersebut.
  */
 class SaveAssessment
 {
     public function __construct(protected GradeService $grades) {}
 
     /**
-     * @param  array<string, mixed>  $values  aspek => nilai (0–100), feedback, visible_to_guardian
+     * @param  array<string, mixed>  $values  scores (id aspek => nilai 0–100), feedback, visible_to_guardian
      */
     public function save(Classroom $classroom, User $participant, User $teacher, PeriodType $type, CarbonInterface $date, array $values): Assessment
     {
@@ -31,20 +33,6 @@ class SaveAssessment
         }
 
         [$start, $end] = $type->range($date);
-
-        $scores = [];
-        foreach (LanguageAspect::periodic() as $aspect) {
-            $raw = $values[$aspect->value] ?? null;
-            $raw = ($raw === '' || $raw === null) ? null : (float) str_replace(',', '.', (string) $raw);
-
-            if ($raw !== null && ($raw < 0 || $raw > 100)) {
-                throw new InvalidArgumentException('Nilai '.$aspect->label().' harus 0–100.');
-            }
-
-            $scores[$aspect->value] = $raw === null ? null : round($raw, 2);
-        }
-
-        $average = GradeService::average($scores);
 
         $assessment = Assessment::query()
             ->where('classroom_id', $classroom->id)
@@ -59,16 +47,62 @@ class SaveAssessment
                 'status' => PublishStatus::Draft,
             ]);
 
-        $assessment->fill($scores + [
-            'period_end' => $end,
-            'teacher_id' => $teacher->id,
-            'average' => $average,
-            'grade' => $this->grades->grade($average),
-            'feedback' => $values['feedback'] ?? $assessment->feedback,
-            'visible_to_guardian' => (bool) ($values['visible_to_guardian'] ?? $assessment->visible_to_guardian ?? true),
-        ])->save();
+        $scores = $this->scores($classroom, $assessment, $values['scores'] ?? []);
 
-        return $assessment;
+        return DB::transaction(function () use ($assessment, $scores, $end, $teacher, $values) {
+            $assessment->fill([
+                'period_end' => $end,
+                'teacher_id' => $teacher->id,
+                'feedback' => $values['feedback'] ?? $assessment->feedback,
+                'visible_to_guardian' => (bool) ($values['visible_to_guardian'] ?? $assessment->visible_to_guardian ?? true),
+            ])->save();
+
+            foreach ($scores as $aspectId => $score) {
+                $score === null
+                    ? $assessment->scores()->where('assessment_aspect_id', $aspectId)->delete()
+                    : $assessment->scores()->updateOrCreate(['assessment_aspect_id' => $aspectId], ['score' => $score]);
+            }
+
+            $average = GradeService::average($assessment->scores()->pluck('score')->map(fn ($v) => (float) $v));
+            $assessment->update(['average' => $average, 'grade' => $this->grades->grade($average)]);
+
+            return $assessment->unsetRelation('scores');
+        });
+    }
+
+    /**
+     * Validasi nilai: aspek harus aktif untuk bahasa kelas (atau sudah berisi nilai), nilai 0–100.
+     *
+     * @param  array<int|string, mixed>  $input
+     * @return array<int, float|null>
+     */
+    protected function scores(Classroom $classroom, Assessment $assessment, array $input): array
+    {
+        $aspects = AssessmentAspect::query()->whereIn('id', array_keys($input))->get()->keyBy('id');
+        $existing = $assessment->exists ? $assessment->scores()->pluck('assessment_aspect_id')->all() : [];
+
+        $scores = [];
+        foreach ($input as $aspectId => $raw) {
+            $aspect = $aspects->get((int) $aspectId);
+            $allowed = $aspect && (in_array($aspect->id, $existing, true)
+                || ($aspect->is_active && ($aspect->language_id === null || (int) $aspect->language_id === (int) $classroom->language_id)));
+
+            if (! $allowed) {
+                throw new InvalidArgumentException('Aspek penilaian tidak tersedia untuk kelas ini.');
+            }
+
+            $raw = ($raw === '' || $raw === null) ? null : str_replace(',', '.', trim((string) $raw));
+            if ($raw !== null && ! is_numeric($raw)) {
+                throw new InvalidArgumentException('Nilai '.$aspect->name.' harus berupa angka.');
+            }
+            if ($raw !== null && ((float) $raw < 0 || (float) $raw > 100)) {
+                throw new InvalidArgumentException('Nilai '.$aspect->name.' harus 0–100.');
+            }
+
+            $scores[$aspect->id] = $raw === null ? null : round((float) $raw, 2);
+        }
+
+        return $scores;
     }
 
     /**

@@ -72,10 +72,8 @@ new #[Title('Nilai & masukan')] class extends Component {
                                     <p class="font-semibold">Penilaian {{ strtolower($a->period_type->label()) }} · {{ $a->periodLabel() }}</p>
                                     <p class="text-sm">Rata-rata {{ angka($a->average, 1) }} · predikat {{ $a->grade }}</p>
                                     <div class="mt-1 flex flex-wrap gap-1 text-xs">
-                                        @foreach (\App\Enums\LanguageAspect::periodic() as $aspect)
-                                            @if ($a->{$aspect->value} !== null)
-                                                <span class="rounded-full bg-santan px-2 py-0.5 dark:bg-hutan-800">{{ $aspect->label() }} {{ angka($a->{$aspect->value}) }}</span>
-                                            @endif
+                                        @foreach ($a->orderedScores() as $score)
+                                            <span class="rounded-full bg-santan px-2 py-0.5 dark:bg-hutan-800">{{ $score->aspect->name }} {{ angka($score->score) }}</span>
                                         @endforeach
                                     </div>
                                     @if ($a->feedback)

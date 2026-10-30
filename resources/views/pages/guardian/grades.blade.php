@@ -70,6 +70,13 @@ new #[Title('Nilai & catatan anak')] class extends Component {
                             </div>
                             <flux:badge :color="\App\Services\GradeService::color($item->grade)" size="lg">{{ $item->grade }}</flux:badge>
                         </div>
+                        @if ($item->scores->isNotEmpty())
+                            <div class="mt-2 flex flex-wrap gap-1 text-xs">
+                                @foreach ($item->orderedScores() as $score)
+                                    <span class="rounded-full bg-santan px-2 py-0.5 dark:bg-hutan-800">{{ $score->aspect->name }} {{ angka($score->score) }}</span>
+                                @endforeach
+                            </div>
+                        @endif
                         @if ($item->feedback)
                             <p class="mt-2 text-sm">{{ $item->feedback }}</p>
                         @endif

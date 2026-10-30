@@ -244,6 +244,7 @@ class Navigation
                 ['label' => 'Lokasi', 'icon' => 'map-pin', 'route' => 'master.locations', 'can' => 'location.manage'],
                 ['label' => 'Asrama & Kamar', 'icon' => 'home-modern', 'route' => 'master.dormitories', 'match' => ['master.dormitories*'], 'can' => 'dormitory.manage'],
                 ['label' => 'Bahasa', 'icon' => 'language', 'route' => 'master.languages', 'can' => 'batch.manage'],
+                ['label' => 'Aspek Penilaian', 'icon' => 'adjustments-horizontal', 'route' => 'master.assessment-aspects', 'can' => 'assessment-aspect.manage'],
                 ['label' => 'Komponen Poin', 'icon' => 'calculator', 'route' => 'master.point-components', 'can' => 'gamification.manage'],
             ],
             'Kegiatan Program' => [

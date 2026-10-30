@@ -58,7 +58,7 @@ class BadgeService
             'points' => $this->points->total($user) >= (int) $criteria['min'],
             'streak' => (int) ($user->streak()->value('longest_streak') ?? 0) >= (int) $criteria['days'],
             'event_count' => $this->eventCount($user, $criteria),
-            'aspect' => (float) (Assessment::query()->published()->where('user_id', $user->id)->latest('period_end')->value($criteria['aspect']) ?? 0) >= (float) $criteria['min'],
+            'aspect' => (float) (Assessment::query()->published()->where('user_id', $user->id)->latest('period_end')->first()?->scoreFor((string) $criteria['aspect']) ?? 0) >= (float) $criteria['min'],
             default => false,
         };
     }

@@ -137,7 +137,8 @@ class UserGuide
                     ['title' => 'Penilaian sesi dan periodik', 'steps' => [
                         'Di halaman sesi, tambahkan komponen penilaian (aspek, bobot, skor maksimal) atau pakai templat, lalu input skor peserta.',
                         'Tulis catatan perkembangan per peserta; pilih apakah wali boleh melihatnya.',
-                        'Penilaian Periodik: susun nilai mingguan/bulanan per aspek (ada saran otomatis dari nilai sesi), lalu terbitkan.',
+                        'Penilaian Periodik: (1) pilih kelas & periode, (2) Atur aspek yang dinilai untuk kelas itu, (3) isi nilai — pakai Isi saran nilai dan filter peserta (Belum dinilai/Draf/Terbit), (4) Simpan draf lalu Terbitkan.',
+                        'Aspek yang belum ada (mis. Hanzi, Pengucapan) ditambahkan admin program di Master Data → Aspek Penilaian.',
                     ]],
                     ['title' => 'Materi, tugas, dan quiz', 'steps' => [
                         'Unggah materi ke Bank Materi lalu tautkan ke sesi.',
@@ -237,6 +238,7 @@ class UserGuide
                         'Setujui atau tolak Izin Keluar asrama (bersama pengelola asrama) di Asrama → Izin Keluar.',
                         'Survei & Evaluasi: pakai templat sarana prasarana, pilih angkatan & responden, tentukan tenggat, lalu lihat hasilnya.',
                         'Komponen Poin: ubah poin aturan otomatis termasuk pengurang (terlambat absen harian/asrama, alpa, terlambat kembali), tambah komponen, dan setujui/tolak pengajuan pengajar. Level & lencana di Gamifikasi.',
+                        'Aspek Penilaian (Master Data): tambah aspek penilaian periodik, umum atau khusus satu bahasa; tandai Bawaan agar otomatis dipakai kelas yang belum memilih. Aspek yang sudah berisi nilai hanya bisa dinonaktifkan.',
                     ]],
                     ['title' => 'Memantau dan melapor', 'steps' => [
                         'Dashboard Eksekutif: grafik kehadiran, nilai, dan konsumsi dengan filter angkatan, kelas, dan rentang tanggal, serta daftar peserta yang perlu perhatian.',

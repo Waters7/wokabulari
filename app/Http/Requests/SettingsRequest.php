@@ -34,6 +34,8 @@ class SettingsRequest extends FormRequest
             'attendance.late_after' => $time,
             'session.code_duration_minutes' => ['required', 'integer', 'between:1,180'],
             'session.validate_location' => ['boolean'],
+            'session.documentation_required' => ['boolean'],
+            'session.documentation_from' => ['required', 'date_format:Y-m-d'],
             'dorm.check_window_start' => $time,
             'dorm.check_window_end' => $time,
             'dorm.curfew' => $time,

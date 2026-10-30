@@ -2,10 +2,12 @@
 
 namespace App\Actions\Sessions;
 
+use App\Enums\SessionPhase;
 use App\Enums\SessionStatus;
 use App\Models\LearningSession;
 use App\Models\SessionAttendanceCode;
 use App\Models\User;
+use App\Services\SessionDocumentationRule;
 use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
 
@@ -14,10 +16,16 @@ use InvalidArgumentException;
  */
 class ManageSessionCode
 {
+    public function __construct(protected SessionDocumentationRule $documentation) {}
+
     public function start(LearningSession $session, User $by): SessionAttendanceCode
     {
         if (in_array($session->status, [SessionStatus::Completed, SessionStatus::Cancelled], true)) {
             throw new InvalidArgumentException('Sesi sudah '.strtolower($session->status->label()).'.');
+        }
+
+        if ($session->status === SessionStatus::Scheduled) {
+            $this->documentation->ensure($session, SessionPhase::Start);
         }
 
         $session->update([

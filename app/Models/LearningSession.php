@@ -70,6 +70,12 @@ class LearningSession extends Model
         return $this->hasMany(SessionAssessmentComponent::class)->orderBy('id');
     }
 
+    /** Foto/file dokumentasi kelas saat mulai & akhir sesi. */
+    public function documentations(): HasMany
+    {
+        return $this->hasMany(SessionDocumentation::class)->orderBy('id');
+    }
+
     public function notes(): HasMany
     {
         return $this->hasMany(SessionNote::class)->latest();

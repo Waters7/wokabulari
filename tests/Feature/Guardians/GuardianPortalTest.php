@@ -18,6 +18,7 @@ use App\Models\DormRoomAssignment;
 use App\Models\GuardianInvitation;
 use App\Models\HealthReport;
 use App\Models\LearningSession;
+use App\Models\SessionDocumentation;
 use App\Models\User;
 use App\Notifications\ChildAbsentNotification;
 use App\Notifications\GuardianAssessmentNotification;
@@ -146,6 +147,7 @@ test('wali dikabari saat anak alpa di sesi dan saat nilai bulanan terbit', funct
     $classroom = Classroom::factory()->withParticipants(1)->create();
     $child = wardOf($guardian, $classroom->participants()->first());
     $session = LearningSession::factory()->for($classroom)->create(['date' => today()]);
+    SessionDocumentation::factory()->for($session, 'session')->end()->create();
 
     app(EndSession::class)->handle($session, $classroom->teacher);
     Notification::assertSentTo($guardian, ChildAbsentNotification::class);

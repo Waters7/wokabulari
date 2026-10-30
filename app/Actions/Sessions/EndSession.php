@@ -3,21 +3,28 @@
 namespace App\Actions\Sessions;
 
 use App\Enums\AttendanceStatus;
+use App\Enums\SessionPhase;
 use App\Enums\SessionStatus;
 use App\Events\ParticipantMarkedAbsent;
 use App\Models\LearningSession;
 use App\Models\LeaveRequest;
 use App\Models\SessionAttendance;
 use App\Models\User;
+use App\Services\SessionDocumentationRule;
 use Illuminate\Support\Facades\DB;
 
 /**
  * Selesaikan sesi: peserta yang belum input kode ditandai alpa, kecuali punya izin/sakit yang disetujui.
+ * Sesi yang wajib dokumentasi harus punya foto/file akhir sesi.
  */
 class EndSession
 {
+    public function __construct(protected SessionDocumentationRule $documentation) {}
+
     public function handle(LearningSession $session, User $by): int
     {
+        $this->documentation->ensure($session, SessionPhase::End);
+
         $absent = [];
 
         $count = DB::transaction(function () use ($session, $by, &$absent) {

@@ -10,6 +10,7 @@ use App\Models\DailyAttendance;
 use App\Models\LearningSession;
 use App\Models\LeaveRequest;
 use App\Models\SessionAttendance;
+use App\Models\SessionDocumentation;
 use App\Models\User;
 use Illuminate\Support\Facades\RateLimiter;
 use Livewire\Livewire;
@@ -18,6 +19,9 @@ function sessionSetup(int $participants = 3): array
 {
     $classroom = Classroom::factory()->withParticipants($participants)->create();
     $session = LearningSession::factory()->for($classroom)->create(['teacher_id' => $classroom->teacher_id]);
+    // Dokumentasi mulai & akhir sudah ada agar tes tidak bergantung pada tanggal wajib dokumentasi.
+    SessionDocumentation::factory()->for($session, 'session')->create();
+    SessionDocumentation::factory()->for($session, 'session')->end()->create();
     $code = app(ManageSessionCode::class)->start($session, $classroom->teacher);
 
     return [$classroom, $session->fresh(), $code];

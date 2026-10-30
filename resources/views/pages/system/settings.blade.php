@@ -37,7 +37,7 @@ new #[Title('Pengaturan sistem')] class extends Component {
             throw ValidationException::withMessages(collect($validator->errors()->messages())->mapWithKeys(fn ($m, $k) => ["values.{$k}" => $m])->all());
         }
 
-        foreach (['session.validate_location', 'dorm.notify_guardian_absent', 'dorm.auto_confirm', 'leader.weekly_email'] as $bool) {
+        foreach (['session.validate_location', 'session.documentation_required', 'dorm.notify_guardian_absent', 'dorm.auto_confirm', 'leader.weekly_email'] as $bool) {
             $flat[$bool] = (bool) ($flat[$bool] ?? false);
         }
         foreach (['attendance.default_radius_m', 'attendance.max_gps_accuracy_m', 'session.code_duration_minutes', 'exit.max_per_week', 'exit.min_hours_before', 'files.max_upload_mb', 'retention.selfie_days_after_batch'] as $int) {
@@ -206,6 +206,8 @@ new #[Title('Pengaturan sistem')] class extends Component {
                 <div class="grid gap-3 sm:grid-cols-2">
                     <flux:input wire:model="values.session.code_duration_minutes" type="number" label="Durasi kode (menit)" />
                     <flux:switch wire:model="values.session.validate_location" label="Validasi lokasi saat input kode" />
+                    <flux:switch wire:model="values.session.documentation_required" label="Wajib dokumentasi kelas" description="Pengajar mengambil foto kamera atau mengunggah file dokumentasi saat mulai dan akhir sesi." />
+                    <flux:input wire:model="values.session.documentation_from" type="date" label="Wajib dokumentasi mulai tanggal" description="Berlaku untuk sesi pada tanggal ini dan seterusnya." />
                 </div>
             </x-card>
 

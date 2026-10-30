@@ -14,6 +14,7 @@ use Throwable;
 
 /**
  * Absen asrama malam: selfie + verifikasi wajah + geofence asrama, dalam jendela waktu (SPEC 3.15).
+ * Setelah jendela berakhir masih bisa sampai batas terlambat (pengaturan dorm.late_until) dan ditandai terlambat.
  * Hasil valid berstatus "menunggu konfirmasi" sampai pengelola asrama mengonfirmasi, atau langsung
  * terkonfirmasi bila pengaturan sistem "Konfirmasi otomatis absen asrama" aktif.
  */
@@ -51,8 +52,9 @@ class RecordDormAttendance
         }
 
         [$opens, $closes] = $dormitory->checkWindow($now);
-        if ($now->lt($opens) || $now->gt($closes)) {
-            throw new InvalidArgumentException('Absen asrama hanya pukul '.jam($opens).'–'.jam($closes).' WITA. Di luar itu, lapor ke pengelola asrama.');
+        $lateUntil = $dormitory->lateUntil($now);
+        if ($now->lt($opens) || $now->gt($lateUntil)) {
+            throw new InvalidArgumentException('Absen asrama hanya pukul '.jam($opens).'–'.jam($closes).' WITA (terlambat s.d. '.jam($lateUntil).'). Di luar itu, lapor ke pengelola asrama.');
         }
 
         $profile = $user->profile;
@@ -119,6 +121,7 @@ class RecordDormAttendance
             'accuracy_m' => $accuracy,
             'distance_m' => $distance,
             'status' => $rejection ? DormAttendanceStatus::Rejected : DormAttendanceStatus::PendingConfirmation,
+            'is_late' => $now->gt($closes),
             'reject_reason' => $rejection,
         ]);
         $attendance->attempts = ($attendance->attempts ?? 0) + 1;

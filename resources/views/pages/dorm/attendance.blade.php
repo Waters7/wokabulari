@@ -2,8 +2,10 @@
 
 use App\Actions\Dorm\RecordDormAttendance;
 use App\Enums\DormAttendanceStatus;
+use App\Enums\PointEvent;
 use App\Http\Requests\DailyAttendanceRequest;
 use App\Models\DormAttendance;
+use App\Services\Gamification\PointService;
 use Flux\Flux;
 use Illuminate\Support\Facades\Validator;
 use Livewire\Attributes\Computed;
@@ -47,9 +49,12 @@ new #[Title('Absen asrama')] class extends Component {
 
         unset($this->tonight);
 
-        $attendance->status === DormAttendanceStatus::Rejected
-            ? Flux::toast(variant: 'danger', text: 'Absen ditolak: '.$attendance->reject_reason)
-            : Flux::toast(variant: 'success', text: 'Absen asrama tercatat. Selamat istirahat!');
+        $penalty = app(PointService::class)->penaltyLabel(PointEvent::DormAttendanceLate);
+        match (true) {
+            $attendance->status === DormAttendanceStatus::Rejected => Flux::toast(variant: 'danger', text: 'Absen ditolak: '.$attendance->reject_reason),
+            $attendance->is_late => Flux::toast(variant: 'warning', text: 'Absen asrama tercatat TERLAMBAT'.($penalty ? ' ('.$penalty.')' : '').'.'),
+            default => Flux::toast(variant: 'success', text: 'Absen asrama tercatat. Selamat istirahat!'),
+        };
     }
 
     public function with(): array
@@ -61,6 +66,8 @@ new #[Title('Absen asrama')] class extends Component {
             'dormitory' => $dormitory,
             'room' => $user->currentRoomAssignment?->room,
             'window' => $dormitory?->checkWindow(),
+            'lateUntil' => $dormitory?->lateUntil(),
+            'penalty' => app(PointService::class)->penaltyLabel(PointEvent::DormAttendanceLate),
             'curfew' => $dormitory?->curfewAt(),
             'needsFace' => config('wokabulari.face_verification_enabled') && ! $user->profile?->hasFaceReference(),
             'history' => DormAttendance::query()->where('user_id', $user->id)->whereDate('date', '<', today())->latest('date')->limit(14)->get(),
@@ -87,6 +94,9 @@ new #[Title('Absen asrama')] class extends Component {
             @if ($tonight->checked_in_at && $tonight->attempts > 0)
                 <p class="mt-2 text-sm text-hutan/70 dark:text-santan/70">Absen pukul {{ jam($tonight->checked_in_at) }} WITA</p>
             @endif
+            @if ($tonight->is_late)
+                <p class="mt-2 text-sm font-semibold text-rica" data-test="late-notice">Tercatat terlambat (lewat {{ jam($window[1]) }} WITA){{ $penalty ? ' · '.$penalty.' setelah dikonfirmasi' : '' }}.</p>
+            @endif
             @if ($tonight->status === DormAttendanceStatus::PendingConfirmation)
                 <p class="mt-2 text-sm text-hutan/70 dark:text-santan/70">Pengelola asrama akan mengonfirmasi kehadiranmu.</p>
             @endif
@@ -103,7 +113,7 @@ new #[Title('Absen asrama')] class extends Component {
                 <flux:icon.home-modern class="size-6 shrink-0 text-woka" />
                 <div>
                     <p class="font-semibold">{{ $dormitory->name }}@if ($room) · Kamar {{ $room->number }}@endif</p>
-                    <p class="text-hutan/60 dark:text-santan/60">Absen {{ jam($window[0]) }}–{{ jam($window[1]) }} WITA · jam malam {{ jam($curfew) }}</p>
+                    <p class="text-hutan/60 dark:text-santan/60">Absen {{ jam($window[0]) }}–{{ jam($window[1]) }} WITA (terlambat s.d. {{ jam($lateUntil) }}) · jam malam {{ jam($curfew) }}</p>
                 </div>
             </div>
         </x-card>
@@ -116,7 +126,11 @@ new #[Title('Absen asrama')] class extends Component {
             <flux:callout icon="exclamation-triangle" color="red" class="mb-4" :text="$error" />
         @endif
 
-        @if (now()->between($window[0], $window[1]))
+        @if (now()->between($window[0], $lateUntil))
+            @if (now()->gt($window[1]))
+                <flux:callout icon="clock" color="amber" class="mb-4" data-test="late-warning" heading="Sudah lewat jam absen asrama"
+                              :text="'Jendela absen sampai '.jam($window[1]).' WITA. Absen masih bisa s.d. '.jam($lateUntil).', tetapi tercatat TERLAMBAT'.($penalty ? ' dan poin berkurang ('.$penalty.')' : '').'.'" />
+            @endif
             <x-face-camera mode="verify" action="submit" :needs-location="true" start-label="Mulai absen asrama" wire:key="dorm-{{ $attempt }}" />
             <p class="mt-4 text-center text-xs text-hutan/60 dark:text-santan/60">Pastikan ngana berada di area asrama dan GPS aktif.</p>
         @else
@@ -131,7 +145,10 @@ new #[Title('Absen asrama')] class extends Component {
             @foreach ($history as $item)
                 <div class="flex items-center justify-between px-4 py-2.5 text-sm" wire:key="dh-{{ $item->id }}">
                     <span>{{ tanggal($item->date, 'D, j M') }}</span>
-                    <x-status-badge :status="$item->status" />
+                    <span class="flex items-center gap-1">
+                        @if ($item->is_late)<flux:badge size="sm" color="amber">Terlambat</flux:badge>@endif
+                        <x-status-badge :status="$item->status" />
+                    </span>
                 </div>
             @endforeach
         </x-card>

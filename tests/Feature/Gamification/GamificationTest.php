@@ -54,11 +54,11 @@ test('poin idempoten: event yang sama tidak menambah poin dua kali', function ()
         ->and(app(PointService::class)->total($user))->toBe(10);
 });
 
-test('absen terlambat tidak mendapat poin tepat waktu tetapi tetap menambah streak', function () {
+test('absen terlambat kena pengurangan poin (bukan poin tepat waktu) tetapi tetap menambah streak', function () {
     $user = participant();
     event(new DailyAttendanceRecorded(presentToday($user, status: AttendanceStatus::Late)));
 
-    expect(app(PointService::class)->total($user))->toBe(0)
+    expect(app(PointService::class)->total($user))->toBe(-5)
         ->and($user->streak->current_streak)->toBe(1);
 });
 

@@ -2,8 +2,10 @@
 
 use App\Actions\Attendance\RecordDailyAttendance;
 use App\Enums\AttendanceStatus;
+use App\Enums\PointEvent;
 use App\Http\Requests\DailyAttendanceRequest;
 use App\Models\DailyAttendance;
+use App\Services\Gamification\PointService;
 use App\Support\AttendanceSchedule;
 use Flux\Flux;
 use Illuminate\Support\Facades\Validator;
@@ -51,7 +53,10 @@ new #[Title('Absen harian')] class extends Component {
         $this->attempt++;
 
         if ($attendance->isAttended()) {
-            Flux::toast(variant: 'success', text: $attendance->status === AttendanceStatus::Late ? 'Absen tercatat (terlambat). Besok lebih pagi neh!' : 'Mantap! Absen tercatat. Selamat blajar!');
+            $penalty = app(PointService::class)->penaltyLabel(PointEvent::DailyAttendanceLate);
+            Flux::toast(variant: $attendance->status === AttendanceStatus::Late ? 'warning' : 'success', text: $attendance->status === AttendanceStatus::Late
+                ? 'Absen tercatat TERLAMBAT'.($penalty ? ' ('.$penalty.')' : '').'. Besok lebih pagi neh!'
+                : 'Mantap! Absen tercatat. Selamat blajar!');
         } else {
             Flux::toast(variant: 'danger', text: 'Absen ditolak: '.$attendance->reject_reason);
         }
@@ -68,6 +73,8 @@ new #[Title('Absen harian')] class extends Component {
             'classroom' => $classroom,
             'needsFace' => config('wokabulari.face_verification_enabled') && ! $user->profile?->hasFaceReference(),
             'schedule' => $schedule,
+            'late' => $now->gt($schedule->lateAfterOn($now)),
+            'penalty' => app(PointService::class)->penaltyLabel(PointEvent::DailyAttendanceLate),
             // Status jadwal hari ini: off (bukan hari absen), early (belum dibuka), closed (sudah ditutup), open.
             'window' => match (true) {
                 ! $schedule->isScheduledDay($now) => 'off',
@@ -92,6 +99,9 @@ new #[Title('Absen harian')] class extends Component {
             <p class="font-display text-xl font-bold">Ngana so absen hari ini!</p>
             <p class="mt-1 text-sm text-hutan/70 dark:text-santan/70">Tercatat pukul {{ jam($today->checked_in_at) }} WITA</p>
             <div class="mt-3"><x-status-badge :status="$today->status" size="lg" /></div>
+            @if ($today->status === AttendanceStatus::Late)
+                <p class="mt-2 text-sm font-semibold text-rica" data-test="late-notice">Tercatat terlambat (lewat {{ jam($schedule->lateAfter) }} WITA){{ $penalty ? ' · '.$penalty : '' }}.</p>
+            @endif
             @if ($today->approval_note)
                 <p class="mt-3 text-xs text-hutan/60 dark:text-santan/60">Ditandai manual: {{ $today->approval_note }}</p>
             @endif
@@ -132,6 +142,11 @@ new #[Title('Absen harian')] class extends Component {
                 </div>
             </div>
         </x-card>
+
+        @if ($late)
+            <flux:callout icon="clock" color="amber" class="mb-4" data-test="late-warning" heading="Sudah lewat batas tepat waktu"
+                          :text="'Batas tepat waktu pukul '.jam($schedule->lateAfter).' WITA. Absen tetap bisa, tetapi tercatat TERLAMBAT'.($penalty ? ' dan poin berkurang ('.$penalty.')' : '').'.'" />
+        @endif
 
         @if ($today?->status === AttendanceStatus::Rejected)
             <flux:callout icon="x-circle" color="red" class="mb-4" heading="Absen sebelumnya ditolak" :text="$today->reject_reason.' Silakan coba lagi.'" />

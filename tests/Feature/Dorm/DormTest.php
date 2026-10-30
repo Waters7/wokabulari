@@ -84,7 +84,7 @@ test('absen asrama di luar radius ditolak dan di luar jendela waktu tidak bisa',
     $rejected = app(RecordDormAttendance::class)->handle($user, dormPayload(['latitude' => 1.4700]));
     expect($rejected->status)->toBe(DormAttendanceStatus::Rejected)->and($rejected->reject_reason)->toContain('radius');
 
-    Carbon::setTestNow(Carbon::parse('2026-10-26 22:10', 'Asia/Makassar'));
+    Carbon::setTestNow(Carbon::parse('2026-10-26 19:00', 'Asia/Makassar'));
     expect(fn () => app(RecordDormAttendance::class)->handle($user, dormPayload()))
         ->toThrow(InvalidArgumentException::class, 'Absen asrama hanya pukul');
 });

@@ -17,7 +17,7 @@ class DormAttendance extends Model
 
     protected $fillable = [
         'user_id', 'dormitory_id', 'date', 'checked_in_at', 'selfie_path', 'face_distance', 'latitude', 'longitude',
-        'accuracy_m', 'distance_m', 'status', 'reject_reason', 'attempts', 'confirmed_by', 'confirmed_at', 'note',
+        'accuracy_m', 'distance_m', 'status', 'is_late', 'reject_reason', 'attempts', 'confirmed_by', 'confirmed_at', 'note',
     ];
 
     /** Selfie tidak ikut terserialisasi; ditampilkan lewat signed URL khusus petugas. */
@@ -36,6 +36,7 @@ class DormAttendance extends Model
             'accuracy_m' => 'float',
             'distance_m' => 'float',
             'attempts' => 'integer',
+            'is_late' => 'boolean',
         ];
     }
 

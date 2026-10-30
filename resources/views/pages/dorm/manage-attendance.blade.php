@@ -186,6 +186,9 @@ new #[Title('Absen asrama malam')] class extends Component {
                                         @endif
                                         @if ($attendance?->checked_in_at && $attendance->attempts > 0)
                                             <span>{{ jam($attendance->checked_in_at) }}</span>
+                                            @if ($attendance->is_late)
+                                                <flux:badge size="sm" color="amber">Terlambat</flux:badge>
+                                            @endif
                                             @if ($attendance->selfie_path)
                                                 <a href="{{ $attendance->selfieUrl() }}" target="_blank" class="font-semibold text-woka underline">selfie</a>
                                             @endif

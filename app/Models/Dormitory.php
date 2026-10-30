@@ -66,6 +66,16 @@ class Dormitory extends Model
         ];
     }
 
+    /** Batas absen terlambat (pengaturan dorm.late_until), tidak lebih awal dari akhir jendela absen. */
+    public function lateUntil(?CarbonInterface $date = null): CarbonInterface
+    {
+        $date = ($date ?? now())->copy()->startOfDay();
+        $until = $date->copy()->setTimeFromTimeString((string) (setting('dorm.late_until') ?: '23:59'))->endOfMinute();
+        $closes = $this->checkWindow($date)[1];
+
+        return $until->lt($closes) ? $closes : $until;
+    }
+
     public function curfewAt(?CarbonInterface $date = null): CarbonInterface
     {
         return ($date ?? now())->copy()->startOfDay()->setTimeFromTimeString($this->curfew_time);

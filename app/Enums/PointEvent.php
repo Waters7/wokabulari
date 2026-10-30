@@ -18,6 +18,8 @@ enum PointEvent: string
     case WeeklyRating = 'weekly_rating';
     case ProgramEvaluation = 'program_evaluation';
     case Absent = 'absent';
+    case DailyAttendanceLate = 'daily_attendance_late';
+    case DormAttendanceLate = 'dorm_attendance_late';
     case LateReturn = 'late_return';
     case Manual = 'manual';
     /** Komponen tambahan dari master data, diberikan pengajar/admin. */
@@ -37,6 +39,8 @@ enum PointEvent: string
             self::WeeklyRating => 'Isi rating mingguan',
             self::ProgramEvaluation => 'Isi evaluasi program',
             self::Absent => 'Alpa',
+            self::DailyAttendanceLate => 'Terlambat absen harian',
+            self::DormAttendanceLate => 'Terlambat absen asrama',
             self::LateReturn => 'Terlambat kembali ke asrama',
             self::Manual => 'Penyesuaian admin',
             self::Custom => 'Komponen tambahan',
@@ -60,6 +64,7 @@ enum PointEvent: string
             self::WeeklyRating => 'star',
             self::ProgramEvaluation => 'clipboard-document-list',
             self::Absent => 'x-circle',
+            self::DailyAttendanceLate, self::DormAttendanceLate => 'clock',
             self::LateReturn => 'clock',
             self::Manual => 'adjustments-horizontal',
             self::Custom => 'sparkles',
@@ -81,6 +86,7 @@ enum PointEvent: string
             self::WeeklyRating => 5,
             self::ProgramEvaluation => 20,
             self::Absent => -10,
+            self::DailyAttendanceLate, self::DormAttendanceLate => -5,
             self::LateReturn => -10,
             self::Manual, self::Custom => 0,
         };
@@ -96,7 +102,7 @@ enum PointEvent: string
             self::AssignmentOnTime, self::AssignmentHighScore => PointCategory::Assignment,
             self::QuizCompleted, self::QuizPerfect => PointCategory::Quiz,
             self::WeeklyRating, self::ProgramEvaluation => PointCategory::Engagement,
-            self::Absent, self::LateReturn => PointCategory::Discipline,
+            self::Absent, self::LateReturn, self::DailyAttendanceLate, self::DormAttendanceLate => PointCategory::Discipline,
             self::Manual, self::Custom => PointCategory::Other,
         };
     }
@@ -107,7 +113,7 @@ enum PointEvent: string
         return ! in_array($this, [self::Manual, self::Custom], true);
     }
 
-    /** Aturan pengurang poin nonaktif secara bawaan. */
+    /** Alpa & terlambat kembali nonaktif secara bawaan; terlambat absen harian/asrama aktif (permintaan pemilik program). */
     public function activeByDefault(): bool
     {
         return ! in_array($this, [self::Absent, self::LateReturn], true);

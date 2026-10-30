@@ -214,6 +214,7 @@ new #[Title('Pengaturan sistem')] class extends Component {
                     <flux:input wire:model="values.dorm.check_window_start" type="time" label="Absen malam mulai" />
                     <flux:input wire:model="values.dorm.check_window_end" type="time" label="Absen malam selesai" />
                     <flux:input wire:model="values.dorm.curfew" type="time" label="Jam malam" />
+                    <flux:input wire:model="values.dorm.late_until" type="time" label="Absen terlambat s.d." description="Setelah jendela absen, absen masih bisa sampai jam ini dan tercatat terlambat." />
                 </div>
                 <flux:switch class="mt-3" wire:model="values.dorm.notify_guardian_absent" label="Kabari wali bila anak belum absen asrama" />
                 <flux:switch class="mt-3" wire:model="values.dorm.auto_confirm" label="Konfirmasi otomatis absen asrama"

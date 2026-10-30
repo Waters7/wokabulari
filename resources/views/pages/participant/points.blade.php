@@ -22,6 +22,15 @@ new #[Title('Poin & lencana')] class extends Component {
 
     public bool $showShare = false;
 
+    /** Riwayat: semua, penambahan, atau pengurangan (punishment). */
+    #[Url(as: 'riwayat')]
+    public string $kind = 'all';
+
+    public function updatedKind(): void
+    {
+        $this->resetPage();
+    }
+
     public function mount(): void
     {
         $this->authorize('viewAny', PointTransaction::class);
@@ -89,7 +98,12 @@ new #[Title('Poin & lencana')] class extends Component {
             'week' => $points->between($user, now()->startOfWeek(), now()->endOfWeek()),
             'streak' => $user->streak,
             'badges' => Badge::query()->where('is_active', true)->orderBy('id')->get()->map(fn (Badge $b) => ['badge' => $b, 'earned' => $owned->get($b->id)?->pivot?->earned_at]),
-            'transactions' => PointTransaction::query()->where('user_id', $user->id)->latest('created_at')->latest('id')->paginate(15),
+            'transactions' => PointTransaction::query()->where('user_id', $user->id)
+                ->when($this->kind === 'plus', fn ($q) => $q->where('points', '>', 0))
+                ->when($this->kind === 'minus', fn ($q) => $q->where('points', '<', 0))
+                ->latest('created_at')->latest('id')->paginate(15),
+            'weekPenalty' => (int) PointTransaction::query()->where('user_id', $user->id)->where('points', '<', 0)
+                ->whereBetween('created_at', [now()->startOfWeek(), now()->endOfWeek()])->sum('points'),
             'shareBadge' => $shareBadge = $this->shareId ? $owned->get($this->shareId) : null,
             'shareCard' => $this->shareCard($shareBadge, $total, $levels),
         ];
@@ -97,7 +111,7 @@ new #[Title('Poin & lencana')] class extends Component {
 }; ?>
 
 <div class="mx-auto max-w-2xl">
-    <x-page-header title="Poin & lencana" subtitle="Kumpulkan poin dari hadir, tugas, quiz, dan rating mingguan.">
+    <x-page-header title="Poin & lencana" subtitle="Kumpulkan poin dari hadir, tugas, quiz, dan rating mingguan. Terlambat absen mengurangi poin.">
         <x-slot:actions>
             @if (Route::has('leaderboard'))
                 <flux:button icon="trophy" size="sm" :href="route('leaderboard')" wire:navigate>Peringkat</flux:button>
@@ -142,7 +156,17 @@ new #[Title('Poin & lencana')] class extends Component {
         <flux:switch wire:model.live="anonymous" label="Sembunyikan nama di peringkat" description="Teman hanya melihat inisial ngana." />
     </x-card>
 
-    <h2 class="mb-2 text-sm font-bold uppercase tracking-wide text-hutan/60 dark:text-santan/60">Riwayat poin</h2>
+    <div class="mb-2 flex flex-wrap items-center justify-between gap-2">
+        <h2 class="text-sm font-bold uppercase tracking-wide text-hutan/60 dark:text-santan/60">Riwayat poin</h2>
+        @if ($weekPenalty < 0)
+            <span class="rounded-full bg-rica-50 px-2.5 py-1 text-xs font-semibold text-rica dark:bg-hutan-800" data-test="week-penalty">Pengurangan minggu ini: {{ $weekPenalty }} poin</span>
+        @endif
+    </div>
+    <flux:radio.group wire:model.live="kind" variant="segmented" size="sm" class="mb-3" aria-label="Jenis riwayat">
+        <flux:radio value="all" label="Semua" class="data-checked:bg-woka! data-checked:text-white!" />
+        <flux:radio value="plus" label="Penambahan" class="data-checked:bg-woka! data-checked:text-white!" />
+        <flux:radio value="minus" label="Pengurangan" class="data-checked:bg-rica! data-checked:text-white!" />
+    </flux:radio.group>
     <x-card :padding="false" class="divide-y divide-woka-100 dark:divide-hutan-800">
         @forelse ($transactions as $tx)
             <div class="flex items-center gap-3 px-4 py-3" wire:key="tx-{{ $tx->id }}">
@@ -156,7 +180,7 @@ new #[Title('Poin & lencana')] class extends Component {
                 <span @class(['shrink-0 font-display text-lg font-bold', 'text-woka dark:text-woka-light' => $tx->points > 0, 'text-rica' => $tx->points < 0])>{{ $tx->points > 0 ? '+' : '' }}{{ $tx->points }}</span>
             </div>
         @empty
-            <p class="px-4 py-6 text-center text-sm text-hutan/60 dark:text-santan/60">Belum ada poin. Absen tepat waktu besok untuk +10!</p>
+            <p class="px-4 py-6 text-center text-sm text-hutan/60 dark:text-santan/60">{{ $kind === 'minus' ? 'Tidak ada pengurangan poin. Pertahankan, neh!' : 'Belum ada poin. Absen tepat waktu besok untuk +10!' }}</p>
         @endforelse
     </x-card>
     <div class="mt-3">{{ $transactions->links() }}</div>

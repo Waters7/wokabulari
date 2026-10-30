@@ -72,7 +72,7 @@ class UserGuide
                         'Buka Absen, izinkan akses kamera dan lokasi saat diminta browser.',
                         'Pertama kali, daftarkan wajah dengan mengikuti petunjuk di layar.',
                         'Pastikan berada di area kampus, lalu ambil foto dan kirim. Absen hanya bisa pada hari & jam yang ditentukan angkatan.',
-                        'Absen sebelum batas tepat waktu mendapat poin. Bila ditolak, hubungi pengajar/pendamping.',
+                        'Absen sebelum batas tepat waktu mendapat poin. Lewat batas itu absen tetap bisa, tetapi tercatat Terlambat dan poin berkurang. Bila ditolak, hubungi pengajar/pendamping.',
                     ]],
                     ['title' => 'Kelas: kode sesi, materi, tugas, quiz', 'steps' => [
                         'Saat sesi berlangsung, buka Input Kode Sesi lalu ketik 6 karakter dari pengajar atau pindai QR di layar.',
@@ -90,12 +90,12 @@ class UserGuide
                         'Tanda tangan sendiri menambah poin. Peserta yang tidak tinggal di asrama hanya menerima jenis konsumsi tertentu.',
                     ]],
                     ['title' => 'Asrama (bagi yang tinggal di asrama)', 'steps' => [
-                        'Absen Asrama setiap malam pada jam yang ditentukan.',
+                        'Absen Asrama setiap malam pada jam yang ditentukan; lewat jendela absen masih bisa sampai batas terlambat, tetapi tercatat Terlambat dan poin berkurang.',
                         'Izin Keluar diajukan beberapa jam sebelumnya dan disetujui pengelola asrama atau admin program; pulang/menginap perlu persetujuan wali dulu. Tunjukkan QR izin ke petugas saat keluar dan kembali.',
                         'Sampaikan kerusakan atau kebutuhan kamar di Keluhan Asrama.',
                     ]],
                     ['title' => 'Poin, rating, dan survei', 'steps' => [
-                        'Poin bertambah dari absen, kode sesi, tugas, quiz, tanda terima konsumsi, absen asrama, dan poin tambahan dari pengajar. Lihat di Poin & Lencana dan Peringkat.',
+                        'Poin bertambah dari absen, kode sesi, tugas, quiz, tanda terima konsumsi, absen asrama, dan poin tambahan dari pengajar; berkurang bila terlambat absen atau melanggar aturan. Lihat di Poin & Lencana (filter Pengurangan) dan Peringkat.',
                         'Isi Rating Mingguan untuk vendor makanan dan pengajar, serta Survei yang dibagikan tim kerja.',
                         'Bagikan kode di Wali Saya supaya orang tua/wali bisa memantau perkembanganmu.',
                     ]],
@@ -236,7 +236,7 @@ class UserGuide
                         'Kelola Pengumuman untuk semua, per role, kelas, atau asrama.',
                         'Setujui atau tolak Izin Keluar asrama (bersama pengelola asrama) di Asrama → Izin Keluar.',
                         'Survei & Evaluasi: pakai templat sarana prasarana, pilih angkatan & responden, tentukan tenggat, lalu lihat hasilnya.',
-                        'Komponen Poin: ubah poin aturan otomatis, tambah komponen, dan setujui/tolak pengajuan pengajar. Level & lencana di Gamifikasi.',
+                        'Komponen Poin: ubah poin aturan otomatis termasuk pengurang (terlambat absen harian/asrama, alpa, terlambat kembali), tambah komponen, dan setujui/tolak pengajuan pengajar. Level & lencana di Gamifikasi.',
                     ]],
                     ['title' => 'Memantau dan melapor', 'steps' => [
                         'Dashboard Eksekutif: grafik kehadiran, nilai, dan konsumsi dengan filter angkatan, kelas, dan rentang tanggal, serta daftar peserta yang perlu perhatian.',

@@ -41,6 +41,9 @@ class GamificationListener
 
         if ($attendance->status === AttendanceStatus::Present) {
             $this->points->award($user, PointEvent::DailyAttendanceOnTime, $attendance, at: $attendance->checked_in_at);
+        } elseif ($attendance->status === AttendanceStatus::Late) {
+            // Tetap hadir, tetapi poin dikurangi (aturan pelanggaran).
+            $this->points->award($user, PointEvent::DailyAttendanceLate, $attendance, at: $attendance->checked_in_at);
         }
 
         if ($attendance->isAttended()) {
@@ -63,9 +66,9 @@ class GamificationListener
     {
         $attendance = $event->attendance;
 
-        // Absen mandiri dalam jendela waktu (bukan apel manual).
+        // Absen mandiri (bukan apel manual): tepat waktu menambah poin, terlambat mengurangi.
         if ($attendance->isSelfCheckIn()) {
-            $this->points->award($attendance->user, PointEvent::DormAttendanceOnTime, $attendance, at: $attendance->checked_in_at);
+            $this->points->award($attendance->user, $attendance->is_late ? PointEvent::DormAttendanceLate : PointEvent::DormAttendanceOnTime, $attendance, at: $attendance->checked_in_at);
         }
     }
 

@@ -33,6 +33,14 @@ class PointService
         return $this->rules->get($event->value);
     }
 
+    /** Mis. "−5 poin" bila aturan pengurang aktif; null bila tidak berlaku. */
+    public function penaltyLabel(PointEvent $event): ?string
+    {
+        $rule = $this->rule($event);
+
+        return $rule && $rule->is_active && $rule->points < 0 ? '−'.abs($rule->points).' poin' : null;
+    }
+
     public function flushRules(): void
     {
         $this->rules = null;

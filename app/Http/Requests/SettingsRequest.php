@@ -37,6 +37,7 @@ class SettingsRequest extends FormRequest
             'dorm.check_window_start' => $time,
             'dorm.check_window_end' => $time,
             'dorm.curfew' => $time,
+            'dorm.late_until' => $time,
             'dorm.notify_guardian_absent' => ['boolean'],
             'dorm.auto_confirm' => ['boolean'],
             'exit.max_per_week' => ['required', 'integer', 'between:0,14'],

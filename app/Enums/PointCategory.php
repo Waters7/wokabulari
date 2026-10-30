@@ -25,7 +25,7 @@ enum PointCategory: string
             self::Assignment => 'Tugas',
             self::Quiz => 'Quiz',
             self::Engagement => 'Keaktifan & partisipasi',
-            self::Discipline => 'Disiplin',
+            self::Discipline => 'Pelanggaran (pengurang poin)',
             self::Other => 'Lainnya',
         };
     }

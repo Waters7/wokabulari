@@ -67,7 +67,7 @@ class ReportMealDelivery
             $window = (int) $date->setTimeFromTimeString($windowStart)->diffInMinutes($date->setTimeFromTimeString($windowEnd));
 
             if (! $schedule) {
-                $schedule = MealSchedule::query()->create([
+                $schedule = ManageMealSchedules::createOrRestore([
                     'date' => $date->toDateString(),
                     'meal_type' => $type,
                     'vendor_id' => $vendor->id,

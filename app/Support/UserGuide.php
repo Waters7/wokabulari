@@ -164,6 +164,8 @@ class UserGuide
                 'topics' => [
                     ['title' => 'Jadwal makan', 'steps' => [
                         'Konsumsi → Jadwal Makan: atur rencana per hari (vendor, menu, jam ambil, porsi). Salin ke minggu depan untuk makan utama.',
+                        'Isi & ubah massal: pilih rentang tanggal dan hari, centang waktu makan, atur vendor, jam, porsi (otomatis = jumlah penerima), dan menu (satu baris per hari, bergilir), lalu Proses. Jadwal yang sudah ada bisa dilewati atau diperbarui.',
+                        'Di tab Ubah / hapus: pilih jadwal (rentang, waktu makan, vendor), centang perubahan (ganti vendor, geser/atur jam, porsi, menu), lalu Ubah — atau Hapus untuk hari libur. Jadwal yang sudah ada tanda terimanya tidak diubah.',
                         'Atur jenis konsumsi peserta tidak asrama dan tim pengajar/tim kerja penerima konsumsi lewat tombol Penerima konsumsi.',
                     ]],
                     ['title' => 'Input konsumsi saat makanan datang', 'steps' => [
@@ -176,6 +178,7 @@ class UserGuide
                     ['title' => 'Monitor dan penerimaan diwakilkan', 'steps' => [
                         'Monitor Makan menampilkan porsi diterima vs total dan daftar penerima yang belum mengambil (yang izin/sakit ditandai; tim pengajar/kerja diberi label).',
                         'Untuk peserta sakit atau di kamar, catat penerimaan diwakilkan dengan tanda tangan petugas dan catatan.',
+                        'Makanan terlambat? Tekan Makanan terlambat di Monitor Makan (atau ikon jam di Jadwal Makan hari ini), pilih +15/+30/+60 menit atau jam baru. Peserta tetap bisa mengambil & tanda tangan sampai jam itu, bahkan setelah waktu ambil ditutup; yang belum mengambil diberi tahu.',
                         'Teruskan daftar Alergi & Pantangan ke vendor; pantau Rekap Rating Vendor tiap minggu.',
                     ]],
                     ['title' => 'Laporan', 'steps' => [

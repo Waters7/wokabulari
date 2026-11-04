@@ -12,6 +12,7 @@ use Carbon\CarbonImmutable;
 use Flux\Flux;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
+use Livewire\Attributes\On;
 use Livewire\Attributes\Title;
 use Livewire\Attributes\Url;
 use Livewire\Component;
@@ -84,6 +85,10 @@ new #[Title('Jadwal makan')] class extends Component {
             $this->form['portions_ordered'] = app(MealRoster::class)->recipients($type)->count();
         }
     }
+
+    /** Segarkan kartu setelah waktu ambil diperpanjang. */
+    #[On('meal-window-extended')]
+    public function refreshAfterExtend(): void {}
 
     public function shift(int $weeks): void
     {
@@ -187,6 +192,7 @@ new #[Title('Jadwal makan')] class extends Component {
             @can('meal.manage')
                 <flux:button icon="adjustments-horizontal" wire:click="$set('showNonResident', true)">Penerima konsumsi</flux:button>
             @endcan
+            <flux:button icon="bolt" :href="route('meals.schedules.bulk', ['dari' => $start->toDateString()])" wire:navigate>Isi & ubah massal</flux:button>
             <x-confirm-button action="duplicate" label="Salin ke minggu depan" icon="document-duplicate" variant="filled" size="base"
                               title="Salin jadwal minggu ini?" message="Jadwal makan utama minggu ini disalin ke minggu berikutnya (snack tidak ikut). Jadwal yang sudah ada tidak ditimpa." confirmLabel="Salin" />
             <flux:button variant="primary" icon="plus" wire:click="create">Jadwal baru</flux:button>
@@ -215,10 +221,16 @@ new #[Title('Jadwal makan')] class extends Component {
                                         <p class="mt-1 text-sm font-semibold">{{ $schedule->vendor->name }}</p>
                                         <p class="line-clamp-2 text-sm">{{ $schedule->menu }}</p>
                                         <p class="text-xs text-hutan/60 dark:text-santan/60">{{ $schedule->windowLabel() }} · {{ $schedule->receipts_count }}/{{ $schedule->portions_ordered }} porsi</p>
+                                        @if ($schedule->extended_at)
+                                            <p class="text-xs font-semibold text-kunyit-700 dark:text-kunyit">Diperpanjang · {{ $schedule->late_note }}</p>
+                                        @endif
                                     </div>
                                     <div class="flex shrink-0 flex-col">
                                         <flux:button size="xs" variant="ghost" icon="truck" :href="route('meals.deliveries.create', ['jadwal' => $schedule->id])" wire:navigate aria-label="Input konsumsi" />
                                         <flux:button size="xs" variant="ghost" icon="pencil-square" wire:click="edit({{ $schedule->id }})" aria-label="Ubah" />
+                                        @if ($schedule->date->isToday())
+                                            <livewire:meals.extend-window :schedule="$schedule" :with-label="false" :key="'ext-'.$schedule->id" />
+                                        @endif
                                         <flux:button size="xs" variant="ghost" icon="trash" wire:click="delete({{ $schedule->id }})" wire:confirm="Hapus jadwal ini?" aria-label="Hapus" />
                                     </div>
                                 </div>

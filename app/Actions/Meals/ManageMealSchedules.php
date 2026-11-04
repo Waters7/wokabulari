@@ -2,6 +2,7 @@
 
 namespace App\Actions\Meals;
 
+use App\Enums\MealType;
 use App\Models\MealSchedule;
 use App\Models\User;
 use Carbon\CarbonImmutable;
@@ -34,8 +35,7 @@ class ManageMealSchedules
             throw new InvalidArgumentException('Jadwal untuk vendor dan waktu makan ini sudah ada pada tanggal tersebut.');
         }
 
-        $schedule ??= new MealSchedule(['created_by' => $by->id]);
-        $schedule->fill([
+        $attributes = [
             'date' => $date,
             'meal_type' => $data['meal_type'],
             'vendor_id' => (int) $data['vendor_id'],
@@ -43,9 +43,37 @@ class ManageMealSchedules
             'starts_at' => $starts,
             'ends_at' => $ends,
             'portions_ordered' => (int) $data['portions_ordered'],
-        ])->save();
+        ];
+
+        if (! $schedule) {
+            return self::createOrRestore($attributes + ['created_by' => $by->id]);
+        }
+
+        $schedule->fill($attributes)->save();
 
         return $schedule;
+    }
+
+    /**
+     * Buat jadwal baru; bila jadwal tanggal–jenis–vendor yang sama pernah dihapus, pulihkan saja
+     * (kunci unik tabel juga berlaku untuk baris terhapus).
+     *
+     * @param  array<string, mixed>  $attributes
+     */
+    public static function createOrRestore(array $attributes): MealSchedule
+    {
+        $trashed = MealSchedule::onlyTrashed()->whereDate('date', $attributes['date'])
+            ->where('meal_type', $attributes['meal_type'] instanceof MealType ? $attributes['meal_type']->value : $attributes['meal_type'])
+            ->where('vendor_id', $attributes['vendor_id'])->first();
+
+        if ($trashed) {
+            $trashed->restore();
+            $trashed->update(collect($attributes)->except('created_by')->all());
+
+            return $trashed;
+        }
+
+        return MealSchedule::query()->create($attributes);
     }
 
     /**
@@ -71,7 +99,7 @@ class ManageMealSchedules
                     continue;
                 }
 
-                MealSchedule::query()->create([
+                self::createOrRestore([
                     'date' => $date,
                     'meal_type' => $schedule->meal_type,
                     'vendor_id' => $schedule->vendor_id,

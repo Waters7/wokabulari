@@ -291,3 +291,8 @@ Acuan: DOCKER.md bagian C–D
 - Dokumentasi kelas wajib (foto kamera/unggah file) saat mulai & akhir sesi mulai 31 Okt 2026; pengaturan di Pengaturan Sistem.
 - Panel Sesi berjalan di dashboard eksekutif (diperbarui tiap menit).
 - Test: 340 lulus. Dicek di 360px: Penilaian periodik (langkah, filter, Atur aspek), Master Aspek Penilaian, detail sesi (dialog dokumentasi, mulai sesi dengan foto), dashboard eksekutif (Sesi berjalan).
+
+### Tambahan — 4 Nov 2026 (v1.16.0)
+- Isi & ubah massal jadwal makan (rentang, hari, waktu makan, menu bergilir, porsi otomatis; ubah/hapus sekaligus).
+- Tombol Makanan terlambat: perpanjang waktu ambil & tanda terima, termasuk membuka lagi jadwal yang sudah ditutup.
+- Test: 348 lulus. Dicek di 360px: Isi jadwal baru, Ubah / hapus, dialog Makanan terlambat di Monitor Makan.

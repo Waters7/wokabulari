@@ -3,6 +3,14 @@
 Versi ditampilkan di halaman login dan menu aplikasi (`config/wokabulari.php` → `version`).
 Aturan penomoran: **patch** (1.0.x) perbaikan, **minor** (1.x.0) fitur baru, **major** (x.0.0) perubahan besar.
 
+## 1.16.0 — 4 November 2026
+
+- **Isi & ubah massal jadwal makan** (Konsumsi → Jadwal Makan → *Isi & ubah massal*): tidak perlu lagi satu per satu.
+  - *Isi jadwal baru:* pilih rentang tanggal (maks. 62 hari) dan hari, centang waktu makan, lalu atur vendor, jam ambil, porsi (otomatis = jumlah penerima, atau angka), dan menu. Menu bergilir: satu baris = menu satu hari; kosong = "Menu menyusul". Jadwal yang sudah ada bisa dilewati atau diperbarui, dan jumlah yang akan dibuat tampil sebelum diproses.
+  - *Ubah / hapus:* pilih jadwal menurut rentang, waktu makan, dan vendor, lalu ganti vendor, geser/atur jam, ubah porsi, ganti menu, atau hapus (mis. hari libur). Jadwal yang sudah ada tanda terimanya tidak ikut diubah.
+- **Tombol Makanan terlambat** di Monitor Makan dan Jadwal Makan (hari ini): perpanjang waktu ambil & tanda terima (+15/+30/+60/+90 menit atau jam tertentu), bisa membuka lagi jadwal yang sudah ditutup pada hari yang sama, dengan catatan alasan dan pemberitahuan ke penerima yang belum mengambil.
+- Perbaikan: membuat lagi jadwal makan yang pernah dihapus (vendor, tanggal, dan waktu makan sama) tidak lagi gagal; jadwal lama dipulihkan.
+
 ## 1.15.0 — 30 Oktober 2026
 
 - **Penilaian periodik lebih sistematis:** alur 4 langkah — (1) kelas & periode, (2) aspek yang dinilai, (3) isi nilai, (4) simpan draf/terbitkan lewat bilah aksi yang selalu terlihat. Ada kemajuan "x/y peserta sudah dinilai", **filter peserta** (cari nama/NIS; Semua, Belum dinilai, Draf, Terbit), tombol *Ke periode ini*, penanda merah untuk nilai yang salah, dan baris kosong tidak lagi dibuat sebagai draf.

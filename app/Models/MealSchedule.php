@@ -18,7 +18,7 @@ class MealSchedule extends Model
 {
     use HasFactory, LogsActivity, SoftDeletes;
 
-    protected $fillable = ['date', 'meal_type', 'vendor_id', 'menu', 'starts_at', 'ends_at', 'portions_ordered', 'created_by'];
+    protected $fillable = ['date', 'meal_type', 'vendor_id', 'menu', 'starts_at', 'ends_at', 'portions_ordered', 'created_by', 'extended_at', 'late_note', 'extended_by'];
 
     protected function casts(): array
     {
@@ -27,18 +27,25 @@ class MealSchedule extends Model
             'meal_type' => MealType::class,
             'starts_at' => 'datetime',
             'ends_at' => 'datetime',
+            'extended_at' => 'datetime',
             'portions_ordered' => 'integer',
         ];
     }
 
     public function getActivitylogOptions(): LogOptions
     {
-        return LogOptions::defaults()->logOnly(['date', 'meal_type', 'vendor_id', 'menu', 'portions_ordered'])->logOnlyDirty()->dontLogEmptyChanges()->useLogName('konsumsi');
+        return LogOptions::defaults()->logOnly(['date', 'meal_type', 'vendor_id', 'menu', 'starts_at', 'ends_at', 'portions_ordered', 'late_note'])->logOnlyDirty()->dontLogEmptyChanges()->useLogName('konsumsi');
     }
 
     public function vendor(): BelongsTo
     {
         return $this->belongsTo(Vendor::class);
+    }
+
+    /** Petugas yang memperpanjang waktu pengambilan (makanan terlambat). */
+    public function extender(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'extended_by');
     }
 
     public function receipts(): HasMany

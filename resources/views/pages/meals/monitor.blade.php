@@ -9,6 +9,7 @@ use App\Models\User;
 use App\Services\MealRoster;
 use Carbon\CarbonImmutable;
 use Flux\Flux;
+use Livewire\Attributes\On;
 use Livewire\Attributes\Title;
 use Livewire\Attributes\Url;
 use Livewire\Component;
@@ -33,6 +34,10 @@ new #[Title('Monitor makan')] class extends Component {
         $this->authorize('viewAny', MealSchedule::class);
         $this->date = $this->date ?: today()->toDateString();
     }
+
+    /** Segarkan setelah waktu ambil diperpanjang. */
+    #[On('meal-window-extended')]
+    public function refreshAfterExtend(): void {}
 
     public function updatedDate(): void
     {
@@ -167,6 +172,9 @@ new #[Title('Monitor makan')] class extends Component {
                     <div class="min-w-0">
                         <p class="whitespace-pre-line font-semibold">{{ $schedule->menu }}</p>
                         <p class="text-sm text-hutan/60 dark:text-santan/60">{{ $schedule->vendor->name }} · {{ $schedule->windowLabel() }} WITA · dipesan {{ $schedule->portions_ordered }} porsi</p>
+                        @if ($schedule->extended_at)
+                            <p class="mt-1 text-sm font-semibold text-kunyit-700 dark:text-kunyit" data-test="extended-info">Diperpanjang {{ jam($schedule->extended_at) }} sampai {{ jam($schedule->ends_at) }} · {{ $schedule->late_note }}</p>
+                        @endif
                         @if ($delivery = $schedule->delivery)
                             <p class="mt-1 text-sm" data-test="delivery-info">
                                 <span class="font-semibold text-woka dark:text-woka-light">Diterima {{ $delivery->quantityLabel() }}</span>
@@ -179,13 +187,20 @@ new #[Title('Monitor makan')] class extends Component {
                             </p>
                         @endif
                     </div>
-                    @if ($schedule->isOpen())
-                        <flux:badge color="amber" icon="signal">Sedang dibuka</flux:badge>
-                    @elseif (now()->lt($schedule->starts_at))
-                        <flux:badge>Dibuka {{ jam($schedule->starts_at) }}</flux:badge>
-                    @else
-                        <flux:badge color="zinc">Ditutup</flux:badge>
-                    @endif
+                    <div class="flex flex-wrap items-center gap-2">
+                        @if ($schedule->isOpen())
+                            <flux:badge color="amber" icon="signal">Sedang dibuka</flux:badge>
+                        @elseif (now()->lt($schedule->starts_at))
+                            <flux:badge>Dibuka {{ jam($schedule->starts_at) }}</flux:badge>
+                        @else
+                            <flux:badge color="zinc">Ditutup</flux:badge>
+                        @endif
+                        @if (! $schedule->date->isPast() || $schedule->date->isToday())
+                            @can('update', $schedule)
+                                <livewire:meals.extend-window :schedule="$schedule" :key="'ext-'.$schedule->id.'-'.$schedule->ends_at->timestamp" />
+                            @endcan
+                        @endif
+                    </div>
                 </div>
                 @php($percent = $total ? round($receivedCount / $total * 100) : 0)
                 <div class="mt-4">

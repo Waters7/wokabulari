@@ -49,9 +49,34 @@ class ManageMealSchedules
             return self::createOrRestore($attributes + ['created_by' => $by->id]);
         }
 
-        $schedule->fill($attributes)->save();
+        return DB::transaction(function () use ($schedule, $attributes) {
+            // Pindah ke tanggal/jenis/vendor lain: bebaskan slot yang dipakai jadwal terhapus.
+            self::releaseTrashedSlot($attributes['date'], $attributes['meal_type'], $attributes['vendor_id']);
+            $schedule->fill($attributes)->save();
 
-        return $schedule;
+            return $schedule;
+        });
+    }
+
+    /**
+     * Kunci unik tanggal–jenis–vendor juga berlaku untuk jadwal terhapus. Sebelum jadwal lain
+     * memakai slot itu, jadwal terhapus yang kosong (tanpa tanda terima & input konsumsi)
+     * dihapus permanen; bila berisi data, proses dihentikan dengan pesan yang jelas.
+     */
+    public static function releaseTrashedSlot(CarbonInterface|string $date, MealType|string $type, int $vendorId): void
+    {
+        $type = $type instanceof MealType ? $type : MealType::from($type);
+        $trashed = MealSchedule::onlyTrashed()->whereDate('date', $date)->where('meal_type', $type)->where('vendor_id', $vendorId)->first();
+
+        if (! $trashed) {
+            return;
+        }
+
+        if ($trashed->receipts()->exists() || $trashed->delivery()->exists()) {
+            throw new InvalidArgumentException('Ada jadwal '.$type->label().' dari vendor ini pada tanggal tersebut yang pernah dihapus dan sudah berisi tanda terima atau input konsumsi. Hubungi admin untuk memulihkannya.');
+        }
+
+        $trashed->forceDelete();
     }
 
     /**

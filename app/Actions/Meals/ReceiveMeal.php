@@ -8,6 +8,8 @@ use App\Models\MealSchedule;
 use App\Models\User;
 use App\Services\ImageService;
 use App\Services\MealRoster;
+use Illuminate\Database\UniqueConstraintViolationException;
+use Illuminate\Support\Facades\Storage;
 use InvalidArgumentException;
 
 /**
@@ -47,16 +49,23 @@ class ReceiveMeal
 
         $path = $this->images->storeSignature($signatureDataUri, 'signatures/'.$schedule->date->format('Y/m'));
 
-        $receipt = MealReceipt::query()->create([
-            'meal_schedule_id' => $schedule->id,
-            'user_id' => $participant->id,
-            'signature_path' => $path,
-            'received_at' => now(),
-            'latitude' => $latitude,
-            'longitude' => $longitude,
-            'proxy_by' => $proxy?->id,
-            'note' => $note ? trim($note) : null,
-        ]);
+        try {
+            $receipt = MealReceipt::query()->create([
+                'meal_schedule_id' => $schedule->id,
+                'user_id' => $participant->id,
+                'signature_path' => $path,
+                'received_at' => now(),
+                'latitude' => $latitude,
+                'longitude' => $longitude,
+                'proxy_by' => $proxy?->id,
+                'note' => $note ? trim($note) : null,
+            ]);
+        } catch (UniqueConstraintViolationException) {
+            // Dua kiriman bersamaan (sinyal lambat/terkirim ulang): yang pertama sudah tersimpan.
+            Storage::disk('private')->delete($path);
+
+            throw new InvalidArgumentException('Penerimaan untuk jadwal ini sudah tercatat.');
+        }
 
         event(new MealReceived($receipt));
 

@@ -177,9 +177,16 @@ class BulkMealSchedules
                 $attributes = [];
 
                 if (! empty($changes['vendor_id']) && (int) $changes['vendor_id'] !== $schedule->vendor_id) {
-                    // Termasuk jadwal terhapus: kunci unik tanggal–jenis–vendor tetap berlaku.
-                    $clash = MealSchedule::withTrashed()->whereDate('date', $schedule->date)->where('meal_type', $schedule->meal_type)
+                    $clash = MealSchedule::query()->whereDate('date', $schedule->date)->where('meal_type', $schedule->meal_type)
                         ->where('vendor_id', $changes['vendor_id'])->whereKeyNot($schedule->id)->exists();
+
+                    try {
+                        // Jadwal terhapus yang kosong di slot vendor tujuan dibebaskan (kunci unik).
+                        $clash || ManageMealSchedules::releaseTrashedSlot($schedule->date, $schedule->meal_type, (int) $changes['vendor_id']);
+                    } catch (InvalidArgumentException) {
+                        $clash = true;
+                    }
+
                     if ($clash) {
                         $result['skipped']++;
                         $result['notes']['clash'] = 'Sebagian dilewati karena vendor tujuan sudah punya jadwal yang sama pada tanggal itu.';

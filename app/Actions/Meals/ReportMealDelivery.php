@@ -78,6 +78,11 @@ class ReportMealDelivery
                     'created_by' => $reporter->id,
                 ]);
             } else {
+                // Ganti vendor: slot vendor baru bisa masih dipakai jadwal terhapus (kunci unik).
+                if ($schedule->vendor_id !== $vendor->id) {
+                    ManageMealSchedules::releaseTrashedSlot($schedule->date, $schedule->meal_type, $vendor->id);
+                }
+
                 // Pengambilan dibuka saat makanan siap; lama rentang pengambilan dipertahankan.
                 $duration = max($window, (int) $schedule->starts_at->diffInMinutes($schedule->ends_at));
                 $schedule->update([

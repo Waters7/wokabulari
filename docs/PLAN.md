@@ -296,3 +296,6 @@ Acuan: DOCKER.md bagian C–D
 - Isi & ubah massal jadwal makan (rentang, hari, waktu makan, menu bergilir, porsi otomatis; ubah/hapus sekaligus).
 - Tombol Makanan terlambat: perpanjang waktu ambil & tanda terima, termasuk membuka lagi jadwal yang sudah ditutup.
 - Test: 348 lulus. Dicek di 360px: Isi jadwal baru, Ubah / hapus, dialog Makanan terlambat di Monitor Makan.
+
+### Perbaikan — 13 Nov 2026 (v1.16.1)
+- Galat 500 simpan input konsumsi saat ganti vendor (bentrok dengan jadwal terhapus) dan tanda terima ganda bersamaan. Test baru di `MealScheduleSlotTest`.

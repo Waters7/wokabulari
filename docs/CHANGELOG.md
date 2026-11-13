@@ -3,6 +3,11 @@
 Versi ditampilkan di halaman login dan menu aplikasi (`config/wokabulari.php` → `version`).
 Aturan penomoran: **patch** (1.0.x) perbaikan, **minor** (1.x.0) fitur baru, **major** (x.0.0) perubahan besar.
 
+## 1.16.1 — 13 November 2026
+
+- Perbaikan: **Simpan input konsumsi galat 500** saat vendor diganti ke vendor yang jadwalnya pada tanggal & waktu makan itu pernah dihapus. Jadwal terhapus yang masih kosong kini dibebaskan otomatis; bila sudah berisi tanda terima/input, muncul pesan yang jelas. Berlaku juga untuk ubah jadwal di form dan ganti vendor massal.
+- Perbaikan: tanda terima makan yang terkirim dua kali bersamaan (sinyal lambat/terkirim ulang) tidak lagi galat 500; kiriman kedua mendapat pesan "sudah tercatat" dan berkas tanda tangan gandanya dibuang.
+
 ## 1.16.0 — 4 November 2026
 
 - **Isi & ubah massal jadwal makan** (Konsumsi → Jadwal Makan → *Isi & ubah massal*): tidak perlu lagi satu per satu.

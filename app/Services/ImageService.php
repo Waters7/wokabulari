@@ -57,6 +57,15 @@ class ImageService
     }
 
     /**
+     * Buat gambar kecil (mis. untuk disematkan di Excel) dari gambar yang sudah tersimpan.
+     */
+    public function thumbnail(string $sourcePath, string $targetPath, int $maxWidth = 320, int $quality = 70, string $disk = 'private'): void
+    {
+        $image = $this->manager()->decodeBinary((string) Storage::disk($disk)->get($sourcePath));
+        Storage::disk($disk)->put($targetPath, (string) $image->orient()->scaleDown($maxWidth)->encode(new JpegEncoder(quality: $quality)));
+    }
+
+    /**
      * @param  list<string>  $allowedMimes
      */
     protected function decodeDataUri(string $dataUri, array $allowedMimes): ImageInterface

@@ -171,7 +171,60 @@ class ReportBuilder
                     'headings' => ['Tanggal', 'Kelas', 'Topik', 'Nama', 'Status', 'Waktu input'],
                     'rows' => $detail,
                 ],
+                $this->documentationSheet($gallery),
             ],
+        ];
+    }
+
+    /**
+     * Lembar Excel "Dokumentasi": foto pertama tiap tahap disematkan sebagai gambar kecil (kolom F & G).
+     * Hanya untuk unduhan; di layar sudah ada galeri.
+     *
+     * @param  Collection<int, array<string, mixed>>  $gallery
+     * @return array<string, mixed>
+     */
+    protected function documentationSheet(Collection $gallery): array
+    {
+        $rows = [];
+        $images = [];
+
+        foreach ($gallery->values() as $i => $item) {
+            $session = $item['session'];
+            $cells = [];
+            $notes = [];
+
+            foreach (SessionPhase::cases() as $offset => $phase) {
+                $part = $item[$phase->value];
+                $photo = $part['files']->first(fn (SessionDocumentation $doc) => $doc->isImage());
+
+                if ($photo) {
+                    $images[] = ['row' => $i, 'column' => 5 + $offset, 'doc' => $photo];
+                }
+
+                $cells[] = match (true) {
+                    $photo !== null => null,
+                    $part['files']->isNotEmpty() => $part['files']->map(fn (SessionDocumentation $d) => $d->original_name ?? 'Berkas')->implode(', '),
+                    default => $part['label'],
+                };
+
+                if ($part['files']->count() > 1) {
+                    $notes[] = $phase->label().': '.$part['files']->count().' berkas (lihat di halaman sesi)';
+                }
+            }
+
+            $rows[] = [
+                tanggal($session->date, 'D, j M Y'), $session->timeRange(), $session->classroom->name, $session->topic, $session->teacher?->name,
+                ...$cells, implode('; ', $notes) ?: null, route('teach.sessions.show', $session),
+            ];
+        }
+
+        return [
+            'title' => 'Dokumentasi',
+            'headings' => ['Tanggal', 'Jam', 'Kelas', 'Topik', 'Pengajar', 'Foto mulai sesi', 'Foto akhir sesi', 'Keterangan', 'Tautan sesi'],
+            'links' => [8],
+            'images' => $images,
+            'excel_only' => true,
+            'rows' => $rows,
         ];
     }
 

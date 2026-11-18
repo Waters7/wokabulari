@@ -4,10 +4,12 @@ namespace App\Models;
 
 use App\Enums\DocumentationSource;
 use App\Enums\SessionPhase;
+use App\Services\ImageService;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\Storage;
+use Throwable;
 
 /**
  * Foto/file dokumentasi kelas saat mulai atau akhir sesi (disk private, dibuka lewat URL bertanda tangan).
@@ -29,7 +31,36 @@ class SessionDocumentation extends Model
 
     protected static function booted(): void
     {
-        static::deleted(fn (SessionDocumentation $doc) => Storage::disk('private')->delete($doc->path));
+        static::deleted(fn (SessionDocumentation $doc) => Storage::disk('private')->delete([$doc->path, $doc->thumbnailFile()]));
+    }
+
+    /** Lokasi gambar kecil di disk private (dibuat saat pertama dibutuhkan). */
+    public function thumbnailFile(): string
+    {
+        return dirname($this->path).'/thumbs/'.pathinfo($this->path, PATHINFO_FILENAME).'.jpg';
+    }
+
+    /**
+     * Path lokal gambar kecil untuk disematkan di Excel; null bila bukan gambar atau gambar tidak bisa dibaca.
+     */
+    public function thumbnailPath(): ?string
+    {
+        if (! $this->isImage()) {
+            return null;
+        }
+
+        $disk = Storage::disk('private');
+        $thumb = $this->thumbnailFile();
+
+        if (! $disk->exists($thumb)) {
+            try {
+                app(ImageService::class)->thumbnail($this->path, $thumb);
+            } catch (Throwable) {
+                return null;
+            }
+        }
+
+        return $disk->path($thumb);
     }
 
     public function session(): BelongsTo

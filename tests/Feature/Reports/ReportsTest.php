@@ -11,6 +11,7 @@ use App\Enums\ReportType;
 use App\Enums\SessionStatus;
 use App\Enums\StaffUnit;
 use App\Exports\ReportExport;
+use App\Exports\ReportSheet;
 use App\Models\Assessment;
 use App\Models\Batch;
 use App\Models\Classroom;
@@ -27,6 +28,7 @@ use App\Services\Reports\ReportBuilder;
 use App\Services\Reports\ReportFilter;
 use App\Services\Reports\ScoreAnalytics;
 use Carbon\CarbonImmutable;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
@@ -247,4 +249,40 @@ test('kolom tautan sesi di Excel menjadi tautan "Buka sesi" yang bisa diklik', f
 
     expect($cell->getValue())->toBe('Buka sesi')
         ->and($cell->getHyperlink()->getUrl())->toBe(route('teach.sessions.show', $this->session));
+});
+
+test('unduhan Excel absen per sesi memuat lembar Dokumentasi berisi foto mulai & akhir sesi', function () {
+    Storage::fake('private');
+    $photo = 'sesi/'.$this->session->id.'/dokumentasi/mulai.jpg';
+    Storage::disk('private')->put($photo, UploadedFile::fake()->image('mulai.jpg', 1200, 900)->getContent());
+    $start = SessionDocumentation::factory()->for($this->session, 'session')->create(['path' => $photo]);
+    SessionDocumentation::factory()->for($this->session, 'session')->end()->create([
+        'path' => 'sesi/x/akhir.pdf', 'mime_type' => 'application/pdf', 'source' => DocumentationSource::Upload, 'original_name' => 'absen-kelas.pdf',
+    ]);
+
+    $report = app(ReportBuilder::class)->build(ReportType::SessionAttendance, ReportPeriod::Weekly, Carbon::parse('2026-11-04')->toImmutable(), $this->batch->id, null);
+    $path = tempnam(sys_get_temp_dir(), 'lap').'.xlsx';
+    file_put_contents($path, Excel::raw(new ReportExport($report), Maatwebsite\Excel\Excel::XLSX));
+    $sheet = IOFactory::load($path)->getSheetByName('Dokumentasi');
+    @unlink($path);
+
+    $drawings = $sheet->getDrawingCollection();
+    expect($sheet->getCell('F6')->getValue())->toBe('Foto mulai sesi')
+        ->and($sheet->getCell('D7')->getValue())->toBe('Perkenalan Diri')
+        ->and($sheet->getCell('G7')->getValue())->toBe('absen-kelas.pdf')
+        ->and($sheet->getCell('I7')->getValue())->toBe('Buka sesi')
+        ->and(count($drawings))->toBe(1)
+        ->and($drawings[0]->getCoordinates())->toBe('F7')
+        ->and($drawings[0]->getHeight())->toBe(ReportSheet::IMAGE_HEIGHT);
+
+    // Gambar kecil dibuat sekali lalu dipakai ulang; ikut terhapus bersama dokumentasinya.
+    Storage::disk('private')->assertExists($start->thumbnailFile());
+    $start->delete();
+    Storage::disk('private')->assertMissing($start->thumbnailFile());
+});
+
+test('lembar Dokumentasi hanya untuk unduhan, tidak tampil sebagai tabel di layar', function () {
+    reportPage(['jenis' => 'session_attendance', 'periode' => 'weekly', 'tanggal' => '2026-11-04', 'angkatan' => $this->batch->id])
+        ->assertSee('Per sesi')
+        ->assertDontSee('Foto mulai sesi');
 });

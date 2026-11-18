@@ -107,6 +107,11 @@ new #[Title('Pusat laporan')] class extends Component {
         abort_unless(auth()->user()->can('report.export'), 403);
         $report = $this->report($builder);
 
+        // Lembar foto dokumentasi hanya untuk yang boleh melihat dokumentasi semua sesi.
+        if (! auth()->user()->can('session.view-all')) {
+            $report['sheets'] = array_values(array_filter($report['sheets'], fn (array $sheet) => ! array_key_exists('images', $sheet)));
+        }
+
         activity('laporan')->causedBy(auth()->user())
             ->withProperties(['jenis' => $report['title'], 'periode' => $report['period'], 'cakupan' => $this->scope()])
             ->log('Mengunduh laporan');
@@ -205,7 +210,7 @@ new #[Title('Pusat laporan')] class extends Component {
             @endforeach
         </div>
 
-        @foreach ($report['sheets'] as $index => $sheet)
+        @foreach (array_filter($report['sheets'], fn (array $sheet) => empty($sheet['excel_only'])) as $index => $sheet)
             <details @if ($index === 0) open @endif class="group mb-4" wire:key="rs-{{ $current->value }}-{{ $index }}">
                 <summary class="mb-2 flex cursor-pointer list-none items-center gap-2 text-sm font-bold uppercase tracking-wide text-hutan/60 dark:text-santan/60">
                     <flux:icon.chevron-right class="size-4 transition group-open:rotate-90" />

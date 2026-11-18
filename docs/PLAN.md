@@ -303,3 +303,7 @@ Acuan: DOCKER.md bagian C–D
 ### Tambahan — 18 Nov 2026 (v1.17.0)
 - Pusat Laporan → Absen per sesi: galeri dokumentasi foto per sesi (filter Belum lengkap), kolom dokumentasi & tautan sesi di Excel.
 - Test: 354 lulus. Dicek di 360px: galeri dokumentasi (lebar kartu dan foto termuat).
+
+### Tambahan — 18 Nov 2026 (v1.18.0)
+- Unduhan Excel Absen per sesi: lembar Dokumentasi dengan foto mulai & akhir sesi tersemat (gambar kecil).
+- Test: 356 lulus. Test membuat berkas Excel sungguhan dan memeriksa letak foto.

@@ -3,6 +3,10 @@
 Versi ditampilkan di halaman login dan menu aplikasi (`config/wokabulari.php` → `version`).
 Aturan penomoran: **patch** (1.0.x) perbaikan, **minor** (1.x.0) fitur baru, **major** (x.0.0) perubahan besar.
 
+## 1.18.0 — 18 November 2026
+
+- **Foto dokumentasi masuk ke unduhan Excel laporan Absen per sesi:** lembar baru *Dokumentasi* berisi tanggal, jam, kelas, topik, pengajar, **foto mulai sesi** dan **foto akhir sesi** yang tersemat langsung di sel, keterangan bila ada lebih dari satu berkas, dan tautan *Buka sesi*. Berkas non-foto (mis. PDF) tampil sebagai nama berkas. Foto disematkan sebagai gambar kecil agar ukuran Excel tetap ringan.
+
 ## 1.17.0 — 18 November 2026
 
 - **Pusat Laporan → Absen per sesi menampilkan dokumentasi foto per sesi:** galeri foto/berkas *Mulai sesi* dan *Akhir sesi* tiap sesi (ketuk untuk memperbesar), tautan *Buka sesi*, dan filter *Belum lengkap* untuk melihat sesi yang wajib dokumentasi tetapi belum ada fotonya. Ringkasan laporan menampilkan jumlah *Dokumentasi belum lengkap*.

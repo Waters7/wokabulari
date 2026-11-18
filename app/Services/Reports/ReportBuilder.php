@@ -5,17 +5,22 @@ namespace App\Services\Reports;
 use App\Enums\MealType;
 use App\Enums\ReportPeriod;
 use App\Enums\ReportType;
+use App\Enums\SessionPhase;
+use App\Enums\SessionStatus;
 use App\Models\Batch;
+use App\Models\LearningSession;
 use App\Models\MealSchedule;
+use App\Models\SessionDocumentation;
 use App\Models\User;
 use App\Services\GradeService;
+use App\Services\SessionDocumentationRule;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Collection;
 
 /**
  * Isi Pusat Laporan: ringkasan + satu atau beberapa tabel (lembar) yang sama untuk layar dan Excel.
  *
- * @phpstan-type Sheet array{title: string, headings: list<string>, rows: list<list<scalar|null>>}
+ * @phpstan-type Sheet array{title: string, headings: list<string>, rows: list<list<scalar|null>>, links?: list<int>}
  * @phpstan-type Report array{title: string, period: string, summary: list<array{label: string, value: string}>, sheets: list<Sheet>}
  */
 class ReportBuilder
@@ -25,6 +30,7 @@ class ReportBuilder
         protected ScoreAnalytics $scores,
         protected MealAnalytics $meals,
         protected TeachingAnalytics $teaching,
+        protected SessionDocumentationRule $documentation,
     ) {}
 
     /**
@@ -121,6 +127,9 @@ class ReportBuilder
         $expected = (int) $sessions->sum('expected');
         $attended = (int) $sessions->sum('attended');
         $statuses = ['present', 'late', 'excused', 'sick', 'absent', 'missing'];
+        $docs = SessionDocumentation::query()->whereIn('learning_session_id', $sessions->map(fn ($r) => $r['session']->id))
+            ->orderBy('id')->get()->groupBy(fn (SessionDocumentation $d) => $d->learning_session_id.'|'.$d->phase->value);
+        $gallery = $sessions->map(fn (array $row) => $this->documentation($row['session'], $docs))->values();
 
         $detail = [];
         foreach ($sessions as $row) {
@@ -141,16 +150,21 @@ class ReportBuilder
                 ['label' => 'Kehadiran rata-rata', 'value' => $this->percent($expected ? $attended / $expected * 100 : null)],
                 ['label' => 'Alpa', 'value' => (string) $sessions->sum(fn ($r) => $r['counts']['absent'])],
                 ['label' => 'Tidak tercatat', 'value' => (string) $sessions->sum(fn ($r) => $r['counts']['missing'])],
+                ['label' => 'Dokumentasi belum lengkap', 'value' => (string) $gallery->where('incomplete', true)->count()],
             ],
+            'gallery' => $gallery->all(),
             'sheets' => [
                 [
                     'title' => 'Per sesi',
-                    'headings' => ['Tanggal', 'Jam', 'Kelas', 'Topik', 'Pengajar', 'Peserta', 'Hadir', 'Terlambat', 'Izin', 'Sakit', 'Alpa', 'Tidak tercatat', 'Kehadiran (%)'],
-                    'rows' => $sessions->map(fn (array $row) => [
+                    'headings' => ['Tanggal', 'Jam', 'Kelas', 'Topik', 'Pengajar', 'Peserta', 'Hadir', 'Terlambat', 'Izin', 'Sakit', 'Alpa', 'Tidak tercatat', 'Kehadiran (%)', 'Dok. mulai', 'Dok. akhir', 'Tautan sesi'],
+                    'links' => [15],
+                    'rows' => $sessions->values()->map(fn (array $row, int $i) => [
                         tanggal($row['session']->date, 'D, j M Y'), $row['session']->timeRange(), $row['session']->classroom->name,
                         $row['session']->topic, $row['session']->teacher?->name, $row['expected'],
                         ...array_map(fn ($s) => $row['counts'][$s], $statuses), $row['rate'],
-                    ])->values()->all(),
+                        $gallery[$i]['start']['label'], $gallery[$i]['end']['label'],
+                        route('teach.sessions.show', $row['session']),
+                    ])->all(),
                 ],
                 [
                     'title' => 'Rincian peserta',
@@ -159,6 +173,37 @@ class ReportBuilder
                 ],
             ],
         ];
+    }
+
+    /**
+     * Dokumentasi foto satu sesi untuk galeri & kolom Excel: berkas per tahap dan statusnya.
+     *
+     * @param  Collection<string, Collection<int, SessionDocumentation>>  $docs  kunci "id sesi|tahap"
+     * @return array<string, mixed>
+     */
+    protected function documentation(LearningSession $session, Collection $docs): array
+    {
+        $required = $this->documentation->required($session);
+        $phases = [];
+
+        foreach (SessionPhase::cases() as $phase) {
+            $files = $docs->get($session->id.'|'.$phase->value, collect())->values();
+            // Tahap sudah lewat: mulai (sesi bukan terjadwal) atau akhir (sesi selesai).
+            $reached = $phase === SessionPhase::Start ? $session->status !== SessionStatus::Scheduled : $session->status === SessionStatus::Completed;
+            $missing = $files->isEmpty() && $required && $reached;
+
+            $phases[$phase->value] = [
+                'files' => $files,
+                'missing' => $missing,
+                'label' => match (true) {
+                    $files->isNotEmpty() => 'Ada ('.$files->count().')',
+                    $missing => 'Belum ada',
+                    default => null,
+                },
+            ];
+        }
+
+        return ['session' => $session, 'required' => $required, 'incomplete' => $phases['start']['missing'] || $phases['end']['missing']] + $phases;
     }
 
     protected function mealReceipts(ReportFilter $filter): array

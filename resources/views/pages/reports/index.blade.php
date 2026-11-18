@@ -38,6 +38,12 @@ new #[Title('Pusat laporan')] class extends Component {
     #[Url(as: 'pengajar')]
     public ?int $teacherId = null;
 
+    /** Galeri dokumentasi sesi: '' = semua, 'missing' = belum lengkap. */
+    #[Url(as: 'dok')]
+    public string $docFilter = '';
+
+    public int $galleryLimit = 24;
+
     public function mount(): void
     {
         $types = ReportType::for(auth()->user());
@@ -222,7 +228,11 @@ new #[Title('Pusat laporan')] class extends Component {
                                     <tr>
                                         @foreach ($row as $cell)
                                             <td @class(['whitespace-nowrap px-3 py-2', 'text-right tabular-nums' => is_int($cell) || is_float($cell)])>
-                                                {{ $cell === null || $cell === '' ? '–' : (is_float($cell) ? angka($cell, 1) : $cell) }}
+                                                @if (is_string($cell) && str_starts_with($cell, url('/').'/'))
+                                                    <a href="{{ $cell }}" wire:navigate class="font-semibold text-woka hover:underline dark:text-woka-light">Buka sesi</a>
+                                                @else
+                                                    {{ $cell === null || $cell === '' ? '–' : (is_float($cell) ? angka($cell, 1) : $cell) }}
+                                                @endif
                                             </td>
                                         @endforeach
                                     </tr>
@@ -235,6 +245,10 @@ new #[Title('Pusat laporan')] class extends Component {
                     @endif
                 @endif
             </details>
+
+            @if ($index === 0 && isset($report['gallery']))
+                @include('partials.reports.session-gallery', ['gallery' => $report['gallery'], 'docFilter' => $docFilter, 'galleryLimit' => $galleryLimit])
+            @endif
         @endforeach
     </div>
 </div>

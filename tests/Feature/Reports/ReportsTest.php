@@ -4,7 +4,10 @@ use App\Actions\Assessments\SaveSessionScore;
 use App\Enums\AttemptStatus;
 use App\Enums\AttendanceStatus;
 use App\Enums\DeliveryUnit;
+use App\Enums\DocumentationSource;
 use App\Enums\MealType;
+use App\Enums\ReportPeriod;
+use App\Enums\ReportType;
 use App\Enums\SessionStatus;
 use App\Enums\StaffUnit;
 use App\Exports\ReportExport;
@@ -18,12 +21,17 @@ use App\Models\MealSchedule;
 use App\Models\Quiz;
 use App\Models\QuizAttempt;
 use App\Models\SessionAssessmentComponent;
+use App\Models\SessionDocumentation;
 use App\Models\Vendor;
+use App\Services\Reports\ReportBuilder;
 use App\Services\Reports\ReportFilter;
 use App\Services\Reports\ScoreAnalytics;
+use Carbon\CarbonImmutable;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
 use Maatwebsite\Excel\Facades\Excel;
+use PhpOffice\PhpSpreadsheet\IOFactory;
 
 /**
  * Rabu 4 Nov 2026. Angkatan absen Senin–Jumat mulai Senin 2 Nov.
@@ -160,12 +168,12 @@ test('dashboard eksekutif: angka utama, catatan keputusan, perlu perhatian, dan 
 });
 
 test('berkas Excel sungguhan terbentuk dengan satu lembar per tabel', function () {
-    $report = app(\App\Services\Reports\ReportBuilder::class)->build(\App\Enums\ReportType::MealReceipts, \App\Enums\ReportPeriod::Weekly, \Carbon\CarbonImmutable::parse('2026-11-04'), $this->batch->id, null);
-    $binary = Excel::raw(new ReportExport($report, ['Angkatan uji']), \Maatwebsite\Excel\Excel::XLSX);
+    $report = app(ReportBuilder::class)->build(ReportType::MealReceipts, ReportPeriod::Weekly, CarbonImmutable::parse('2026-11-04'), $this->batch->id, null);
+    $binary = Excel::raw(new ReportExport($report, ['Angkatan uji']), Maatwebsite\Excel\Excel::XLSX);
 
     $path = tempnam(sys_get_temp_dir(), 'lap').'.xlsx';
     file_put_contents($path, $binary);
-    $book = \PhpOffice\PhpSpreadsheet\IOFactory::load($path);
+    $book = IOFactory::load($path);
     unlink($path);
 
     expect($book->getSheetNames())->toBe(['Per jadwal', 'Per penerima', 'Per vendor', 'Rincian tanda terima'])
@@ -195,4 +203,48 @@ test('dashboard eksekutif: tab grafik, urut kolom & filter tabel peserta', funct
 
     // Dari ringkasan "Lihat semua" membuka tab Peserta dengan filter perlu perhatian.
     $page->call('showPeople', 'attention')->assertSet('tab', 'peserta')->assertSet('show', 'attention');
+});
+
+test('absen per sesi: galeri dokumentasi foto per sesi, filter belum lengkap, kolom dokumentasi di Excel', function () {
+    Storage::fake('private');
+    Excel::fake();
+    $complete = LearningSession::factory()->for($this->classroom)->create(['date' => '2026-11-04', 'topic' => 'Angka dan Waktu', 'status' => SessionStatus::Completed]);
+    SessionDocumentation::factory()->for($complete, 'session')->create();
+    SessionDocumentation::factory()->for($complete, 'session')->end()->create([
+        'mime_type' => 'application/pdf', 'source' => DocumentationSource::Upload, 'original_name' => 'akhir.pdf',
+    ]);
+    $params = ['jenis' => 'session_attendance', 'periode' => 'weekly', 'tanggal' => '2026-11-04', 'angkatan' => $this->batch->id];
+
+    Livewire::actingAs(leader())->withQueryParams($params)->test('pages::reports.index')
+        ->assertSee('Dokumentasi foto per sesi')
+        ->assertSee('Belum lengkap (1)')
+        ->assertSee('Dokumentasi belum lengkap')
+        ->assertSeeHtml('wire:key="g-'.$complete->id.'"')
+        ->assertSeeHtml('wire:key="g-'.$this->session->id.'"')
+        ->assertSeeInOrder(['Perkenalan Diri', 'Mulai sesi', 'Belum ada', 'Akhir sesi', 'Belum ada'])
+        ->assertSeeHtml(route('teach.sessions.show', $this->session))
+        ->set('docFilter', 'missing')
+        ->assertDontSeeHtml('wire:key="g-'.$complete->id.'"')
+        ->assertSeeHtml('wire:key="g-'.$this->session->id.'"')
+        ->call('export');
+
+    Excel::assertDownloaded('absen-per-sesi-2026-11-02-mingguan.xlsx', function (ReportExport $export) use ($complete) {
+        $rows = $export->sheets()[0]->array();
+
+        return $rows[5][13] === 'Dok. mulai' && $rows[5][15] === 'Tautan sesi'
+            && $rows[6][13] === 'Belum ada' && $rows[6][14] === 'Belum ada'
+            && $rows[7][13] === 'Ada (1)' && $rows[7][15] === route('teach.sessions.show', $complete);
+    });
+});
+
+test('kolom tautan sesi di Excel menjadi tautan "Buka sesi" yang bisa diklik', function () {
+    $report = app(ReportBuilder::class)->build(ReportType::SessionAttendance, ReportPeriod::Weekly, Carbon::parse('2026-11-04')->toImmutable(), $this->batch->id, null);
+    $path = tempnam(sys_get_temp_dir(), 'lap').'.xlsx';
+    file_put_contents($path, Excel::raw(new ReportExport($report), Maatwebsite\Excel\Excel::XLSX));
+
+    $cell = IOFactory::load($path)->getSheet(0)->getCell('P7');
+    @unlink($path);
+
+    expect($cell->getValue())->toBe('Buka sesi')
+        ->and($cell->getHyperlink()->getUrl())->toBe(route('teach.sessions.show', $this->session));
 });

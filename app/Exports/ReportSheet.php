@@ -8,6 +8,7 @@ use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithEvents;
 use Maatwebsite\Excel\Concerns\WithTitle;
 use Maatwebsite\Excel\Events\AfterSheet;
+use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 
 class ReportSheet implements FromArray, ShouldAutoSize, WithEvents, WithTitle
 {
@@ -15,7 +16,7 @@ class ReportSheet implements FromArray, ShouldAutoSize, WithEvents, WithTitle
     protected const HEADER_ROWS = 5;
 
     /**
-     * @param  array{title: string, headings: list<string>, rows: list<list<mixed>>}  $sheet
+     * @param  array{title: string, headings: list<string>, rows: list<list<mixed>>, links?: list<int>}  $sheet
      * @param  array<string, mixed>  $report
      * @param  list<string>  $scope
      */
@@ -48,6 +49,20 @@ class ReportSheet implements FromArray, ShouldAutoSize, WithEvents, WithTitle
                 $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(13);
                 $sheet->getStyle((self::HEADER_ROWS + 1).':'.(self::HEADER_ROWS + 1))->getFont()->setBold(true);
                 $sheet->freezePane('A'.(self::HEADER_ROWS + 2));
+
+                // Kolom tautan (mis. ke halaman sesi): tampil "Buka sesi" yang bisa diklik.
+                foreach ($this->sheet['links'] ?? [] as $column) {
+                    $letter = Coordinate::stringFromColumnIndex($column + 1);
+                    foreach ($this->sheet['rows'] as $i => $row) {
+                        $url = $row[$column] ?? null;
+                        if (is_string($url) && str_starts_with($url, 'http')) {
+                            $cell = $sheet->getCell($letter.(self::HEADER_ROWS + 2 + $i));
+                            $cell->setValue('Buka sesi');
+                            $cell->getHyperlink()->setUrl($url);
+                            $cell->getStyle()->getFont()->setUnderline(true)->getColor()->setRGB('007D71');
+                        }
+                    }
+                }
             },
         ];
     }

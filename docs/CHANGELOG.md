@@ -3,6 +3,11 @@
 Versi ditampilkan di halaman login dan menu aplikasi (`config/wokabulari.php` → `version`).
 Aturan penomoran: **patch** (1.0.x) perbaikan, **minor** (1.x.0) fitur baru, **major** (x.0.0) perubahan besar.
 
+## 1.17.0 — 18 November 2026
+
+- **Pusat Laporan → Absen per sesi menampilkan dokumentasi foto per sesi:** galeri foto/berkas *Mulai sesi* dan *Akhir sesi* tiap sesi (ketuk untuk memperbesar), tautan *Buka sesi*, dan filter *Belum lengkap* untuk melihat sesi yang wajib dokumentasi tetapi belum ada fotonya. Ringkasan laporan menampilkan jumlah *Dokumentasi belum lengkap*.
+- Unduhan Excel laporan sesi mendapat kolom *Dok. mulai*, *Dok. akhir* (mis. "Ada (1)" atau "Belum ada"), dan *Tautan sesi* berupa tautan "Buka sesi" yang bisa diklik.
+
 ## 1.16.1 — 13 November 2026
 
 - Perbaikan: **Simpan input konsumsi galat 500** saat vendor diganti ke vendor yang jadwalnya pada tanggal & waktu makan itu pernah dihapus. Jadwal terhapus yang masih kosong kini dibebaskan otomatis; bila sudah berisi tanda terima/input, muncul pesan yang jelas. Berlaku juga untuk ubah jadwal di form dan ganti vendor massal.

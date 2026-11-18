@@ -299,3 +299,7 @@ Acuan: DOCKER.md bagian C–D
 
 ### Perbaikan — 13 Nov 2026 (v1.16.1)
 - Galat 500 simpan input konsumsi saat ganti vendor (bentrok dengan jadwal terhapus) dan tanda terima ganda bersamaan. Test baru di `MealScheduleSlotTest`.
+
+### Tambahan — 18 Nov 2026 (v1.17.0)
+- Pusat Laporan → Absen per sesi: galeri dokumentasi foto per sesi (filter Belum lengkap), kolom dokumentasi & tautan sesi di Excel.
+- Test: 354 lulus. Dicek di 360px: galeri dokumentasi (lebar kartu dan foto termuat).

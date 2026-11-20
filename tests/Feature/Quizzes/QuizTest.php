@@ -7,6 +7,7 @@ use App\Actions\Quizzes\QuizAttemptService;
 use App\Actions\Quizzes\SaveQuestion;
 use App\Enums\AttemptStatus;
 use App\Enums\ComponentSource;
+use App\Enums\QuizStatus;
 use App\Enums\QuizType;
 use App\Events\QuizCompleted;
 use App\Models\Classroom;
@@ -327,4 +328,52 @@ test('pilih semua soal bank sekaligus saat menyusun quiz', function () {
         ->call('addSelected');
 
     expect($quiz->fresh()->questions()->count())->toBe(5);
+});
+
+test('quiz yang belum dikerjakan bisa dihapus dari pengaturan; soalnya tetap di bank soal', function () {
+    [$classroom, $quiz, $q] = quizWithAllTypes(['status' => QuizStatus::Draft]);
+    $teacher = $classroom->teacher;
+
+    Livewire::actingAs($teacher)->test('pages::teach.quizzes')
+        ->call('edit', $quiz->id)
+        ->assertSeeHtml('data-test="quiz-delete"')
+        ->call('delete', $quiz->id)
+        ->assertSet('showForm', false);
+
+    expect(Quiz::query()->find($quiz->id))->toBeNull()
+        ->and(Quiz::withTrashed()->find($quiz->id))->not->toBeNull()
+        ->and(Question::query()->whereKey(collect($q)->pluck('id'))->count())->toBe(6);
+
+    $this->actingAs($classroom->participants->first())->get(route('quizzes.take', $quiz))->assertNotFound();
+});
+
+test('quiz yang sudah dikerjakan tidak bisa dihapus; pengajar lain tidak bisa menghapus', function () {
+    [$classroom, $quiz] = quizWithAllTypes();
+    $quiz->update(['status' => QuizStatus::Published]);
+    app(QuizAttemptService::class)->start($quiz->fresh(), $classroom->participants->first(), 'sesi-x');
+
+    Livewire::actingAs($classroom->teacher)->test('pages::teach.quizzes')
+        ->call('edit', $quiz->id)
+        ->assertDontSeeHtml('data-test="quiz-delete"')
+        ->assertSee('tidak bisa dihapus')
+        ->call('delete', $quiz->id);
+    expect(Quiz::query()->find($quiz->id))->not->toBeNull();
+
+    expect(fn () => app(ManageQuiz::class)->delete($quiz))->toThrow(InvalidArgumentException::class, 'sudah dikerjakan');
+
+    $other = Quiz::factory()->create();
+    Livewire::actingAs(teacher())->test('pages::teach.quizzes')->call('delete', $other->id)->assertForbidden();
+});
+
+test('hapus dari halaman detail quiz kembali ke daftar dengan pesan', function () {
+    [$classroom, $quiz] = quizWithAllTypes();
+
+    Livewire::actingAs($classroom->teacher)->test('pages::teach.quiz-show', ['quiz' => $quiz])
+        ->assertSeeHtml('data-test="quiz-delete"')
+        ->call('deleteQuiz')
+        ->assertRedirect(route('teach.quizzes.index'));
+
+    expect(Quiz::query()->find($quiz->id))->toBeNull();
+    $this->actingAs($classroom->teacher)->withSession(['status' => 'Quiz "'.$quiz->title.'" dihapus.'])
+        ->get(route('teach.quizzes.index'))->assertSee('dihapus');
 });

@@ -153,6 +153,24 @@ new #[Title('Quiz & ujian')] class extends Component {
         Flux::toast(variant: 'success', text: 'Pengaturan quiz tersimpan.');
     }
 
+    public function delete(int $id, ManageQuiz $manage): void
+    {
+        $quiz = Quiz::findOrFail($id);
+        $this->authorize('update', $quiz);
+
+        try {
+            $manage->delete($quiz);
+        } catch (\InvalidArgumentException $e) {
+            Flux::toast(variant: 'danger', text: $e->getMessage());
+
+            return;
+        }
+
+        $this->showForm = false;
+        $this->editingId = null;
+        Flux::toast(variant: 'success', text: 'Quiz "'.$quiz->title.'" dihapus. Soal-soalnya tetap ada di bank soal.');
+    }
+
     public function with(): array
     {
         $classrooms = $this->classrooms();
@@ -172,6 +190,7 @@ new #[Title('Quiz & ujian')] class extends Component {
             'aspects' => LanguageAspect::cases(),
             'visibilities' => ResultVisibility::cases(),
             'displays' => ReadingDisplay::cases(),
+            'editingAttempts' => $this->editingId ? \App\Models\QuizAttempt::query()->where('quiz_id', $this->editingId)->count() : 0,
         ];
     }
 }; ?>
@@ -183,6 +202,10 @@ new #[Title('Quiz & ujian')] class extends Component {
             <flux:button variant="primary" icon="plus" wire:click="create">Quiz baru</flux:button>
         </x-slot:actions>
     </x-page-header>
+
+    @if (session('status'))
+        <flux:callout class="mb-4" icon="check-circle" color="green" :text="session('status')" data-test="quiz-status" />
+    @endif
 
     <div class="mb-4 grid gap-2 sm:grid-cols-3">
         <flux:select wire:model.live="classroom">
@@ -201,9 +224,10 @@ new #[Title('Quiz & ujian')] class extends Component {
 
     <div class="space-y-2">
         @forelse ($quizzes as $quiz)
-            <x-card :href="route('teach.quizzes.show', $quiz)" wire:key="qz-{{ $quiz->id }}">
-                <div class="flex flex-wrap items-start justify-between gap-2">
-                    <div class="min-w-0">
+            {{-- Tombol pengaturan di luar tautan kartu agar tidak ikut membuka halaman quiz. --}}
+            <x-card wire:key="qz-{{ $quiz->id }}" class="transition hover:ring-woka-200 hover:shadow-sm">
+                <div class="flex items-start justify-between gap-2">
+                    <a href="{{ route('teach.quizzes.show', $quiz) }}" wire:navigate class="min-w-0 flex-1">
                         <p class="text-xs text-hutan/60 dark:text-santan/60">{{ $quiz->classroom->label() }} · {{ $quiz->opens_at ? tanggal_jam($quiz->opens_at) : 'Tanpa jadwal' }}{{ $quiz->closes_at ? ' – '.tanggal_jam($quiz->closes_at) : '' }}</p>
                         <p class="font-display text-lg font-bold">{{ $quiz->title }}</p>
                         <div class="mt-1 flex flex-wrap items-center gap-1.5 text-xs">
@@ -212,8 +236,8 @@ new #[Title('Quiz & ujian')] class extends Component {
                             <span>{{ $quiz->questions_count }} soal · {{ $quiz->duration_minutes }} menit · {{ $quiz->finished_count }} mengerjakan</span>
                             @if ($quiz->pending_count)<flux:badge size="sm" color="amber">{{ $quiz->pending_count }} perlu dinilai</flux:badge>@endif
                         </div>
-                    </div>
-                    <flux:button size="sm" variant="ghost" icon="cog-6-tooth" wire:click.prevent="edit({{ $quiz->id }})" aria-label="Pengaturan" />
+                    </a>
+                    <flux:button size="sm" variant="ghost" icon="cog-6-tooth" wire:click="edit({{ $quiz->id }})" aria-label="Pengaturan" class="shrink-0" />
                 </div>
             </x-card>
         @empty
@@ -272,9 +296,23 @@ new #[Title('Quiz & ujian')] class extends Component {
                 <flux:switch wire:model="form.shuffle_questions" label="Acak soal" />
                 <flux:switch wire:model="form.shuffle_options" label="Acak opsi" />
             </div>
-            <div class="flex justify-end gap-2">
-                <flux:modal.close><flux:button variant="ghost">Batal</flux:button></flux:modal.close>
-                <flux:button type="submit" variant="primary">{{ $editingId ? 'Simpan' : 'Lanjut pilih soal' }}</flux:button>
+            <div class="flex flex-wrap items-center justify-between gap-2" x-data="{ confirming: false }" wire:key="quiz-actions-{{ $editingId ?? 'baru' }}">
+                @if ($editingId && $editingAttempts === 0)
+                    <div class="flex flex-wrap items-center gap-2" data-test="quiz-delete">
+                        <flux:button variant="ghost" icon="trash" class="text-rica!" x-show="! confirming" x-on:click="confirming = true">Hapus quiz</flux:button>
+                        <span x-show="confirming" x-cloak class="text-sm font-semibold text-rica">Hapus quiz ini? Soal tetap ada di bank soal.</span>
+                        <flux:button variant="danger" size="sm" x-show="confirming" x-cloak wire:click="delete({{ $editingId }})">Ya, hapus</flux:button>
+                        <flux:button variant="ghost" size="sm" x-show="confirming" x-cloak x-on:click="confirming = false">Batal</flux:button>
+                    </div>
+                @elseif ($editingId)
+                    <p class="text-xs text-hutan/60 dark:text-santan/60">Sudah dikerjakan {{ $editingAttempts }} peserta, tidak bisa dihapus. Tutup quiz bila tidak dipakai.</p>
+                @else
+                    <span></span>
+                @endif
+                <div class="flex gap-2" x-show="! confirming">
+                    <flux:modal.close><flux:button variant="ghost">Batal</flux:button></flux:modal.close>
+                    <flux:button type="submit" variant="primary">{{ $editingId ? 'Simpan' : 'Lanjut pilih soal' }}</flux:button>
+                </div>
             </div>
         </form>
     </flux:modal>

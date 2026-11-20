@@ -92,6 +92,22 @@ new #[Title('Detail quiz')] class extends Component {
         $this->run(fn () => $manage->publish($this->quiz), 'Quiz diterbitkan. Peserta mendapat notifikasi.');
     }
 
+    public function deleteQuiz(ManageQuiz $manage): void
+    {
+        $this->authorize('manage', $this->quiz);
+
+        try {
+            $manage->delete($this->quiz);
+        } catch (\InvalidArgumentException $e) {
+            Flux::toast(variant: 'danger', text: $e->getMessage());
+
+            return;
+        }
+
+        session()->flash('status', 'Quiz "'.$this->quiz->title.'" dihapus. Soal-soalnya tetap ada di bank soal.');
+        $this->redirectRoute('teach.quizzes.index', navigate: true);
+    }
+
     public function close(ManageQuiz $manage): void
     {
         $this->run(fn () => $manage->close($this->quiz), 'Quiz ditutup.');
@@ -150,6 +166,10 @@ new #[Title('Detail quiz')] class extends Component {
             @endif
             @if ($quiz->result_visibility === \App\Enums\ResultVisibility::Manual && ! $quiz->results_released_at)
                 <flux:button icon="eye" wire:click="release">Rilis hasil</flux:button>
+            @endif
+            @if (! $quiz->attempts()->exists())
+                <x-confirm-button action="deleteQuiz" label="Hapus" icon="trash" variant="danger" size="base" data-test="quiz-delete"
+                                  title="Hapus quiz ini?" message="Quiz yang belum dikerjakan siapa pun akan dihapus. Soal-soalnya tetap tersimpan di bank soal." confirmLabel="Ya, hapus" />
             @endif
         </x-slot:actions>
     </x-page-header>

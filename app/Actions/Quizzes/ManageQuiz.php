@@ -120,6 +120,18 @@ class ManageQuiz
         $quiz->update(['results_released_at' => now()]);
     }
 
+    /**
+     * Hapus quiz yang belum dikerjakan siapa pun (mis. tidak jadi terbit). Soal tetap ada di bank soal.
+     */
+    public function delete(Quiz $quiz): void
+    {
+        if ($quiz->attempts()->exists()) {
+            throw new InvalidArgumentException('Quiz sudah dikerjakan peserta sehingga tidak bisa dihapus. Tutup quiz bila tidak dipakai lagi.');
+        }
+
+        $quiz->delete();
+    }
+
     /** Soal tidak boleh diubah setelah ada peserta yang mengerjakan. */
     protected function ensureEditable(Quiz $quiz): void
     {

@@ -377,3 +377,45 @@ test('hapus dari halaman detail quiz kembali ke daftar dengan pesan', function (
     $this->actingAs($classroom->teacher)->withSession(['status' => 'Quiz "'.$quiz->title.'" dihapus.'])
         ->get(route('teach.quizzes.index'))->assertSee('dihapus');
 });
+
+test('atur poin otomatis: sama rata dengan jumlah pas, per jenis soal, dan kembali ke poin bank soal', function () {
+    [$classroom, $quiz, $q] = quizWithAllTypes(['status' => QuizStatus::Draft]);
+
+    // 6 soal, total 100: 16,67 ×4 + 16,66 ×2 = 100 tepat.
+    $page = Livewire::actingAs($classroom->teacher)->test('pages::teach.quiz-show', ['quiz' => $quiz])
+        ->assertSeeHtml('data-test="auto-points"')
+        ->set('pointTotal', '100')
+        ->call('applyPoints')
+        ->assertHasNoErrors();
+
+    $points = $quiz->fresh()->questions->map(fn ($question) => (float) $question->pivot->points);
+    expect(round($points->sum(), 2))->toBe(100.0)
+        ->and($points->unique()->sort()->values()->all())->toBe([16.66, 16.67])
+        ->and($quiz->fresh()->totalPoints())->toBe(100.0);
+
+    $page->set('pointMode', 'jenis')
+        ->set('typePoints.multiple_choice', '2')
+        ->set('typePoints.matching', '10')
+        ->set('typePoints.essay', '')
+        ->call('applyPoints')
+        ->assertHasNoErrors();
+    $fresh = $quiz->fresh();
+    expect($fresh->pointsFor($fresh->questions->firstWhere('id', $q['mc']->id)))->toBe(2.0)
+        ->and($fresh->pointsFor($fresh->questions->firstWhere('id', $q['match']->id)))->toBe(10.0)
+        ->and($fresh->pointsFor($fresh->questions->firstWhere('id', $q['essay']->id)))->toBe(16.66);
+
+    $page->set('pointMode', 'rata')->set('pointTotal', '0')->call('applyPoints')->assertHasErrors('pointTotal');
+
+    $page->call('resetPoints');
+    expect($quiz->fresh()->questions->pluck('pivot.points')->filter()->all())->toBe([])
+        ->and($quiz->fresh()->totalPoints())->toBe(7.0);
+});
+
+test('poin otomatis ditolak setelah quiz dikerjakan', function () {
+    [$classroom, $quiz] = quizWithAllTypes();
+    $quiz->update(['status' => QuizStatus::Published]);
+    app(QuizAttemptService::class)->start($quiz->fresh(), $classroom->participants->first(), 'sesi-p');
+
+    expect(fn () => app(ManageQuiz::class)->distributePoints($quiz, 100))->toThrow(InvalidArgumentException::class);
+    Livewire::actingAs($classroom->teacher)->test('pages::teach.quiz-show', ['quiz' => $quiz])->assertDontSeeHtml('data-test="auto-points"');
+});

@@ -61,6 +61,18 @@ class QuizRequest extends FormRequest
     }
 
     /**
+     * Atur poin otomatis: sama rata (total dibagi rata) atau per jenis soal.
+     *
+     * @return array<string, mixed>
+     */
+    public static function pointsRules(string $mode): array
+    {
+        return $mode === 'rata'
+            ? ['total' => ['required', 'numeric', 'min:1', 'max:1000']]
+            : ['types' => ['required', 'array'], 'types.*' => ['nullable', 'numeric', 'min:0.01', 'max:100']];
+    }
+
+    /**
      * @return array<string, mixed>
      */
     public static function questionRules(): array

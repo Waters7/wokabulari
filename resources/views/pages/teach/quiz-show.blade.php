@@ -4,10 +4,13 @@ use App\Actions\Quizzes\ManageQuiz;
 use App\Enums\AttemptStatus;
 use App\Enums\QuizStatus;
 use App\Enums\QuizType;
+use App\Http\Requests\QuizRequest;
 use App\Models\QuestionBank;
 use App\Models\Quiz;
 use App\Services\QuizAnalytics;
 use Flux\Flux;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Title;
 use Livewire\Attributes\Url;
 use Livewire\Component;
@@ -27,6 +30,14 @@ new #[Title('Detail quiz')] class extends Component {
 
     /** @var array<int, array{points: mixed, section: mixed}> */
     public array $pivots = [];
+
+    /** Atur poin otomatis: 'rata' = total dibagi rata, 'jenis' = poin per jenis soal. */
+    public string $pointMode = 'rata';
+
+    public string $pointTotal = '100';
+
+    /** @var array<string, string> jenis soal => poin */
+    public array $typePoints = [];
 
     public function mount(Quiz $quiz): void
     {
@@ -80,6 +91,35 @@ new #[Title('Detail quiz')] class extends Component {
         $this->run(fn () => $manage->move($this->quiz, $questionId, $direction), 'Urutan diperbarui.');
     }
 
+    public function applyPoints(ManageQuiz $manage): void
+    {
+        $this->authorize('manage', $this->quiz);
+        $this->resetErrorBag();
+        $mode = $this->pointMode === 'jenis' ? 'jenis' : 'rata';
+        $data = $mode === 'rata' ? ['total' => str_replace(',', '.', $this->pointTotal)] : ['types' => array_map(fn ($v) => $v === '' ? null : str_replace(',', '.', (string) $v), $this->typePoints)];
+
+        $validator = Validator::make($data, QuizRequest::pointsRules($mode), [], ['total' => 'total poin', 'types.*' => 'poin']);
+        if ($validator->fails()) {
+            throw ValidationException::withMessages(collect($validator->errors()->messages())->mapWithKeys(fn ($m, $k) => [$k === 'total' ? 'pointTotal' : 'typePoints.'.substr($k, 6) => $m])->all());
+        }
+
+        if ($mode === 'rata') {
+            $this->run(function () use ($manage, $data) {
+                $each = $manage->distributePoints($this->quiz, (float) $data['total']);
+                $this->pointTotal = (string) (float) $data['total'];
+
+                return $each;
+            }, 'Poin dibagi rata: total '.angka((float) $data['total'], 2).' poin, setiap jawaban benar bernilai sama.');
+        } else {
+            $this->run(fn () => $manage->setPointsByType($this->quiz, $data['types']), 'Poin per jenis soal diterapkan.');
+        }
+    }
+
+    public function resetPoints(ManageQuiz $manage): void
+    {
+        $this->run(fn () => $manage->resetPoints($this->quiz), 'Poin dikembalikan ke nilai di bank soal.');
+    }
+
     public function savePivot(int $questionId, ManageQuiz $manage): void
     {
         $pivot = $this->pivots[$questionId] ?? [];
@@ -130,6 +170,11 @@ new #[Title('Detail quiz')] class extends Component {
         ];
 
         if ($this->tab === 'soal') {
+            // Jenis soal di quiz ini untuk pengaturan poin per jenis.
+            $data['typeCounts'] = $questions->groupBy(fn ($q) => $q->type->value)->map->count();
+            foreach ($data['typeCounts'] as $type => $count) {
+                $this->typePoints[$type] ??= (string) (float) $this->quiz->pointsFor($questions->first(fn ($q) => $q->type->value === $type));
+            }
             $data['banks'] = QuestionBank::query()->where('language_id', $this->quiz->classroom->language_id)->withCount('questions')->orderBy('name')->get();
             $data['bankQuestions'] = $this->bank ? QuestionBank::find($this->bank)?->questions()->whereNotIn('questions.id', $questions->pluck('id'))->get() ?? collect() : collect();
         }
@@ -187,6 +232,47 @@ new #[Title('Detail quiz')] class extends Component {
         @endif
         <div class="grid gap-4 lg:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)]">
             <div class="space-y-2">
+                @if (! $locked && $questions->isNotEmpty())
+                    <x-card x-data="{ open: false }" data-test="auto-points">
+                        <button type="button" class="flex w-full items-center justify-between gap-2 text-left" x-on:click="open = ! open">
+                            <span class="flex items-center gap-2 font-semibold"><flux:icon.calculator class="size-5 text-woka" /> Atur poin otomatis</span>
+                            <span class="text-xs text-hutan/60 dark:text-santan/60">{{ $questions->count() }} soal · total {{ angka($totalPoints, 2) }} poin <flux:icon.chevron-down variant="micro" class="inline transition" x-bind:class="open && 'rotate-180'" /></span>
+                        </button>
+                        <div x-show="open" x-collapse class="mt-3 space-y-3">
+                            <flux:radio.group wire:model.live="pointMode" variant="segmented" aria-label="Cara mengatur poin">
+                                <flux:radio value="rata">Sama rata</flux:radio>
+                                <flux:radio value="jenis">Per jenis soal</flux:radio>
+                            </flux:radio.group>
+
+                            @if ($pointMode === 'jenis')
+                                <div class="grid gap-2 sm:grid-cols-2">
+                                    @foreach ($typeCounts as $type => $count)
+                                        <div wire:key="tp-{{ $type }}">
+                                            <flux:input wire:model="typePoints.{{ $type }}" inputmode="decimal" :label="\App\Enums\QuestionType::from($type)->label().' ('.$count.' soal)'" description="Poin per soal" />
+                                            <flux:error name="typePoints.{{ $type }}" />
+                                        </div>
+                                    @endforeach
+                                </div>
+                            @else
+                                <div>
+                                    <flux:input wire:model.live.debounce.400ms="pointTotal" inputmode="decimal" label="Total poin quiz" class="max-w-40" />
+                                    <flux:error name="pointTotal" />
+                                    @php
+                                        $perQuestion = is_numeric(str_replace(',', '.', $pointTotal)) ? (float) str_replace(',', '.', $pointTotal) / $questions->count() : null;
+                                    @endphp
+                                    <p class="mt-1 text-xs text-hutan/60 dark:text-santan/60">
+                                        Dibagi rata ke {{ $questions->count() }} soal{{ $perQuestion ? ' ≈ '.angka($perQuestion, 2).' poin per soal' : '' }}. Setiap jawaban benar bernilai sama; jumlahnya pas sesuai total.
+                                    </p>
+                                </div>
+                            @endif
+
+                            <div class="flex flex-wrap items-center gap-2">
+                                <flux:button variant="primary" size="sm" icon="check" wire:click="applyPoints">Terapkan ke semua soal</flux:button>
+                                <flux:button variant="ghost" size="sm" wire:click="resetPoints">Pakai poin dari bank soal</flux:button>
+                            </div>
+                        </div>
+                    </x-card>
+                @endif
                 @forelse ($questions as $i => $question)
                     <x-card wire:key="qq-{{ $question->id }}">
                         <div class="flex items-start gap-3">

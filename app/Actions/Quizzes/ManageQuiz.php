@@ -8,6 +8,7 @@ use App\Models\LearningSession;
 use App\Models\Quiz;
 use App\Models\User;
 use App\Notifications\QuizPublishedNotification;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Notification;
 use InvalidArgumentException;
 
@@ -98,6 +99,70 @@ class ManageQuiz
     {
         $this->ensureEditable($quiz);
         $quiz->questions()->updateExistingPivot($questionId, ['points' => $points, 'section' => $section ?: null]);
+    }
+
+    /**
+     * Bagi rata total poin ke semua soal: tiap jawaban benar bernilai sama dan jumlahnya tepat = total
+     * (sisa pembulatan sen dibagikan ke soal-soal awal).
+     *
+     * @return float|null poin per soal (pembulatan ke bawah), null bila belum ada soal
+     */
+    public function distributePoints(Quiz $quiz, float $total): ?float
+    {
+        $this->ensureEditable($quiz);
+        $ids = $quiz->questions()->pluck('questions.id')->values();
+
+        if ($ids->isEmpty()) {
+            return null;
+        }
+
+        $cents = (int) round($total * 100);
+        [$base, $extra] = [intdiv($cents, $ids->count()), $cents % $ids->count()];
+
+        if ($base < 1) {
+            throw new InvalidArgumentException('Total poin terlalu kecil untuk '.$ids->count().' soal.');
+        }
+
+        DB::transaction(function () use ($quiz, $ids, $base, $extra) {
+            foreach ($ids as $i => $id) {
+                $quiz->questions()->updateExistingPivot($id, ['points' => ($base + ($i < $extra ? 1 : 0)) / 100]);
+            }
+        });
+
+        return $base / 100;
+    }
+
+    /**
+     * Poin per jenis soal (mis. pilihan ganda 2, menjodohkan 10). Jenis yang dikosongkan tidak diubah.
+     *
+     * @param  array<string, mixed>  $pointsByType  nilai jenis soal => poin
+     * @return int jumlah soal yang diubah
+     */
+    public function setPointsByType(Quiz $quiz, array $pointsByType): int
+    {
+        $this->ensureEditable($quiz);
+        $changed = 0;
+
+        DB::transaction(function () use ($quiz, $pointsByType, &$changed) {
+            foreach ($quiz->questions()->get() as $question) {
+                $points = $pointsByType[$question->type->value] ?? null;
+                if (! is_numeric($points)) {
+                    continue;
+                }
+
+                $quiz->questions()->updateExistingPivot($question->id, ['points' => round((float) $points, 2)]);
+                $changed++;
+            }
+        });
+
+        return $changed;
+    }
+
+    /** Kembalikan semua poin ke nilai di bank soal. */
+    public function resetPoints(Quiz $quiz): void
+    {
+        $this->ensureEditable($quiz);
+        $quiz->questions()->newPivotQuery()->update(['points' => null]);
     }
 
     public function publish(Quiz $quiz): void

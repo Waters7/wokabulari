@@ -3,6 +3,11 @@
 Versi ditampilkan di halaman login dan menu aplikasi (`config/wokabulari.php` → `version`).
 Aturan penomoran: **patch** (1.0.x) perbaikan, **minor** (1.x.0) fitur baru, **major** (x.0.0) perubahan besar.
 
+## 1.20.0 — 20 November 2026
+
+- **Hapus quiz/post test yang tidak jadi terbit:** lewat ikon pengaturan di daftar Quiz & ujian (*Hapus quiz*, dengan konfirmasi) atau tombol *Hapus* di halaman detail quiz. Hanya bisa bila belum ada peserta yang mengerjakan; soal-soalnya tetap tersimpan di bank soal.
+- Perbaikan: ikon pengaturan di daftar quiz kini membuka jendela pengaturan (sebelumnya ikut membuka halaman detail quiz).
+
 ## 1.19.0 — 20 November 2026
 
 - **Gambar soal untuk semua jenis soal** (pilihan ganda, esai, menjodohkan, dst.), bukan hanya soal menyimak/berbicara. Gambar tampil saat peserta mengerjakan, di daftar Bank Soal, dan di halaman *Perlu Dinilai*.

@@ -312,3 +312,7 @@ Acuan: DOCKER.md bagian C–D
 - Gambar soal untuk semua jenis soal; contoh jawaban di Perlu Dinilai; Pilih semua soal bank di quiz.
 - Berkas impor Post Test Mandarin (56 soal, 100 poin) disiapkan di luar repo dan diuji lewat alur impor.
 - Test: 358 lulus.
+
+### Tambahan — 20 Nov 2026 (v1.20.0)
+- Hapus quiz/post test yang belum dikerjakan (daftar & detail quiz); perbaikan ikon pengaturan di daftar quiz.
+- Test: 361 lulus. Dicek di 360px: jendela pengaturan (konfirmasi hapus) dan tombol Hapus di detail quiz.

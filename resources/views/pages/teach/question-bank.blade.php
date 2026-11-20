@@ -185,6 +185,7 @@ new #[Title('Soal')] class extends Component {
             'tones' => SaveQuestion::TONES,
             'canEdit' => auth()->user()->can('update', $this->bank),
             'isCjk' => $this->bank->language->isCjk(),
+            'editingMedia' => $this->editingId && $this->bank->questions()->whereKey($this->editingId)->whereNotNull('media_path')->exists(),
         ];
     }
 }; ?>
@@ -219,9 +220,12 @@ new #[Title('Soal')] class extends Component {
                             <x-status-badge :status="$question->type" />
                             <span class="text-hutan/60 dark:text-santan/60">{{ angka($question->points, 1) }} poin</span>
                             @if ($question->quizzes_count)<flux:badge size="sm">Dipakai {{ $question->quizzes_count }} quiz</flux:badge>@endif
-                            @if ($question->media_path)<flux:badge size="sm" icon="musical-note">Media</flux:badge>@endif
+                            @if ($question->media_path)<flux:badge size="sm" :icon="$question->hasImage() ? 'photo' : 'musical-note'">{{ $question->hasImage() ? 'Gambar' : 'Audio' }}</flux:badge>@endif
                         </div>
                         <x-reading-text :text="$question->body" :reading="$question->reading" as="p" class="whitespace-pre-line font-semibold" />
+                        @if ($question->hasImage())
+                            <img src="{{ $question->mediaUrl() }}" alt="Gambar soal" class="mt-2 max-h-40 rounded-lg" loading="lazy">
+                        @endif
                         @if ($question->options->isNotEmpty())
                             <ul class="mt-2 grid gap-1 text-sm sm:grid-cols-2">
                                 @foreach ($question->options as $option)
@@ -261,13 +265,13 @@ new #[Title('Soal')] class extends Component {
             <flux:textarea wire:model="form.body" label="Pertanyaan" rows="3" :placeholder="$isCjk ? 'Contoh: 你好吗？' : 'Tulis pertanyaan…'" />
             <flux:input wire:model="form.reading" :label="'Bacaan ('.($bank->language->reading_label ?? 'opsional').')'" placeholder="nǐ hǎo ma? / konnichiwa" />
 
-            @if (in_array($form['type'], ['listening', 'speaking'], true))
-                <div>
-                    <flux:input type="file" wire:model="media" accept="audio/*,image/*" :label="$form['type'] === 'listening' ? 'Audio soal (wajib)' : 'Audio/gambar contoh (opsional)'" />
-                    <div wire:loading wire:target="media" class="mt-1 text-xs text-woka">Mengunggah…</div>
-                    <flux:error name="media" />
-                </div>
-            @endif
+            <div>
+                <flux:input type="file" wire:model="media" :accept="in_array($form['type'], ['listening', 'speaking'], true) ? 'audio/*,image/*' : 'image/*'"
+                            :label="match ($form['type']) { 'listening' => 'Audio soal (wajib)', 'speaking' => 'Audio/gambar contoh (opsional)', default => 'Gambar soal (opsional)' }"
+                            :description="$editingMedia ? 'Sudah ada media; pilih berkas baru untuk mengganti.' : null" />
+                <div wire:loading wire:target="media" class="mt-1 text-xs text-woka">Mengunggah…</div>
+                <flux:error name="media" />
+            </div>
 
             @switch($form['type'])
                 @case('multiple_choice')

@@ -56,6 +56,14 @@ new #[Title('Detail quiz')] class extends Component {
         $this->loadPivots();
     }
 
+    /** Centang semua soal bank yang belum ada di quiz (atau kosongkan bila sudah tercentang semua). */
+    public function toggleAll(): void
+    {
+        $this->authorize('manage', $this->quiz);
+        $ids = $this->bank ? QuestionBank::find($this->bank)?->questions()->whereNotIn('questions.id', $this->quiz->questions()->pluck('questions.id'))->pluck('questions.id')->all() ?? [] : [];
+        $this->selected = count($this->selected) === count($ids) ? [] : array_map('strval', $ids);
+    }
+
     public function addSelected(ManageQuiz $manage): void
     {
         $this->run(fn () => $manage->addQuestions($this->quiz, $this->selected, $this->section), count($this->selected).' soal ditambahkan.');
@@ -202,13 +210,21 @@ new #[Title('Detail quiz')] class extends Component {
                     @if ($quiz->type === QuizType::Tryout)
                         <flux:input wire:model="section" label="Bagian untuk soal terpilih" placeholder="听力 Listening" class="mb-3" />
                     @endif
+                    @if ($bankQuestions->isNotEmpty())
+                        <div class="mb-2 flex items-center justify-between gap-2 text-sm">
+                            <button type="button" wire:click="toggleAll" class="font-semibold text-woka hover:underline dark:text-woka-light">
+                                {{ count($selected) === $bankQuestions->count() ? 'Batal pilih semua' : 'Pilih semua ('.$bankQuestions->count().')' }}
+                            </button>
+                            <span class="text-hutan/60 dark:text-santan/60">{{ count($selected) }} terpilih</span>
+                        </div>
+                    @endif
                     <div class="max-h-[60vh] space-y-1 overflow-y-auto">
                         @forelse ($bankQuestions as $bq)
                             <label class="flex items-start gap-2 rounded-lg p-2 hover:bg-woka-50 dark:hover:bg-hutan-800" wire:key="bq-{{ $bq->id }}">
                                 <input type="checkbox" wire:model="selected" value="{{ $bq->id }}" class="mt-1 size-5 shrink-0 accent-woka">
                                 <span class="min-w-0 text-sm">
                                     <x-status-badge :status="$bq->type" />
-                                    <span class="mt-0.5 block">{{ \Illuminate\Support\Str::limit($bq->body, 120) }}</span>
+                                    <span class="mt-0.5 block">{{ \Illuminate\Support\Str::limit($bq->body, 120) }}@if ($bq->media_path) <flux:icon :name="$bq->hasImage() ? 'photo' : 'musical-note'" variant="micro" class="inline text-woka" />@endif</span>
                                 </span>
                             </label>
                         @empty

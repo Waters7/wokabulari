@@ -18,6 +18,7 @@ use App\Models\Quiz;
 use App\Models\QuizAttempt;
 use App\Models\SessionAssessmentComponent;
 use App\Services\QuizAnalytics;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Notification;
@@ -263,4 +264,67 @@ test('halaman quiz tampil sesuai role dan alur kerjakan → kumpul → hasil', f
     expect($attempt->status)->toBe(AttemptStatus::Graded);
     $this->actingAs($participant)->get(route('quizzes.result', $attempt))->assertOk()->assertSee('Halo');
     $this->actingAs($classroom->participants->last())->get(route('quizzes.result', $attempt))->assertForbidden();
+});
+
+test('gambar soal bisa ditambahkan ke pilihan ganda & esai; tampil di bank soal, saat dikerjakan, dan saat dinilai', function () {
+    $classroom = Classroom::factory()->withParticipants(1)->create(['language_id' => Language::factory()->mandarin()]);
+    $teacher = $classroom->teacher;
+    $bank = QuestionBank::factory()->create(['language_id' => $classroom->language_id, 'teacher_id' => $teacher->id]);
+
+    Livewire::actingAs($teacher)->test('pages::teach.question-bank', ['bank' => $bank])
+        ->call('create')
+        ->set('form.body', '这是什么？(Zhè shì shénme?)')
+        ->set('form.options.0.body', '体温计')
+        ->set('form.options.1.body', '血压计')
+        ->set('form.correct_index', 1)
+        ->set('media', UploadedFile::fake()->image('soal-31.jpg', 400, 300))
+        ->call('save')
+        ->assertHasNoErrors()
+        ->call('create')
+        ->set('form.type', 'essay')
+        ->set('form.body', 'Deskripsikan gambar berikut minimal 3 kalimat.')
+        ->set('form.explanation', '她们在公园散步。')
+        ->set('media', UploadedFile::fake()->image('deskripsi.jpg', 400, 300))
+        ->call('save')
+        ->assertHasNoErrors()
+        ->assertSee('Gambar soal (opsional)')
+        ->assertSeeHtml('alt="Gambar soal"');
+
+    [$choice, $essay] = $bank->questions()->orderBy('id')->get()->all();
+    expect($choice->hasImage())->toBeTrue()->and($essay->hasImage())->toBeTrue();
+
+    $quiz = Quiz::factory()->for($classroom)->create(['teacher_id' => $teacher->id]);
+    app(ManageQuiz::class)->addQuestions($quiz, [$choice->id, $essay->id]);
+    $participant = $classroom->participants->first();
+
+    Livewire::actingAs($participant)->test('pages::participant.quiz-take', ['quiz' => $quiz])->assertSeeHtml('<img src=');
+
+    $attempt = app(QuizAttemptService::class)->start($quiz->fresh(), $participant, 'sesi-a', '127.0.0.1', 'pest');
+    app(QuizAttemptService::class)->saveAnswers($attempt, [$essay->id => ['text' => '她们在公园。']], 'sesi-a');
+    app(QuizAttemptService::class)->submit($attempt->fresh());
+
+    Livewire::actingAs($teacher)->test('pages::teach.grading')
+        ->assertSee('Contoh jawaban: 她们在公园散步。')
+        ->assertSeeHtml('alt="Gambar soal"');
+});
+
+test('pilih semua soal bank sekaligus saat menyusun quiz', function () {
+    $classroom = Classroom::factory()->withParticipants(1)->create(['language_id' => Language::factory()->mandarin()]);
+    $bank = QuestionBank::factory()->create(['language_id' => $classroom->language_id]);
+    $save = app(SaveQuestion::class);
+    foreach (range(1, 5) as $i) {
+        $save->handle($bank, ['type' => 'essay', 'body' => "Soal {$i}", 'points' => 1]);
+    }
+    $quiz = Quiz::factory()->for($classroom)->create(['teacher_id' => $classroom->teacher_id]);
+    app(ManageQuiz::class)->addQuestions($quiz, [$bank->questions()->value('id')]);
+
+    Livewire::actingAs($classroom->teacher)->test('pages::teach.quiz-show', ['quiz' => $quiz])
+        ->set('bank', $bank->id)
+        ->assertSee('Pilih semua (4)')
+        ->call('toggleAll')
+        ->assertCount('selected', 4)
+        ->assertSee('Batal pilih semua')
+        ->call('addSelected');
+
+    expect($quiz->fresh()->questions()->count())->toBe(5);
 });

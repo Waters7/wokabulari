@@ -44,4 +44,10 @@ class Question extends Model
     {
         return $this->media_path ? Storage::disk('private')->temporaryUrl($this->media_path, now()->addHours(3)) : null;
     }
+
+    /** Media soal berupa gambar (bukan audio). */
+    public function hasImage(): bool
+    {
+        return (bool) ($this->media_path && preg_match('/\.(jpe?g|png|webp)$/i', $this->media_path));
+    }
 }

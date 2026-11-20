@@ -76,6 +76,12 @@ new #[Title('Perlu dinilai')] class extends Component {
                 <div class="mt-2 rounded-xl bg-santan p-3 dark:bg-hutan-950">
                     <x-status-badge :status="$answer->question->type" />
                     <x-reading-text :text="$answer->question->body" :reading="$answer->question->reading" as="p" class="mt-1 whitespace-pre-line text-sm font-semibold" />
+                    @if ($answer->question->hasImage())
+                        <img src="{{ $answer->question->mediaUrl() }}" alt="Gambar soal" class="mt-2 max-h-48 rounded-lg" loading="lazy">
+                    @endif
+                    @if ($answer->question->explanation)
+                        <p class="mt-2 text-xs text-hutan/70 dark:text-santan/70">Contoh jawaban: {{ $answer->question->explanation }}</p>
+                    @endif
                 </div>
                 @if ($answer->audio_path)
                     <audio controls preload="metadata" class="mt-3 w-full" src="{{ $answer->audioUrl() }}"></audio>

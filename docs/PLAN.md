@@ -316,3 +316,7 @@ Acuan: DOCKER.md bagian C–D
 ### Tambahan — 20 Nov 2026 (v1.20.0)
 - Hapus quiz/post test yang belum dikerjakan (daftar & detail quiz); perbaikan ikon pengaturan di daftar quiz.
 - Test: 361 lulus. Dicek di 360px: jendela pengaturan (konfirmasi hapus) dan tombol Hapus di detail quiz.
+
+### Tambahan — 20 Nov 2026 (v1.21.0)
+- Atur poin otomatis di quiz: sama rata (total pas), per jenis soal, kembali ke poin bank soal.
+- Test: 363 lulus. Dicek di 360px: panel Atur poin otomatis; dicoba terapkan & kembalikan di browser lokal.

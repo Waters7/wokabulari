@@ -3,6 +3,12 @@
 Versi ditampilkan di halaman login dan menu aplikasi (`config/wokabulari.php` → `version`).
 Aturan penomoran: **patch** (1.0.x) perbaikan, **minor** (1.x.0) fitur baru, **major** (x.0.0) perubahan besar.
 
+## 1.19.0 — 20 November 2026
+
+- **Gambar soal untuk semua jenis soal** (pilihan ganda, esai, menjodohkan, dst.), bukan hanya soal menyimak/berbicara. Gambar tampil saat peserta mengerjakan, di daftar Bank Soal, dan di halaman *Perlu Dinilai*.
+- **Perlu Dinilai** menampilkan *contoh jawaban* (kolom pembahasan) di bawah soal esai, sebagai acuan pengajar.
+- **Pilih semua** saat menambahkan soal dari bank ke quiz, beserta jumlah soal terpilih.
+
 ## 1.18.0 — 18 November 2026
 
 - **Foto dokumentasi masuk ke unduhan Excel laporan Absen per sesi:** lembar baru *Dokumentasi* berisi tanggal, jam, kelas, topik, pengajar, **foto mulai sesi** dan **foto akhir sesi** yang tersemat langsung di sel, keterangan bila ada lebih dari satu berkas, dan tautan *Buka sesi*. Berkas non-foto (mis. PDF) tampil sebagai nama berkas. Foto disematkan sebagai gambar kecil agar ukuran Excel tetap ringan.

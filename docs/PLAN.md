@@ -307,3 +307,8 @@ Acuan: DOCKER.md bagian C–D
 ### Tambahan — 18 Nov 2026 (v1.18.0)
 - Unduhan Excel Absen per sesi: lembar Dokumentasi dengan foto mulai & akhir sesi tersemat (gambar kecil).
 - Test: 356 lulus. Test membuat berkas Excel sungguhan dan memeriksa letak foto.
+
+### Tambahan — 20 Nov 2026 (v1.19.0)
+- Gambar soal untuk semua jenis soal; contoh jawaban di Perlu Dinilai; Pilih semua soal bank di quiz.
+- Berkas impor Post Test Mandarin (56 soal, 100 poin) disiapkan di luar repo dan diuji lewat alur impor.
+- Test: 358 lulus.

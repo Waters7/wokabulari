@@ -8,10 +8,15 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
+/**
+ * Satu kali pengerjaan quiz oleh peserta. Attempt yang di-reset pengajar disembunyikan (soft delete)
+ * sehingga tidak dihitung lagi dan peserta boleh mengerjakan ulang.
+ */
 class QuizAttempt extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     protected $fillable = [
         'quiz_id', 'user_id', 'started_at', 'expires_at', 'submitted_at', 'score', 'max_score', 'percentage', 'status',

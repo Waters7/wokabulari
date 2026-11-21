@@ -18,6 +18,7 @@ use App\Models\QuestionBank;
 use App\Models\Quiz;
 use App\Models\QuizAttempt;
 use App\Models\SessionAssessmentComponent;
+use App\Notifications\QuizRetakeNotification;
 use App\Services\QuizAnalytics;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Carbon;
@@ -25,6 +26,7 @@ use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
+use Spatie\Activitylog\Models\Activity;
 
 beforeEach(function () {
     Notification::fake();
@@ -418,4 +420,85 @@ test('poin otomatis ditolak setelah quiz dikerjakan', function () {
 
     expect(fn () => app(ManageQuiz::class)->distributePoints($quiz, 100))->toThrow(InvalidArgumentException::class);
     Livewire::actingAs($classroom->teacher)->test('pages::teach.quiz-show', ['quiz' => $quiz])->assertDontSeeHtml('data-test="auto-points"');
+});
+
+test('kumpul otomatis dari HP yang jamnya salah ditolak sebelum waktu habis; hitung mundur memakai jam server', function () {
+    [$classroom, $quiz] = quizWithAllTypes(['duration_minutes' => 60]);
+    $participant = $classroom->participants->first();
+
+    $page = Livewire::actingAs($participant)->test('pages::participant.quiz-take', ['quiz' => $quiz])
+        ->assertSeeHtml("'quiz-timeout', '")
+        ->call('submit', true)
+        ->assertDispatched('quiz-time-sync')
+        ->assertNoRedirect();
+
+    $attempt = $quiz->attempts()->where('user_id', $participant->id)->first();
+    expect($attempt->status)->toBe(AttemptStatus::InProgress);
+
+    // Setelah waktu benar-benar habis, kumpul otomatis diterima.
+    $this->travel(61)->minutes();
+    $page->call('submit', true)->assertRedirect(route('quizzes.result', $attempt));
+    expect($attempt->fresh()->status)->not->toBe(AttemptStatus::InProgress)
+        ->and($attempt->fresh()->auto_submitted)->toBeTrue();
+});
+
+test('reset pengerjaan peserta: attempt disembunyikan, peserta boleh mengerjakan ulang dan diberi tahu', function () {
+    [$classroom, $quiz] = quizWithAllTypes(['max_attempts' => 1]);
+    $participant = $classroom->participants->first();
+    $service = app(QuizAttemptService::class);
+    $attempt = $service->submit($service->start($quiz, $participant, 'sesi-r'), auto: true);
+
+    expect(fn () => $service->start($quiz->fresh(), $participant, 'sesi-r'))->toThrow(InvalidArgumentException::class, 'habis');
+
+    Livewire::actingAs($classroom->teacher)->test('pages::teach.quiz-show', ['quiz' => $quiz, 'tab' => 'hasil'])
+        ->set('tab', 'hasil')
+        ->assertSeeHtml('data-test="reset-'.$attempt->id.'"')
+        ->call('resetAttempt', $attempt->id);
+
+    expect(QuizAttempt::query()->find($attempt->id))->toBeNull()
+        ->and(QuizAttempt::withTrashed()->find($attempt->id))->not->toBeNull()
+        ->and(Activity::query()->where('description', 'Reset pengerjaan quiz peserta')->exists())->toBeTrue();
+    Notification::assertSentTo($participant, QuizRetakeNotification::class);
+
+    $again = $service->start($quiz->fresh(), $participant, 'sesi-r2');
+    expect($again->id)->not->toBe($attempt->id)->and($again->status)->toBe(AttemptStatus::InProgress);
+
+    Livewire::actingAs(teacher())->test('pages::teach.quiz-show', ['quiz' => $quiz])->assertForbidden();
+});
+
+test('perlu dinilai: semua jawaban esai satu peserta dalam satu kartu, simpan semua sekaligus', function () {
+    $classroom = Classroom::factory()->withParticipants(2)->create(['language_id' => Language::factory()->mandarin()]);
+    [$ani, $budi] = $classroom->participants()->orderBy('users.id')->get()->all();
+    $ani->update(['name' => 'Ani Lumowa']);
+    $budi->update(['name' => 'Budi Kalalo']);
+    $bank = QuestionBank::factory()->create(['language_id' => $classroom->language_id]);
+    $save = app(SaveQuestion::class);
+    $e1 = $save->handle($bank, ['type' => 'essay', 'body' => 'Sebutkan 3 olahraga.', 'points' => 2, 'explanation' => '跑步, 游泳, 打篮球']);
+    $e2 = $save->handle($bank, ['type' => 'essay', 'body' => 'Sebutkan 5 bagian tubuh.', 'points' => 2]);
+    $quiz = Quiz::factory()->for($classroom)->create(['teacher_id' => $classroom->teacher_id]);
+    app(ManageQuiz::class)->addQuestions($quiz, [$e1->id, $e2->id]);
+    $service = app(QuizAttemptService::class);
+    foreach ([$ani, $budi] as $user) {
+        $attempt = $service->start($quiz->fresh(), $user, 'sesi-'.$user->id);
+        $service->saveAnswers($attempt, [$e1->id => ['text' => 'pǎobù, yóuyǒng'], $e2->id => ['text' => 'tóu, shǒu']], 'sesi-'.$user->id);
+        $service->submit($attempt->fresh());
+    }
+    $aniAttempt = $quiz->attempts()->where('user_id', $ani->id)->first();
+    [$a1, $a2] = $aniAttempt->answers()->orderBy('id')->get()->all();
+
+    $page = Livewire::actingAs($classroom->teacher)->test('pages::teach.grading')
+        ->assertSeeHtml('data-test="attempt-'.$aniAttempt->id.'"')
+        ->assertSeeInOrder(['Ani Lumowa', 'Soal 1', 'Sebutkan 3 olahraga.', 'pǎobù, yóuyǒng', 'Soal 2', 'Sebutkan 5 bagian tubuh.', 'Budi Kalalo'])
+        ->set('search', 'kalalo')
+        ->assertDontSeeHtml('data-test="attempt-'.$aniAttempt->id.'"')
+        ->set('search', '');
+
+    // Nilai di luar batas ditandai; yang valid tetap tersimpan.
+    $page->set("grades.{$a1->id}.score", '1,5')->set("grades.{$a2->id}.score", '9')->call('gradeAttempt', $aniAttempt->id)
+        ->assertHasErrors("grades.{$a2->id}.score");
+    expect($a1->fresh()->score)->toBe(1.5)->and($aniAttempt->fresh()->status)->toBe(AttemptStatus::NeedsGrading);
+
+    $page->set("grades.{$a2->id}.score", '2')->set("grades.{$a2->id}.feedback", 'Bagus')->call('gradeAttempt', $aniAttempt->id)->assertHasNoErrors();
+    expect($aniAttempt->fresh()->status)->toBe(AttemptStatus::Graded)
+        ->and($a2->fresh()->teacher_feedback)->toBe('Bagus');
 });

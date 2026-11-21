@@ -132,6 +132,17 @@ new #[Title('Detail quiz')] class extends Component {
         $this->run(fn () => $manage->publish($this->quiz), 'Quiz diterbitkan. Peserta mendapat notifikasi.');
     }
 
+    /** Reset pengerjaan seorang peserta agar ia boleh mengerjakan ulang. */
+    public function resetAttempt(int $attemptId, \App\Actions\Quizzes\ResetQuizAttempt $reset): void
+    {
+        $this->authorize('manage', $this->quiz);
+        $attempt = $this->quiz->attempts()->with('user')->findOrFail($attemptId);
+        $reset->handle($attempt, auth()->user());
+        $this->quiz->refresh();
+        $this->loadPivots();
+        Flux::toast(variant: 'success', text: 'Pengerjaan '.$attempt->user->name.' di-reset. Peserta bisa mengerjakan ulang dan sudah diberi tahu.');
+    }
+
     public function deleteQuiz(ManageQuiz $manage): void
     {
         $this->authorize('manage', $this->quiz);
@@ -346,7 +357,7 @@ new #[Title('Detail quiz')] class extends Component {
     @elseif ($tab === 'hasil')
         <div class="table-scroll">
             <table>
-                <thead><tr><th>Peserta</th><th>Mulai</th><th>Status</th><th>Skor</th><th>%</th>@if ($quiz->type === QuizType::Tryout)<th>Skala</th><th>Target</th>@endif<th>Pindah tab</th></tr></thead>
+                <thead><tr><th>Peserta</th><th>Mulai</th><th>Status</th><th>Skor</th><th>%</th>@if ($quiz->type === QuizType::Tryout)<th>Skala</th><th>Target</th>@endif<th>Pindah tab</th><th class="text-right">Aksi</th></tr></thead>
                 <tbody>
                     @foreach ($attempts as $attempt)
                         <tr wire:key="at-{{ $attempt->id }}">
@@ -367,11 +378,16 @@ new #[Title('Detail quiz')] class extends Component {
                                     <flux:badge size="sm" :color="$attempt->tab_switch_count >= 3 ? 'red' : 'amber'">{{ $attempt->tab_switch_count }}×</flux:badge>
                                 @else – @endif
                             </td>
+                            <td class="text-right">
+                                <x-confirm-button action="resetAttempt({{ $attempt->id }})" label="Reset" icon="arrow-path" variant="filled" size="xs" data-test="reset-{{ $attempt->id }}"
+                                                  title="Reset pengerjaan {{ $attempt->user->name }}?"
+                                                  message="Jawaban pada pengerjaan ini disembunyikan dan tidak dihitung, lalu peserta boleh mengerjakan ulang selama quiz masih dibuka. Peserta diberi tahu." confirmLabel="Ya, reset" />
+                            </td>
                         </tr>
                     @endforeach
                     @foreach ($notAttempted as $user)
                         <tr wire:key="na-{{ $user->id }}" class="text-hutan/50 dark:text-santan/50">
-                            <td>{{ $user->name }}</td><td colspan="{{ $quiz->type === QuizType::Tryout ? 7 : 5 }}">Belum mengerjakan</td>
+                            <td>{{ $user->name }}</td><td colspan="{{ $quiz->type === QuizType::Tryout ? 8 : 6 }}">Belum mengerjakan</td>
                         </tr>
                     @endforeach
                 </tbody>

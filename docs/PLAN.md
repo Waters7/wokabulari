@@ -320,3 +320,7 @@ Acuan: DOCKER.md bagian C–D
 ### Tambahan — 20 Nov 2026 (v1.21.0)
 - Atur poin otomatis di quiz: sama rata (total pas), per jenis soal, kembali ke poin bank soal.
 - Test: 363 lulus. Dicek di 360px: panel Atur poin otomatis; dicoba terapkan & kembalikan di browser lokal.
+
+### Perbaikan & tambahan — 21 Nov 2026 (v1.22.0)
+- Bug kumpul otomatis quiz (jam HP peserta) diperbaiki; reset pengerjaan per peserta; Perlu Dinilai dikelompokkan per peserta.
+- Test: 366 lulus. Dicek di 360px: Perlu Dinilai per peserta, tab Hasil dengan tombol Reset.

@@ -3,6 +3,12 @@
 Versi ditampilkan di halaman login dan menu aplikasi (`config/wokabulari.php` → `version`).
 Aturan penomoran: **patch** (1.0.x) perbaikan, **minor** (1.x.0) fitur baru, **major** (x.0.0) perubahan besar.
 
+## 1.22.0 — 21 November 2026
+
+- Perbaikan penting: **jawaban quiz terkumpul otomatis padahal peserta baru mulai.** Penyebabnya hitung mundur memakai jam HP peserta; bila jam HP lebih cepat, waktu dianggap habis. Kini hitung mundur memakai jam server, dan server menolak kumpul otomatis sebelum waktu attempt benar-benar habis.
+- **Reset pengerjaan per peserta** di tab *Hasil* quiz: peserta yang terkumpul tidak sengaja bisa mengerjakan ulang (tidak dihitung sebagai percobaan) dan mendapat pemberitahuan. Pengerjaan lama disembunyikan, tidak dihapus permanen, dan tercatat di log.
+- **Perlu Dinilai dikelompokkan per peserta:** semua jawaban esai/berbicara seorang peserta tampil dalam satu kartu (urut nomor soal, gambar soal, contoh jawaban) dengan satu tombol *Simpan semua nilai*; nilai yang dikosongkan tetap menunggu. Ada filter quiz dan cari nama peserta.
+
 ## 1.21.0 — 20 November 2026
 
 - **Atur poin otomatis** di tab *Soal* quiz, tidak perlu mengisi poin soal satu per satu:

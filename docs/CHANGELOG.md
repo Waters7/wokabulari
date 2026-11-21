@@ -3,6 +3,11 @@
 Versi ditampilkan di halaman login dan menu aplikasi (`config/wokabulari.php` → `version`).
 Aturan penomoran: **patch** (1.0.x) perbaikan, **minor** (1.x.0) fitur baru, **major** (x.0.0) perubahan besar.
 
+## 1.23.0 — 21 November 2026
+
+- **Perlu Dinilai per soal** (tampilan bawaan): pilih quiz, lalu pilih soal; semua jawaban peserta untuk soal itu tampil berurutan nama, dengan kolom nilai, tombol cepat *0 · ½ · Penuh*, dan umpan balik. Satu tombol *Simpan nilai soal ini*; setelah tersimpan, otomatis lanjut ke soal berikutnya yang masih menunggu. Tampilan *Per peserta* tetap tersedia.
+- **Makro penilaian:** *Pilih semua* lalu beri nilai yang sama ke jawaban yang dicentang; **nilai otomatis dari kata kunci** (mis. "跑步/paobu, 游泳/youyong", butuh 2) — tiap kata kunci yang muncul menambah nilai, pinyin tanpa tanda nada tetap terbaca. Hasil makro hanya mengisi kolom; pengajar memeriksa lalu menyimpan.
+
 ## 1.22.0 — 21 November 2026
 
 - Perbaikan penting: **jawaban quiz terkumpul otomatis padahal peserta baru mulai.** Penyebabnya hitung mundur memakai jam HP peserta; bila jam HP lebih cepat, waktu dianggap habis. Kini hitung mundur memakai jam server, dan server menolak kumpul otomatis sebelum waktu attempt benar-benar habis.

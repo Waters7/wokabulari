@@ -324,3 +324,7 @@ Acuan: DOCKER.md bagian C–D
 ### Perbaikan & tambahan — 21 Nov 2026 (v1.22.0)
 - Bug kumpul otomatis quiz (jam HP peserta) diperbaiki; reset pengerjaan per peserta; Perlu Dinilai dikelompokkan per peserta.
 - Test: 366 lulus. Dicek di 360px: Perlu Dinilai per peserta, tab Hasil dengan tombol Reset.
+
+### Tambahan — 21 Nov 2026 (v1.23.0)
+- Perlu Dinilai per soal dengan makro penilaian (pilih semua + nilai massal, nilai dari kata kunci, tombol cepat 0/½/Penuh).
+- Test: 368 lulus. Dicek di 360px: tampilan per soal (kolom nilai sebaris tombol cepat).

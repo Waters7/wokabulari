@@ -149,6 +149,13 @@ new #[Title('Mengerjakan quiz')] class extends Component {
     {
         $attempt = $this->attempt();
 
+        // Kumpul otomatis dari browser hanya bila waktu memang habis menurut server (jam HP peserta bisa salah).
+        if ($auto && $attempt->isInProgress() && $attempt->expires_at->isAfter(now()->addSeconds(5))) {
+            $this->dispatch('quiz-time-sync', expiresAt: $attempt->expires_at->toIso8601String(), serverNow: now()->toIso8601String());
+
+            return;
+        }
+
         if ($attempt->isInProgress()) {
             try {
                 $service->saveAnswers($attempt, $this->normalizedAnswers(), session()->getId());
@@ -239,7 +246,7 @@ new #[Title('Mengerjakan quiz')] class extends Component {
                             <span x-show="!saving && lastSaved" x-text="'tersimpan ' + lastSaved"></span>
                         </p>
                     </div>
-                    <div x-data="countdown('{{ $expiresAt }}', 'quiz-timeout')" class="rounded-full px-3 py-1 font-mono text-lg font-bold"
+                    <div x-data="countdown('{{ $expiresAt }}', 'quiz-timeout', '{{ now()->toIso8601String() }}')" x-on:quiz-time-sync.window="sync($event.detail.expiresAt, $event.detail.serverNow)" class="rounded-full px-3 py-1 font-mono text-lg font-bold"
                          :class="remaining <= 60 ? 'bg-rica text-white animate-pulse' : 'bg-hutan text-santan'" x-text="display" aria-label="Sisa waktu"></div>
                 </div>
                 <p x-show="warning" x-text="warning" x-cloak class="mt-1 text-xs font-semibold text-rica"></p>

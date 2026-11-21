@@ -31,9 +31,12 @@ document.addEventListener('alpine:init', () => {
     window.Alpine.data('classCamera', classCamera);
 
     // Hitung mundur ke waktu tertentu (ISO string). Dipakai di kode sesi, quiz, dan tenggat.
-    window.Alpine.data('countdown', (target, onDone = null) => ({
+    // serverNow (opsional): jam server saat halaman dibuat, agar jam HP yang salah tidak memengaruhi hitungan.
+    window.Alpine.data('countdown', (target, onDone = null, serverNow = null) => ({
         remaining: 0,
         timer: null,
+        target,
+        offset: serverNow ? new Date(serverNow).getTime() - Date.now() : 0,
         init() {
             this.tick();
             this.timer = setInterval(() => this.tick(), 1000);
@@ -41,8 +44,16 @@ document.addEventListener('alpine:init', () => {
         destroy() {
             clearInterval(this.timer);
         },
+        // Samakan lagi dengan server (mis. setelah server menolak kumpul otomatis yang terlalu cepat).
+        sync(newTarget, newServerNow) {
+            this.target = newTarget;
+            this.offset = new Date(newServerNow).getTime() - Date.now();
+            clearInterval(this.timer);
+            this.tick();
+            this.timer = setInterval(() => this.tick(), 1000);
+        },
         tick() {
-            this.remaining = Math.max(0, Math.floor((new Date(target).getTime() - Date.now()) / 1000));
+            this.remaining = Math.max(0, Math.floor((new Date(this.target).getTime() - (Date.now() + this.offset)) / 1000));
             if (this.remaining === 0) {
                 clearInterval(this.timer);
                 if (onDone) {

@@ -16,9 +16,11 @@ use App\Models\LearningSession;
 use App\Models\Question;
 use App\Models\QuestionBank;
 use App\Models\Quiz;
+use App\Models\QuizAnswer;
 use App\Models\QuizAttempt;
 use App\Models\SessionAssessmentComponent;
 use App\Notifications\QuizRetakeNotification;
+use App\Services\EssayKeywordScorer;
 use App\Services\QuizAnalytics;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Carbon;
@@ -307,7 +309,7 @@ test('gambar soal bisa ditambahkan ke pilihan ganda & esai; tampil di bank soal,
     app(QuizAttemptService::class)->submit($attempt->fresh());
 
     Livewire::actingAs($teacher)->test('pages::teach.grading')
-        ->assertSee('Contoh jawaban: 她们在公园散步。')
+        ->assertSee('她们在公园散步。')
         ->assertSeeHtml('alt="Gambar soal"');
 });
 
@@ -486,7 +488,7 @@ test('perlu dinilai: semua jawaban esai satu peserta dalam satu kartu, simpan se
     $aniAttempt = $quiz->attempts()->where('user_id', $ani->id)->first();
     [$a1, $a2] = $aniAttempt->answers()->orderBy('id')->get()->all();
 
-    $page = Livewire::actingAs($classroom->teacher)->test('pages::teach.grading')
+    $page = Livewire::actingAs($classroom->teacher)->withQueryParams(['tampilan' => 'peserta'])->test('pages::teach.grading')
         ->assertSeeHtml('data-test="attempt-'.$aniAttempt->id.'"')
         ->assertSeeInOrder(['Ani Lumowa', 'Soal 1', 'Sebutkan 3 olahraga.', 'pǎobù, yóuyǒng', 'Soal 2', 'Sebutkan 5 bagian tubuh.', 'Budi Kalalo'])
         ->set('search', 'kalalo')
@@ -501,4 +503,61 @@ test('perlu dinilai: semua jawaban esai satu peserta dalam satu kartu, simpan se
     $page->set("grades.{$a2->id}.score", '2')->set("grades.{$a2->id}.feedback", 'Bagus')->call('gradeAttempt', $aniAttempt->id)->assertHasNoErrors();
     expect($aniAttempt->fresh()->status)->toBe(AttemptStatus::Graded)
         ->and($a2->fresh()->teacher_feedback)->toBe('Bagus');
+});
+
+test('perlu dinilai per soal: semua jawaban satu soal, makro nilai massal dan kata kunci', function () {
+    $classroom = Classroom::factory()->withParticipants(3)->create(['language_id' => Language::factory()->mandarin()]);
+    [$ani, $budi, $citra] = $classroom->participants()->orderBy('users.id')->get()->all();
+    $ani->update(['name' => 'Ani Lumowa']);
+    $budi->update(['name' => 'Budi Kalalo']);
+    $citra->update(['name' => 'Citra Mamuaja']);
+    $bank = QuestionBank::factory()->create(['language_id' => $classroom->language_id]);
+    $save = app(SaveQuestion::class);
+    $sport = $save->handle($bank, ['type' => 'essay', 'body' => 'Sebutkan 2 olahraga.', 'points' => 2, 'explanation' => '跑步, 游泳']);
+    $body = $save->handle($bank, ['type' => 'essay', 'body' => 'Sebutkan bagian tubuh.', 'points' => 4]);
+    $quiz = Quiz::factory()->for($classroom)->create(['teacher_id' => $classroom->teacher_id]);
+    app(ManageQuiz::class)->addQuestions($quiz, [$sport->id, $body->id]);
+    $service = app(QuizAttemptService::class);
+    foreach ([[$ani, 'pǎobù dan 游泳'], [$budi, 'paobu saja'], [$citra, 'tidak tahu']] as [$user, $text]) {
+        $attempt = $service->start($quiz->fresh(), $user, 'sesi-'.$user->id);
+        $service->saveAnswers($attempt, [$sport->id => ['text' => $text], $body->id => ['text' => 'tóu']], 'sesi-'.$user->id);
+        $service->submit($attempt->fresh());
+    }
+    $answerOf = fn ($user, $question) => QuizAnswer::query()->where('question_id', $question->id)
+        ->whereHas('attempt', fn ($q) => $q->where('user_id', $user->id))->first();
+    [$aAni, $aBudi, $aCitra] = [$answerOf($ani, $sport), $answerOf($budi, $sport), $answerOf($citra, $sport)];
+
+    $page = Livewire::actingAs($classroom->teacher)->test('pages::teach.grading')
+        ->assertSet('quiz', $quiz->id)
+        ->assertSeeHtml('data-test="grading-macro"')
+        ->assertSeeInOrder(['Sebutkan 2 olahraga.', 'Ani Lumowa', 'pǎobù dan 游泳', 'Budi Kalalo', 'Citra Mamuaja', 'tidak tahu'])
+        ->assertDontSee('Sebutkan bagian tubuh.');
+
+    // Kata kunci: Ani menyebut 2 dari 2 (penuh), Budi 1 dari 2 (setengah), Citra tidak ada.
+    $page->set('keywords', '跑步/paobu, 游泳/youyong')->set('keywordsNeeded', '2')->call('applyKeywords')
+        ->assertSet("grades.{$aAni->id}.score", '2')
+        ->assertSet("grades.{$aBudi->id}.score", '1')
+        ->assertSet("grades.{$aCitra->id}.score", '0');
+
+    // Nilai massal untuk yang dicentang; di luar batas ditolak.
+    $page->set('selected', [(string) $aBudi->id])->set('bulkScore', '5')->call('applyBulk')->assertHasErrors('bulkScore')
+        ->set('bulkScore', '1,5')->call('applyBulk')->assertSet("grades.{$aBudi->id}.score", '1.5');
+
+    $page->call('saveQuestion')->assertHasNoErrors()
+        ->assertSee('Sebutkan bagian tubuh.');   // pindah otomatis ke soal berikutnya yang masih menunggu
+
+    expect($aAni->fresh()->score)->toBe(2.0)
+        ->and($aBudi->fresh()->score)->toBe(1.5)
+        ->and($aCitra->fresh()->score)->toBe(0.0);
+});
+
+test('pencocokan kata kunci: pinyin tanpa tanda nada, huruf Mandarin, alternatif', function () {
+    $scorer = new EssayKeywordScorer;
+    $keywords = EssayKeywordScorer::parse("跑步/paobu, 游泳/yóuyǒng\n打篮球/lanqiu");
+
+    expect($keywords)->toHaveCount(3)
+        ->and($scorer->matches('Saya suka Pǎo Bù dan 游泳', $keywords))->toBe(2)
+        ->and($scorer->score('lanqiu, youyong, paobu, tenis', $keywords, 3, 2))->toBe(2.0)
+        ->and($scorer->score('sanbu', $keywords, 3, 2))->toBe(0.0)
+        ->and($scorer->score('打篮球', $keywords, 2, 3))->toBe(1.5);
 });

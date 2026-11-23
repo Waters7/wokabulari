@@ -333,3 +333,10 @@ Acuan: DOCKER.md bagian C–D
 - [x] Rekap gabungan beberapa quiz (jumlah poin, peringkat, predikat) + Excel.
 - [x] Rapor peserta: akumulasi semua penilaian, pretest–posttest gabungan, PDF + Excel daftar kelas.
 - Test: 375 lulus. Dicek di 360px: Rekap gabungan, tab Rapor, halaman rapor peserta.
+
+### Perbaikan & tambahan — 23 Nov 2026 (v1.25.0)
+- [x] Pusat Laporan: data dipotong sampai tanggal yang dipilih + periode Rentang.
+- [x] Unduh semua laporan (satu Excel).
+- [x] Foto dokumentasi konsumsi di laporan Input konsumsi + Excel.
+- [x] Soal & hasil quiz: cetak (lembar peserta/pengajar/hasil) dan Excel.
+- Test: 382 lulus. Dicek di 360px: Pusat Laporan (periode 4 pilihan, Rentang, galeri foto konsumsi), halaman cetak quiz (lembar peserta, kunci, hasil); unduh semua laporan dari data demo 5 minggu: 17 lembar, 3,2 detik.

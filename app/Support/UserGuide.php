@@ -144,6 +144,7 @@ class UserGuide
                         'Unggah materi ke Bank Materi lalu tautkan ke sesi.',
                         'Buat Tugas dengan tenggat dan aturan terlambat, terbitkan, lalu nilai pengumpulan (bisa dengan umpan balik suara).',
                         'Susun soal di Bank Soal (bisa impor templat Excel), buat Quiz & Ujian, dan nilai jawaban esai di Perlu Dinilai.',
+                        'Di detail quiz: Cetak membuka lembar siap cetak (lembar peserta tanpa kunci, lembar pengajar dengan kunci, atau hasil); Excel mengunduh soal + kunci, hasil, nilai per soal, dan jawaban tiap peserta.',
                         'Rekap & Rapor: centang beberapa quiz (mis. pretest pilihan ganda + esai) untuk menjumlahkan poinnya jadi satu nilai akhir dan peringkat; tab Rapor peserta berisi akumulasi semua penilaian dan bisa diunduh PDF.',
                     ]],
                     ['title' => 'Poin peserta', 'steps' => [
@@ -183,7 +184,8 @@ class UserGuide
                         'Teruskan daftar Alergi & Pantangan ke vendor; pantau Rekap Rating Vendor tiap minggu.',
                     ]],
                     ['title' => 'Laporan', 'steps' => [
-                        'Laporan → Pusat Laporan: penerimaan konsumsi dan input konsumsi harian, mingguan, atau bulanan, lengkap dengan total per vendor; unduh Excel sebagai dasar pembayaran vendor.',
+                        'Laporan → Pusat Laporan: penerimaan konsumsi dan input konsumsi harian, mingguan, bulanan, atau rentang tanggal, lengkap dengan total per vendor; unduh Excel sebagai dasar pembayaran vendor.',
+                        'Laporan Input konsumsi menampilkan foto menu & foto total tiap input (filter Foto belum lengkap); di Excel foto ikut tersemat di lembar Foto konsumsi.',
                     ]],
                 ],
             ],
@@ -246,7 +248,8 @@ class UserGuide
                     ]],
                     ['title' => 'Memantau dan melapor', 'steps' => [
                         'Dashboard Eksekutif: grafik kehadiran, nilai, dan konsumsi dengan filter angkatan, kelas, dan rentang tanggal, serta daftar peserta yang perlu perhatian.',
-                        'Pusat Laporan: absen harian, absen per sesi, konsumsi, input konsumsi, rekap nilai, dan laporan mengajar tiap pengajar; unduh Excel.',
+                        'Pusat Laporan: absen harian, absen per sesi, konsumsi, input konsumsi, rekap nilai, dan laporan mengajar tiap pengajar; unduh Excel, atau Unduh semua laporan sekaligus dalam satu berkas.',
+                        'Data dipotong sampai tanggal yang dipilih: bulanan dengan tanggal 6 Nov = 1–6 Nov. Butuh rentang lain? Pilih periode Rentang lalu isi Dari dan Sampai.',
                     ]],
                 ],
             ],
@@ -262,7 +265,7 @@ class UserGuide
                         'Pilih satu peserta untuk melihat grafik kehadiran dan nilainya per minggu.',
                     ]],
                     ['title' => 'Laporan', 'steps' => [
-                        'Pusat Laporan: pilih jenis laporan dan periode (harian, mingguan, bulanan), lalu Unduh Excel.',
+                        'Pusat Laporan: pilih jenis laporan dan periode (harian, mingguan, bulanan, rentang); data diambil sampai tanggal yang dipilih. Unduh Excel, atau Unduh semua laporan untuk semua jenis sekaligus.',
                         'Rekap Rating Pengajar dan hasil Survei & Evaluasi juga bisa dibuka.',
                         'Rekap & Rapor Nilai: gabungan beberapa quiz per kelas dan rapor tiap peserta (Excel dan PDF).',
                     ]],

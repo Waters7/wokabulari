@@ -3,6 +3,17 @@
 Versi ditampilkan di halaman login dan menu aplikasi (`config/wokabulari.php` → `version`).
 Aturan penomoran: **patch** (1.0.x) perbaikan, **minor** (1.x.0) fitur baru, **major** (x.0.0) perubahan besar.
 
+## 1.25.0 — 23 November 2026
+
+- **Pusat Laporan memotong data sampai tanggal yang dipilih.** Sebelumnya periode mingguan/bulanan selalu mengambil seminggu atau sebulan penuh (mis. tanggal 6 Nov dengan periode bulanan = 1–30 Nov, termasuk jadwal makan dan sesi yang sudah direncanakan). Kini bulanan 6 Nov = **1–6 Nov**; label kolom tanggal menjadi *Sampai tanggal*. Panah ◀ ▶ pindah ke periode sebelum/berikutnya sampai akhir periode itu (atau hari ini).
+- **Periode Rentang:** isi *Dari* dan *Sampai* untuk rentang bebas, mis. awal angkatan s.d. 6 Nov.
+- **Unduh semua laporan:** satu berkas Excel berisi lembar *Ringkasan* dan semua jenis laporan yang boleh Anda lihat (absen harian, absen sesi, konsumsi, input konsumsi, nilai, mengajar) untuk periode dan cakupan yang sama.
+- **Foto dokumentasi konsumsi:** laporan *Input konsumsi* menampilkan foto menu & foto total tiap input, dengan filter *Foto belum lengkap* dan ringkasan *Input tanpa foto*. Di Excel, foto ikut tersemat di lembar *Foto konsumsi*.
+- **Soal & hasil quiz bisa dicetak dan diunduh Excel** (tombol *Cetak* dan *Excel* di detail quiz):
+  - Cetak: lembar peserta (tanpa kunci, ada kolom nama dan garis jawaban), lembar pengajar (dengan kunci), atau hasil (peringkat, nilai, predikat). Huruf Mandarin/Jepang tercetak dengan benar.
+  - Excel: lembar *Soal* (pilihan + kunci + poin), *Hasil*, *Nilai per soal*, dan *Jawaban* tiap peserta.
+- Saat mencetak halaman apa pun (rapor, quiz), menu samping dan navigasi tidak ikut tercetak, dan mode gelap otomatis dicetak terang.
+
 ## 1.24.0 — 23 November 2026
 
 - **Rekap & Rapor nilai** (menu Mengajar → *Rekap & Rapor*; pimpinan dan admin di Laporan → *Rekap & Rapor Nilai*):

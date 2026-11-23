@@ -248,7 +248,7 @@ class UserGuide
                     ]],
                     ['title' => 'Memantau dan melapor', 'steps' => [
                         'Dashboard Eksekutif: grafik kehadiran, nilai, dan konsumsi dengan filter angkatan, kelas, dan rentang tanggal, serta daftar peserta yang perlu perhatian.',
-                        'Pusat Laporan: absen harian, absen per sesi, konsumsi, input konsumsi, rekap nilai, dan laporan mengajar tiap pengajar; unduh Excel, atau Unduh semua laporan sekaligus dalam satu berkas.',
+                        'Pusat Laporan: absen harian, absen per sesi, konsumsi, input konsumsi, rekap nilai, dan laporan mengajar tiap pengajar; unduh Excel, Unduh PDF berkop (kop Poltekkes, tanggal & jam cetak di tiap halaman), atau Unduh semua laporan sekaligus dalam satu berkas.',
                         'Hapus peserta: centang peserta di Program → Peserta, lalu menu ⋮ di bilah bawah → Hapus peserta. Riwayatnya tetap tersimpan; pilih status Terhapus lalu Pulihkan bila salah hapus. NIS peserta terhapus bisa dipakai lagi.',
                         'Data dipotong sampai tanggal yang dipilih: bulanan dengan tanggal 6 Nov = 1–6 Nov. Butuh rentang lain? Pilih periode Rentang lalu isi Dari dan Sampai.',
                     ]],
@@ -266,7 +266,7 @@ class UserGuide
                         'Pilih satu peserta untuk melihat grafik kehadiran dan nilainya per minggu.',
                     ]],
                     ['title' => 'Laporan', 'steps' => [
-                        'Pusat Laporan: pilih jenis laporan dan periode (harian, mingguan, bulanan, rentang); data diambil sampai tanggal yang dipilih. Unduh Excel, atau Unduh semua laporan untuk semua jenis sekaligus.',
+                        'Pusat Laporan: pilih jenis laporan dan periode (harian, mingguan, bulanan, rentang); data diambil sampai tanggal yang dipilih. Unduh Excel, Unduh PDF berkop untuk dicetak/dikirim, atau Unduh semua laporan untuk semua jenis sekaligus.',
                         'Rekap Rating Pengajar dan hasil Survei & Evaluasi juga bisa dibuka.',
                         'Rekap & Rapor Nilai: gabungan beberapa quiz per kelas dan rapor tiap peserta (Excel dan PDF).',
                     ]],

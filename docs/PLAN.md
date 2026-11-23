@@ -344,3 +344,7 @@ Acuan: DOCKER.md bagian C–D
 ### Tambahan — 23 Nov 2026 (v1.26.0)
 - [x] Hapus banyak peserta sekaligus, filter Terhapus + Pulihkan, NIS/email peserta terhapus bisa dipakai lagi.
 - Test: 387 lulus. Dicek di 360px: daftar peserta (bilah aksi massal dengan Hapus peserta, filter Terhapus, Pulihkan); dicoba hapus lalu pulihkan 2 peserta demo lokal.
+
+### Tambahan — 23 Nov 2026 (v1.27.0)
+- [x] PDF berkop (kop Kemenkes Poltekkes Manado) di Pusat Laporan; kop + waktu cetak di rapor PDF dan cetak quiz.
+- Test: 388 lulus. Dicek di 360px: tombol Pusat Laporan, lembar cetak quiz berkop; PDF dicek dari data demo (absen harian 2 halaman, absen sesi 7 halaman, rapor 1 halaman).

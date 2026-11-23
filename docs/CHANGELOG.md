@@ -3,6 +3,13 @@
 Versi ditampilkan di halaman login dan menu aplikasi (`config/wokabulari.php` → `version`).
 Aturan penomoran: **patch** (1.0.x) perbaikan, **minor** (1.x.0) fitur baru, **major** (x.0.0) perubahan besar.
 
+## 1.27.0 — 23 November 2026
+
+- **Unduh PDF berkop** di Pusat Laporan untuk semua jenis laporan. Formatnya PDF A4 mendatar dengan **kop surat Kemenkes Poltekkes Manado** di setiap halaman, judul, periode, cakupan, ringkasan, dan tabel yang judul kolomnya berulang di tiap halaman. Kaki setiap halaman memuat **tanggal & jam cetak, nama pencetak**, dan *Halaman X dari Y*.
+- **Rapor peserta (PDF)** kini memakai kop Poltekkes, tanggal & jam cetak, dan nomor halaman.
+- **Cetak soal & hasil quiz** memakai kop Poltekkes dan mencantumkan tanggal, jam, serta nama pencetak.
+- Catatan: huruf Mandarin/Jepang (mis. topik sesi) belum bisa tampil di PDF dan muncul sebagai kotak. Lembar cetak quiz tidak terpengaruh karena dicetak dari browser.
+
 ## 1.26.0 — 23 November 2026
 
 - **Hapus banyak peserta sekaligus** (Program → Peserta): centang peserta (atau *Pilih semua hasil*), lalu menu ⋮ di bilah bawah → *Hapus peserta*. Peserta terhapus tidak bisa login dan hilang dari daftar, laporan, absen, dan nilai, tetapi riwayatnya tetap tersimpan. Peserta juga otomatis keluar dari kamar asrama sehingga tempat tidurnya kosong kembali.

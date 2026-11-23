@@ -4,7 +4,9 @@ use App\Actions\Classrooms\AssignParticipants;
 use App\Actions\Classrooms\DistributeParticipants;
 use App\Actions\Dorm\AssignRooms;
 use App\Actions\Dorm\SetDormResidency;
+use App\Actions\Participants\DeleteParticipants;
 use App\Actions\Participants\ImportParticipants;
+use App\Actions\Participants\RestoreParticipants;
 use App\Actions\Participants\SaveParticipant;
 use App\Actions\Participants\SetParticipantGender;
 use App\Enums\Gender;
@@ -148,6 +150,61 @@ new #[Title('Peserta')] class extends Component {
         return User::query()->participants()->findOrFail($id);
     }
 
+    /** Hapus satu peserta (bisa dipulihkan dari filter Terhapus). */
+    public function delete(int $id): void
+    {
+        $user = $this->findModel($id);
+        $this->authorize('delete', $user);
+
+        app(DeleteParticipants::class)->handle(collect([$user]), auth()->user());
+        Flux::toast(variant: 'success', text: "{$user->name} dihapus. Bisa dipulihkan dari filter Terhapus.");
+    }
+
+    /** Hapus semua peserta terpilih sekaligus. */
+    public function deleteSelected(DeleteParticipants $delete): void
+    {
+        abort_unless(auth()->user()->can('participant.manage'), 403);
+
+        $count = $delete->handle($this->selectedParticipants(), auth()->user());
+        $this->reset('selected');
+        Flux::toast(variant: 'success', text: "{$count} peserta dihapus. Bisa dipulihkan dari filter Terhapus.");
+    }
+
+    public function restore(int $id, RestoreParticipants $restore): void
+    {
+        $user = User::query()->participants()->onlyTrashed()->findOrFail($id);
+        $this->authorize('restore', $user);
+
+        $this->notifyRestore($restore->handle(collect([$user]), auth()->user()));
+    }
+
+    public function restoreSelected(RestoreParticipants $restore): void
+    {
+        abort_unless(auth()->user()->can('participant.manage'), 403);
+
+        $trashed = User::query()->participants()->onlyTrashed()->whereIn('id', $this->selected)->orderBy('name')->get();
+        $this->notifyRestore($restore->handle($trashed, auth()->user()));
+        $this->reset('selected');
+    }
+
+    /** @param array{restored: int, failed: list<string>} $result */
+    protected function notifyRestore(array $result): void
+    {
+        if ($result['restored'] > 0) {
+            Flux::toast(variant: 'success', text: "{$result['restored']} peserta dipulihkan. Atur ulang kamar asrama bila perlu.");
+        }
+
+        if ($result['failed'] !== []) {
+            Flux::toast(variant: 'danger', text: implode(' ', $result['failed']));
+        }
+    }
+
+    /** Filter Terhapus hanya untuk pengelola peserta. */
+    protected function showingDeleted(): bool
+    {
+        return $this->status === 'deleted' && auth()->user()->can('participant.manage');
+    }
+
     public function resetPassword(int $id): void
     {
         $user = $this->findModel($id);
@@ -239,6 +296,8 @@ new #[Title('Peserta')] class extends Component {
     public function updatingStatus(): void
     {
         $this->resetPage();
+        // Pilihan lama tidak dibawa saat pindah ke/dari daftar Terhapus.
+        $this->reset('selected');
     }
 
     protected function filteredQuery(): Builder
@@ -255,7 +314,8 @@ new #[Title('Peserta')] class extends Component {
             ->when($this->status === 'no_gender', fn (Builder $q) => $q->whereDoesntHave('profile', fn ($p) => $p->whereNotNull('gender')))
             ->when($this->status === 'no_face', fn (Builder $q) => $q->whereDoesntHave('profile', fn ($q) => $q->whereNotNull('face_enrolled_at')))
             ->when($this->status === 'first_login', fn (Builder $q) => $q->where('must_change_password', true))
-            ->when($this->status === 'inactive', fn (Builder $q) => $q->where('is_active', false));
+            ->when($this->status === 'inactive', fn (Builder $q) => $q->where('is_active', false))
+            ->when($this->showingDeleted(), fn (Builder $q) => $q->onlyTrashed());
     }
 
     // ---- Aksi massal (makro) ----
@@ -434,6 +494,7 @@ new #[Title('Peserta')] class extends Component {
             'canManage' => auth()->user()->can('participant.manage'),
             'canDorm' => auth()->user()->can('dormitory.manage'),
             'canBulk' => $this->canBulk(),
+            'showingDeleted' => $this->showingDeleted(),
             'dormRooms' => $this->showBulkDorm && $this->bulkDormMode === 'room'
                 ? DormRoom::query()->with('dormitory')->withCount('activeAssignments')->get()
                     ->sortBy(fn ($room) => [$room->dormitory?->name, strlen($room->number), $room->number])->values()
@@ -472,16 +533,28 @@ new #[Title('Peserta')] class extends Component {
             <flux:select.option value="no_face">Wajah belum didaftarkan</flux:select.option>
             <flux:select.option value="first_login">Belum ganti kata sandi awal</flux:select.option>
             <flux:select.option value="inactive">Nonaktif</flux:select.option>
+            @if ($canManage)
+                <flux:select.option value="deleted">Terhapus (bisa dipulihkan)</flux:select.option>
+            @endif
         </flux:select>
     </div>
 
+    @if ($showingDeleted)
+        <flux:callout icon="trash" class="mb-3" data-test="deleted-note"
+                      text="Peserta terhapus tidak bisa login dan tidak muncul di daftar, laporan, absen, maupun nilai. Riwayatnya tetap tersimpan; Pulihkan untuk mengaktifkan kembali dengan NIS/email semula." />
+    @endif
+
     @if ($participants->isEmpty())
-        <x-empty-state icon="user-group" title="Belum ada peserta" description="Tambahkan peserta satu per satu atau import dari Excel/CSV." />
+        @if ($showingDeleted)
+            <x-empty-state icon="trash" title="Tidak ada peserta terhapus" />
+        @else
+            <x-empty-state icon="user-group" title="Belum ada peserta" description="Tambahkan peserta satu per satu atau import dari Excel/CSV." />
+        @endif
     @else
         @if ($canBulk)
             <div class="mb-2 flex flex-wrap items-center gap-2 text-sm">
                 <flux:button size="sm" icon="check-circle" wire:click="selectAllFiltered">Pilih semua hasil ({{ $participants->total() }})</flux:button>
-                <span class="text-hutan/60 dark:text-santan/60">lalu atur kelas atau asrama sekaligus.</span>
+                <span class="text-hutan/60 dark:text-santan/60">{{ $showingDeleted ? 'lalu pulihkan sekaligus.' : ($canManage ? 'lalu atur kelas, asrama, atau hapus sekaligus.' : 'lalu atur asrama sekaligus.') }}</span>
             </div>
         @endif
         <div class="table-scroll">
@@ -502,16 +575,22 @@ new #[Title('Peserta')] class extends Component {
                                 </td>
                             @endif
                             <td>
-                                <a href="{{ route('master.participants.show', $participant) }}" wire:navigate class="font-semibold hover:text-woka">{{ $participant->name }}</a>
-                                @if ($participant->username)
-                                    <span class="block text-xs text-hutan/60 dark:text-santan/60">{{ $participant->username }}</span>
+                                @if ($participant->trashed())
+                                    <span class="font-semibold">{{ $participant->name }}</span>
+                                @else
+                                    <a href="{{ route('master.participants.show', $participant) }}" wire:navigate class="font-semibold hover:text-woka">{{ $participant->name }}</a>
+                                @endif
+                                @if ($participant->identity('username'))
+                                    <span class="block text-xs text-hutan/60 dark:text-santan/60">{{ $participant->identity('username') }}</span>
                                 @endif
                             </td>
-                            <td class="whitespace-nowrap">{{ Phone::display($participant->phone) }}</td>
+                            <td class="whitespace-nowrap">{{ Phone::display($participant->identity('phone')) }}</td>
                             <td class="max-w-48 truncate">{{ $participant->profile?->school_name ?? '–' }}</td>
                             <td>{{ $participant->classrooms->first()?->name ?? '–' }}</td>
                             <td class="whitespace-nowrap">
-                                @if ($participant->profile?->lives_in_dorm === false)
+                                @if ($participant->trashed())
+                                    –
+                                @elseif ($participant->profile?->lives_in_dorm === false)
                                     <flux:badge size="sm" color="zinc">Tidak asrama</flux:badge>
                                 @elseif ($participant->currentRoomAssignment?->room)
                                     Kamar {{ $participant->currentRoomAssignment->room->number }}
@@ -520,6 +599,9 @@ new #[Title('Peserta')] class extends Component {
                                 @endif
                             </td>
                             <td class="space-x-1 whitespace-nowrap">
+                                @if ($participant->trashed())
+                                    <flux:badge size="sm" color="red" icon="trash">Terhapus {{ tanggal($participant->deleted_at, 'j M') }}</flux:badge>
+                                @endif
                                 @unless ($participant->is_active)
                                     <flux:badge size="sm" color="zinc">Nonaktif</flux:badge>
                                 @endunless
@@ -533,14 +615,16 @@ new #[Title('Peserta')] class extends Component {
                                 @endif
                             </td>
                             <td class="whitespace-nowrap text-end">
-                                @if ($canManage)
+                                @if ($canManage && $participant->trashed())
+                                    <flux:button size="sm" icon="arrow-uturn-left" wire:click="restore({{ $participant->id }})" data-test="restore-{{ $participant->id }}">Pulihkan</flux:button>
+                                @elseif ($canManage)
                                     <flux:dropdown align="end">
                                         <flux:button size="sm" variant="ghost" icon="ellipsis-vertical" aria-label="Aksi" />
                                         <flux:menu>
                                             <flux:menu.item icon="pencil-square" wire:click="edit({{ $participant->id }})">Ubah</flux:menu.item>
                                             <flux:menu.item icon="key" wire:click="resetPassword({{ $participant->id }})" wire:confirm="Kembalikan kata sandi {{ $participant->name }} ke sandi awal?">Reset kata sandi</flux:menu.item>
                                             <flux:menu.separator />
-                                            <flux:menu.item icon="trash" variant="danger" wire:click="delete({{ $participant->id }})" wire:confirm="Hapus peserta {{ $participant->name }}? Data riwayat tetap tersimpan.">Hapus</flux:menu.item>
+                                            <flux:menu.item icon="trash" variant="danger" wire:click="delete({{ $participant->id }})" wire:confirm="Hapus peserta {{ $participant->name }}? Akun tidak bisa login dan keluar dari kamar asrama. Riwayat tetap tersimpan dan bisa dipulihkan dari filter Terhapus.">Hapus</flux:menu.item>
                                         </flux:menu>
                                     </flux:dropdown>
                                 @endif
@@ -562,22 +646,29 @@ new #[Title('Peserta')] class extends Component {
                 'bottom-4' => ! auth()->user()->primaryRole()?->usesBottomNav(),
             ]) data-test="bulk-bar">
             <span class="me-auto text-sm font-semibold">{{ count($selected) }} <span class="hidden sm:inline">peserta</span> dipilih</span>
-            @if ($canManage)
-                <flux:button size="sm" icon="academic-cap" wire:click="openBulkClass"><span class="sm:hidden">Kelas</span><span class="hidden sm:inline">Atur kelas</span></flux:button>
+            @if ($showingDeleted)
+                <flux:button size="sm" icon="arrow-uturn-left" wire:click="restoreSelected" data-test="restore-selected">Pulihkan</flux:button>
+                <flux:button size="sm" variant="ghost" icon="x-mark" wire:click="clearSelection" aria-label="Batal pilih" class="text-santan!" />
+            @else
+                @if ($canManage)
+                    <flux:button size="sm" icon="academic-cap" wire:click="openBulkClass"><span class="sm:hidden">Kelas</span><span class="hidden sm:inline">Atur kelas</span></flux:button>
+                @endif
+                @if ($canDorm)
+                    <flux:button size="sm" icon="home-modern" wire:click="openBulkDorm"><span class="sm:hidden">Asrama</span><span class="hidden sm:inline">Atur asrama</span></flux:button>
+                @endif
+                <flux:dropdown position="top" align="end">
+                    <flux:button size="sm" variant="ghost" icon="ellipsis-vertical" aria-label="Aksi lain" class="text-santan!" />
+                    <flux:menu>
+                        @if ($canManage)
+                            <flux:menu.item icon="key" wire:click="resetSelectedPasswords"
+                                            wire:confirm="Kembalikan kata sandi {{ count($selected) }} peserta ke sandi awal? Mereka wajib menggantinya saat login berikutnya.">Reset kata sandi</flux:menu.item>
+                            <flux:menu.item icon="trash" variant="danger" wire:click="deleteSelected" data-test="delete-selected"
+                                            wire:confirm="Hapus {{ count($selected) }} peserta terpilih? Akun mereka tidak bisa login, hilang dari daftar dan laporan, dan keluar dari kamar asrama. Riwayat tetap tersimpan dan bisa dipulihkan dari filter Terhapus.">Hapus peserta</flux:menu.item>
+                        @endif
+                        <flux:menu.item icon="x-mark" wire:click="clearSelection">Batal pilih</flux:menu.item>
+                    </flux:menu>
+                </flux:dropdown>
             @endif
-            @if ($canDorm)
-                <flux:button size="sm" icon="home-modern" wire:click="openBulkDorm"><span class="sm:hidden">Asrama</span><span class="hidden sm:inline">Atur asrama</span></flux:button>
-            @endif
-            <flux:dropdown position="top" align="end">
-                <flux:button size="sm" variant="ghost" icon="ellipsis-vertical" aria-label="Aksi lain" class="text-santan!" />
-                <flux:menu>
-                    @if ($canManage)
-                        <flux:menu.item icon="key" wire:click="resetSelectedPasswords"
-                                        wire:confirm="Kembalikan kata sandi {{ count($selected) }} peserta ke sandi awal? Mereka wajib menggantinya saat login berikutnya.">Reset kata sandi</flux:menu.item>
-                    @endif
-                    <flux:menu.item icon="x-mark" wire:click="clearSelection">Batal pilih</flux:menu.item>
-                </flux:menu>
-            </flux:dropdown>
         </div>
         <div class="h-24 lg:h-16"></div>
     @endif

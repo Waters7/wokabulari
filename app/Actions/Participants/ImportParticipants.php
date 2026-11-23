@@ -177,15 +177,16 @@ class ImportParticipants
      */
     protected function findExisting(array $data): ?User
     {
-        $query = User::query()->withTrashed();
-
         foreach (['phone', 'username', 'email'] as $key) {
-            if (filled($data[$key])) {
-                $user = (clone $query)->where($key, $data[$key])->first();
+            if (filled($data[$key]) && $user = User::query()->where($key, $data[$key])->first()) {
+                return $user;
+            }
+        }
 
-                if ($user) {
-                    return $user;
-                }
+        // Peserta terhapus dikenali dari identitas yang disimpan saat dihapus; baris impor memulihkannya.
+        foreach (['phone', 'username', 'email'] as $key) {
+            if (filled($data[$key]) && $user = User::query()->onlyTrashed()->where("deleted_identity->{$key}", $data[$key])->latest('deleted_at')->first()) {
+                return $user;
             }
         }
 

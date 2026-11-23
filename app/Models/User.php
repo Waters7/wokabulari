@@ -17,6 +17,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use InvalidArgumentException;
 use Spatie\Activitylog\Models\Concerns\LogsActivity;
 use Spatie\Activitylog\Support\LogOptions;
 use Spatie\Permission\Traits\HasRoles;
@@ -56,7 +57,40 @@ class User extends Authenticatable
             'leaderboard_anonymous' => 'boolean',
             'consented_at' => 'datetime',
             'last_login_at' => 'datetime',
+            'deleted_identity' => 'array',
         ];
+    }
+
+    protected static function booted(): void
+    {
+        // Akun terhapus melepas NIS/email/HP agar bisa dipakai akun lain; disimpan untuk dikembalikan saat dipulihkan.
+        static::softDeleted(function (User $user) {
+            $identity = array_filter(['username' => $user->username, 'email' => $user->email, 'phone' => $user->phone], fn ($value) => filled($value));
+
+            if ($identity !== []) {
+                $user->forceFill(['deleted_identity' => $identity, 'username' => null, 'email' => null, 'phone' => null])->saveQuietly();
+            }
+        });
+
+        static::restoring(function (User $user) {
+            $identity = $user->deleted_identity ?? [];
+
+            foreach ($identity as $field => $value) {
+                if (static::query()->where($field, $value)->whereKeyNot($user->id)->exists()) {
+                    $label = ['username' => 'NIS/NIP', 'email' => 'Email', 'phone' => 'No. HP'][$field] ?? $field;
+
+                    throw new InvalidArgumentException("{$user->name} tidak bisa dipulihkan: {$label} {$value} sudah dipakai akun lain.");
+                }
+            }
+
+            $user->forceFill($identity + ['deleted_identity' => null]);
+        });
+    }
+
+    /** NIS/email/HP akun, termasuk yang disimpan saat akun dihapus. */
+    public function identity(string $field): ?string
+    {
+        return $this->{$field} ?? ($this->deleted_identity[$field] ?? null);
     }
 
     public function getActivitylogOptions(): LogOptions
@@ -307,7 +341,9 @@ class User extends Authenticatable
         $query->where(function (Builder $query) use ($term) {
             $query->where('name', 'like', "%{$term}%")
                 ->orWhere('username', 'like', "%{$term}%")
-                ->orWhere('email', 'like', "%{$term}%");
+                ->orWhere('email', 'like', "%{$term}%")
+                // NIS/email akun terhapus (filter Terhapus)
+                ->orWhere('deleted_identity', 'like', "%{$term}%");
         });
     }
 

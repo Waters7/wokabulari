@@ -43,6 +43,12 @@ class UserPolicy
         return ! $user->is($target) && $this->update($user, $target);
     }
 
+    /** Memulihkan akun terhapus: siapa pun yang boleh menghapusnya. */
+    public function restore(User $user, User $target): bool
+    {
+        return $this->delete($user, $target);
+    }
+
     /** Pengguna mengisi email login sendiri; email super admin dikelola lewat server. */
     public function updateLoginEmail(User $user, User $target): bool
     {

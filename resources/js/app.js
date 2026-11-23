@@ -259,3 +259,15 @@ if ('serviceWorker' in navigator && (location.protocol === 'https:' || ['localho
         navigator.serviceWorker.register('/sw.js').catch(() => {});
     });
 }
+
+// Cetak selalu memakai tampilan terang agar teks terbaca di kertas.
+let darkBeforePrint = false;
+window.addEventListener('beforeprint', () => {
+    darkBeforePrint = document.documentElement.classList.contains('dark');
+    document.documentElement.classList.remove('dark');
+});
+window.addEventListener('afterprint', () => {
+    if (darkBeforePrint) {
+        document.documentElement.classList.add('dark');
+    }
+});

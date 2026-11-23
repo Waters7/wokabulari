@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\QuestionTemplateController;
+use App\Http\Controllers\QuizPaperExportController;
 use App\Http\Controllers\ReportCardPdfController;
 use App\Http\Controllers\VocabularyTemplateController;
 use Illuminate\Support\Facades\Route;
@@ -25,6 +26,8 @@ Route::prefix('mengajar')->name('teach.')->group(function () {
         Route::livewire('bank-soal/{bank}', 'pages::teach.question-bank')->name('questions.bank');
         Route::livewire('quiz', 'pages::teach.quizzes')->name('quizzes.index');
         Route::livewire('quiz/{quiz}', 'pages::teach.quiz-show')->name('quizzes.show');
+        Route::livewire('quiz/{quiz}/cetak', 'pages::teach.quiz-print')->name('quizzes.print');
+        Route::get('quiz/{quiz}/excel', QuizPaperExportController::class)->name('quizzes.excel');
         Route::livewire('perlu-dinilai', 'pages::teach.grading')->name('grading');
     });
 

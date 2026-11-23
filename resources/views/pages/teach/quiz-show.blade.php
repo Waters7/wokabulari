@@ -215,6 +215,8 @@ new #[Title('Detail quiz')] class extends Component {
         <x-slot:actions>
             <x-status-badge :status="$quiz->type" size="lg" />
             <x-status-badge :status="$quiz->status" size="lg" />
+            <flux:button icon="printer" :href="route('teach.quizzes.print', ['quiz' => $quiz, 'bagian' => $tab === 'hasil' ? 'hasil' : 'soal'])" wire:navigate data-test="quiz-print">Cetak</flux:button>
+            <flux:button icon="arrow-down-tray" :href="route('teach.quizzes.excel', $quiz)" data-test="quiz-excel">Excel</flux:button>
             @if ($quiz->status === QuizStatus::Draft)
                 <flux:button variant="primary" icon="paper-airplane" wire:click="publish">Terbitkan</flux:button>
             @elseif ($quiz->status === QuizStatus::Published)

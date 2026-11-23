@@ -1,7 +1,7 @@
 {{-- Navigasi bawah HP (maks. 5 item) untuk peserta, wali, dan tim kerja --}}
 @props(['items' => []])
 
-<nav class="pb-safe fixed inset-x-0 bottom-0 z-40 border-t border-woka-100 bg-white/95 backdrop-blur lg:hidden dark:border-hutan-800 dark:bg-hutan-900/95"
+<nav class="pb-safe fixed inset-x-0 bottom-0 z-40 print:hidden border-t border-woka-100 bg-white/95 backdrop-blur lg:hidden dark:border-hutan-800 dark:bg-hutan-900/95"
      aria-label="Navigasi utama">
     <ul class="mx-auto grid max-w-lg" style="grid-template-columns: repeat({{ count($items) }}, minmax(0, 1fr));">
         @foreach ($items as $item)

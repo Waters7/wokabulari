@@ -212,3 +212,26 @@ select:focus[data-flux-control] {
     border-color: transparent !important;
     color: var(--color-toska) !important;
 }
+
+/* Cetak (rapor, soal & hasil quiz, dll.): hanya isi halaman, tanpa menu samping, header, dan navigasi bawah */
+@media print {
+    [data-flux-sidebar],
+    [data-flux-header],
+    [data-flux-toast-group] {
+        display: none !important;
+    }
+
+    [data-flux-main] {
+        padding: 0 !important;
+        margin: 0 !important;
+        max-width: none !important;
+    }
+
+    body {
+        background: #fff !important;
+    }
+
+    .table-scroll {
+        overflow: visible !important;
+    }
+}

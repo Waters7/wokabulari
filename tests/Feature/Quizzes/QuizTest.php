@@ -10,6 +10,7 @@ use App\Enums\ComponentSource;
 use App\Enums\QuizStatus;
 use App\Enums\QuizType;
 use App\Events\QuizCompleted;
+use App\Exports\ReportExport;
 use App\Models\Classroom;
 use App\Models\Language;
 use App\Models\LearningSession;
@@ -28,6 +29,7 @@ use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
+use Maatwebsite\Excel\Facades\Excel;
 use Spatie\Activitylog\Models\Activity;
 
 beforeEach(function () {
@@ -560,4 +562,83 @@ test('pencocokan kata kunci: pinyin tanpa tanda nada, huruf Mandarin, alternatif
         ->and($scorer->score('lanqiu, youyong, paobu, tenis', $keywords, 3, 2))->toBe(2.0)
         ->and($scorer->score('sanbu', $keywords, 3, 2))->toBe(0.0)
         ->and($scorer->score('打篮球', $keywords, 2, 3))->toBe(1.5);
+});
+
+/** Peserta pertama mengerjakan quiz semua tipe (pilihan ganda benar, b/s salah, jodoh 1 dari 2, esai menunggu). */
+function submittedQuizPaper(): array
+{
+    Event::fake([QuizCompleted::class]);
+    [$classroom, $quiz, $q] = quizWithAllTypes(['title' => 'Pretest Mandarin']);
+    $participant = $classroom->participants->first();
+    $participant->update(['name' => 'Angel Rondonuwu']);
+    $service = app(QuizAttemptService::class);
+
+    $attempt = $service->start($quiz, $participant, 'sesi-1');
+    $service->saveAnswers($attempt, [
+        $q['mc']->id => ['option' => $q['mc']->options->firstWhere('is_correct', true)->id],
+        $q['tf']->id => ['option' => $q['tf']->options->firstWhere('body', 'Salah')->id],
+        $q['match']->id => ['pairs' => [$q['match']->options[0]->id => 'dokter', $q['match']->options[1]->id => 'pasien']],
+        $q['essay']->id => ['text' => 'Nama saya Angel.'],
+    ], 'sesi-1');
+    $service->submit($attempt);
+
+    return [$classroom, $quiz->fresh(), $q, $participant];
+}
+
+test('soal & hasil quiz diunduh Excel: kunci, hasil, nilai per soal, dan jawaban peserta', function () {
+    Excel::fake();
+    [$classroom, $quiz] = submittedQuizPaper();
+
+    $this->actingAs($classroom->teacher)->get(route('teach.quizzes.excel', $quiz))->assertOk();
+
+    Excel::assertDownloaded('soal-hasil-pretest-mandarin-'.now()->format('Y-m-d').'.xlsx', function (ReportExport $export) {
+        [$soal, $hasil, $perSoal, $jawaban] = array_map(fn ($sheet) => $sheet->array(), $export->sheets());
+        $keys = array_column(array_slice($soal, 6), 5, 1);
+        $answers = collect(array_slice($jawaban, 6))->keyBy(2);
+
+        return $soal[5][5] === 'Kunci jawaban'
+            && $soal[6][4] === "A. Halo\nB. Terima kasih\nC. Selamat tinggal" && $soal[6][5] === 'A. Halo'
+            && $keys['Benar/Salah'] === 'Benar'
+            && $keys['Isian singkat'] === '谢谢 / xièxie'
+            && $keys['Menjodohkan'] === '医生 → dokter; 护士 → perawat'
+            && $keys['Nada Mandarin'] === 'Nada 1'
+            && $hasil[6][1] === 'Angel Rondonuwu' && $hasil[6][5] === 'Perlu dinilai'
+            && collect(array_slice($hasil, 7))->contains(fn ($row) => $row[5] === 'Belum mengerjakan')
+            && $perSoal[5][2] === 'No 1 (maks 1)' && $perSoal[6][2] == 1
+            && $answers['Pilihan ganda'][3] === 'A. Halo' && $answers['Pilihan ganda'][5] === 'Benar'
+            && $answers['Benar/Salah'][5] === 'Salah'
+            && $answers['Menjodohkan'][3] === '医生 → dokter; 护士 → pasien' && $answers['Menjodohkan'][5] === 'Sebagian'
+            && $answers['Esai'][3] === 'Nama saya Angel.' && $answers['Esai'][5] === 'Menunggu dinilai'
+            && in_array($answers['Isian singkat'][5], ['Tidak dijawab', 'Salah'], true);
+    });
+});
+
+test('cetak quiz: lembar peserta tanpa kunci, lembar pengajar dengan kunci, dan hasil', function () {
+    [$classroom, $quiz, $q] = submittedQuizPaper();
+
+    Livewire::actingAs($classroom->teacher)->test('pages::teach.quiz-print', ['quiz' => $quiz])
+        ->assertSee('Pretest Mandarin')
+        ->assertSee('你好 artinya?')
+        ->assertSee('Perkenalkan dirimu.')
+        ->assertDontSee('谢谢 / xièxie')
+        ->assertDontSee('Angel Rondonuwu')
+        ->set('withKey', true)
+        ->assertSee('Kunci:')->assertSee('谢谢 / xièxie')
+        ->assertSee('→ dokter')
+        ->set('part', 'hasil')
+        ->assertDontSee('你好 artinya?')
+        ->assertSeeInOrder(['Hasil', 'Angel Rondonuwu', 'Perlu dinilai', 'Belum mengerjakan']);
+
+    $this->actingAs($classroom->teacher)->get(route('teach.quizzes.show', $quiz))
+        ->assertSee(route('teach.quizzes.print', ['quiz' => $quiz, 'bagian' => 'soal']), false)
+        ->assertSee(route('teach.quizzes.excel', $quiz), false);
+});
+
+test('cetak & Excel soal quiz hanya untuk pengajar quiz itu', function () {
+    [$classroom, $quiz, , $participant] = submittedQuizPaper();
+
+    $this->actingAs(teacher())->get(route('teach.quizzes.print', $quiz))->assertForbidden();
+    $this->actingAs(teacher())->get(route('teach.quizzes.excel', $quiz))->assertForbidden();
+    $this->actingAs($participant)->get(route('teach.quizzes.print', $quiz))->assertForbidden();
+    $this->actingAs($participant)->get(route('teach.quizzes.excel', $quiz))->assertForbidden();
 });

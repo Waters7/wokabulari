@@ -58,7 +58,7 @@
 
         <flux:main @class(['max-w-7xl', 'has-bottom-nav' => count($bottomItems) > 0])>
             {{-- Bilah kanan atas (desktop): notifikasi dan profil (Keluar ada di menu profil) --}}
-            <div class="mb-3 hidden items-center justify-end gap-2 lg:flex">
+            <div class="mb-3 hidden items-center justify-end gap-2 lg:flex print:hidden">
                 <x-notification-bell :count="$unread" />
                 <flux:dropdown position="bottom" align="end">
                     <flux:profile :name="$user->name" :initials="$user->initials()" :avatar="$user->photo_url" icon-trailing="chevron-down" />

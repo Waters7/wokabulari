@@ -9,6 +9,8 @@ use App\Enums\Role;
 use App\Models\Classroom;
 use App\Models\User;
 use App\Services\Reports\ReportBuilder;
+use App\Support\Letterhead;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Str;
 use Livewire\Attributes\Title;
@@ -162,6 +164,32 @@ new #[Title('Pusat laporan')] class extends Component {
         return Excel::download(new ReportExport($report, $this->scope()), Str::slug($report['title']).'-'.$this->fileSuffix().'.xlsx');
     }
 
+    /** PDF berkop (A4 mendatar): tabel yang sama dengan layar, kop Poltekkes dan waktu cetak di setiap halaman. */
+    public function exportPdf(ReportBuilder $builder)
+    {
+        abort_unless(auth()->user()->can('report.export'), 403);
+        @set_time_limit(300);
+
+        $report = $this->permitted($this->report($builder));
+        // Lembar khusus Excel (foto dokumentasi) tidak ikut di PDF.
+        $report['sheets'] = array_values(array_filter($report['sheets'], fn (array $sheet) => empty($sheet['excel_only'])));
+
+        activity('laporan')->causedBy(auth()->user())
+            ->withProperties(['jenis' => $report['title'], 'periode' => $report['period'], 'cakupan' => $this->scope(), 'format' => 'PDF'])
+            ->log('Mengunduh laporan');
+
+        $pdf = Pdf::loadView('pdf.report', [
+            'report' => $report,
+            'scope' => $this->scope(),
+            'kop' => Letterhead::pdf(),
+            'printedAt' => now(),
+            'printedBy' => auth()->user()->name,
+        ])->setPaper('a4', 'landscape');
+        $content = Letterhead::output($pdf);
+
+        return response()->streamDownload(fn () => print ($content), Str::slug($report['title']).'-'.$this->fileSuffix().'.pdf', ['Content-Type' => 'application/pdf']);
+    }
+
     /** Semua jenis laporan yang boleh dilihat pengguna, satu berkas Excel, untuk rentang & cakupan yang sama. */
     public function exportAll(ReportBuilder $builder)
     {
@@ -205,6 +233,10 @@ new #[Title('Pusat laporan')] class extends Component {
         <x-slot:actions>
             @can('report.export')
                 <flux:button variant="primary" icon="arrow-down-tray" wire:click="export">Unduh Excel</flux:button>
+                <flux:button icon="document-text" wire:click="exportPdf" wire:loading.attr="disabled" wire:target="exportPdf" data-test="export-pdf">
+                    <span wire:loading.remove wire:target="exportPdf">Unduh PDF berkop</span>
+                    <span wire:loading wire:target="exportPdf">Menyiapkan PDF…</span>
+                </flux:button>
                 <flux:button icon="archive-box-arrow-down" wire:click="exportAll" wire:loading.attr="disabled" wire:target="exportAll" data-test="export-all">
                     <span wire:loading.remove wire:target="exportAll">Unduh semua laporan</span>
                     <span wire:loading wire:target="exportAll">Menyiapkan…</span>

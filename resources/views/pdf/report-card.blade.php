@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <title>Rapor {{ $card['user']->name }}</title>
     <style>
-        @page { margin: 28px 32px; }
+        @page { margin: 118px 32px 48px 32px; }
         body { font-family: 'DejaVu Sans', sans-serif; color: #0b3b38; font-size: 11px; }
         .head { border-bottom: 3px solid #007d71; padding-bottom: 8px; margin-bottom: 12px; }
         .head img { height: 34px; float: right; }
@@ -29,10 +29,10 @@
         $pct = fn ($v) => $v === null ? '–' : angka($v, 1);
         $classroom = $card['classroom'];
     @endphp
+    @include('pdf.partials.letterhead')
     <div class="head">
-        @if ($brand)<img src="{{ $brand }}" alt="Wokabulari">@endif
         <h1>Rapor Peserta</h1>
-        <div class="muted">{{ $program }} · {{ $organizer }}</div>
+        <div class="muted">{{ $program }} · {{ $organizer }} · dicetak {{ tanggal($printedAt, 'l, j F Y') }} pukul {{ jam($printedAt) }} WITA</div>
     </div>
 
     <table class="grid">

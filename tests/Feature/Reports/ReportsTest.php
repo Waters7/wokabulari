@@ -28,6 +28,8 @@ use App\Models\Vendor;
 use App\Services\Reports\ReportBuilder;
 use App\Services\Reports\ReportFilter;
 use App\Services\Reports\ScoreAnalytics;
+use App\Support\Letterhead;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\CarbonImmutable;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Carbon;
@@ -389,4 +391,21 @@ test('foto dokumentasi konsumsi tampil di laporan input konsumsi dan tersemat di
         ->and(count($sheet->getDrawingCollection()))->toBe(1)
         ->and($sheet->getDrawingCollection()[0]->getCoordinates())->toBe('F7');
     Storage::disk('private')->assertExists(MealDelivery::thumbnailFile($photo));
+});
+
+test('unduh PDF berkop: kop Poltekkes, periode, cakupan, dan waktu cetak di setiap halaman', function () {
+    reportPage(['jenis' => 'daily_attendance', 'periode' => 'weekly', 'tanggal' => '2026-11-04', 'angkatan' => $this->batch->id])
+        ->assertSee('Unduh PDF berkop')
+        ->call('exportPdf')
+        ->assertFileDownloaded('absen-harian-2026-11-02-sd-2026-11-04.pdf');
+
+    $report = app(ReportBuilder::class)->between(ReportType::DailyAttendance, CarbonImmutable::parse('2026-11-02'), CarbonImmutable::parse('2026-11-04'), $this->batch->id, null);
+    $data = ['report' => $report, 'scope' => ['Angkatan uji'], 'kop' => Letterhead::pdf(), 'printedAt' => now(), 'printedBy' => 'Admin Program'];
+    $html = view('pdf.report', $data)->render();
+
+    expect($html)->toContain('data:image/png;base64,')
+        ->toContain('Dicetak: Rabu, 4 November 2026 pukul 10.00 WITA oleh Admin Program')
+        ->toContain('2 – 4 November 2026')
+        ->toContain('Angel Rondonuwu')
+        ->and(Letterhead::output(Pdf::loadView('pdf.report', $data)->setPaper('a4', 'landscape')))->toStartWith('%PDF');
 });

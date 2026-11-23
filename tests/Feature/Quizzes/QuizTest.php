@@ -618,6 +618,8 @@ test('cetak quiz: lembar peserta tanpa kunci, lembar pengajar dengan kunci, dan 
 
     Livewire::actingAs($classroom->teacher)->test('pages::teach.quiz-print', ['quiz' => $quiz])
         ->assertSee('Pretest Mandarin')
+        ->assertSeeHtml('images/brand/kop-instansi.png')
+        ->assertSee('Dicetak:')
         ->assertSee('你好 artinya?')
         ->assertSee('Perkenalkan dirimu.')
         ->assertDontSee('谢谢 / xièxie')

@@ -4,6 +4,7 @@ use App\Enums\QuestionType;
 use App\Models\Quiz;
 use App\Services\GradeService;
 use App\Services\Reports\QuizPaper;
+use App\Support\Letterhead;
 use Livewire\Attributes\Title;
 use Livewire\Attributes\Url;
 use Livewire\Component;
@@ -37,6 +38,7 @@ new #[Title('Cetak quiz')] class extends Component {
             'totalPoints' => $questions->sum('points'),
             'results' => $this->part === 'soal' ? null : $paper->results($this->quiz),
             'isCjk' => $this->quiz->classroom->language->isCjk(),
+            'kop' => Letterhead::urls(),
         ];
     }
 }; ?>
@@ -68,8 +70,13 @@ new #[Title('Cetak quiz')] class extends Component {
     </div>
 
     <article class="rounded-2xl bg-white p-5 text-hutan ring-1 ring-woka-100 sm:p-8 dark:bg-hutan-900 dark:text-santan dark:ring-hutan-800 print:rounded-none print:p-0 print:ring-0" data-test="quiz-paper">
+        {{-- Kop surat Kemenkes Poltekkes Manado (latar putih agar tetap terbaca di mode gelap) --}}
+        <div class="-mx-2 mb-3 flex items-center justify-between gap-3 rounded-lg bg-white px-2 py-1 print:mx-0 print:px-0" data-test="letterhead">
+            <img src="{{ $kop['logo'] }}" alt="Kemenkes Poltekkes Manado" class="h-9 w-auto sm:h-12 print:h-12">
+            <img src="{{ $kop['institution'] }}" alt="Politeknik Kesehatan Manado" class="h-14 w-auto sm:h-20 print:h-20">
+        </div>
         <header class="border-b-2 border-woka pb-3">
-            <p class="text-xs font-semibold uppercase tracking-wide text-hutan/60 dark:text-santan/60">{{ setting('program.name') }} · {{ setting('program.organizer') }}</p>
+            <p class="text-xs font-semibold uppercase tracking-wide text-hutan/60 dark:text-santan/60">{{ setting('program.name') }}</p>
             <h1 class="mt-1 font-display text-2xl font-extrabold">{{ $quiz->title }}</h1>
             <p class="mt-1 text-sm">{{ $quiz->classroom->label() }} · {{ $quiz->type->label() }} · {{ $quiz->duration_minutes }} menit · {{ $questions->count() }} soal · {{ poin($totalPoints) }} poin
                 @if ($quiz->opens_at) · {{ tanggal($quiz->opens_at, 'j F Y') }}@endif</p>
@@ -196,8 +203,9 @@ new #[Title('Cetak quiz')] class extends Component {
             </section>
         @endif
 
-        <footer class="mt-8 flex justify-end text-center text-sm">
-            <div class="w-56">
+        <footer class="mt-8 flex flex-wrap items-end justify-between gap-4 text-sm">
+            <p class="text-xs text-hutan/60 dark:text-santan/60" data-test="printed-at">Dicetak: {{ tanggal(now(), 'l, j F Y') }} pukul {{ jam(now()) }} WITA oleh {{ auth()->user()->name }}</p>
+            <div class="w-56 text-center">
                 <p>Manado, {{ tanggal(now()) }}</p>
                 <p>Pengajar</p>
                 <p class="mt-14 border-t border-hutan pt-1">{{ $quiz->teacher?->name ?? $quiz->classroom->teacher?->name }}</p>

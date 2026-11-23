@@ -142,7 +142,7 @@ test('rapor satu peserta tampil di layar dan bisa diunduh PDF', function () {
         ->assertSee('Belum ada penilaian periodik');
 
     $this->actingAs($this->teacher)->get(route('teach.report-card.pdf', [$this->classroom, $this->a]))
-        ->assertOk()->assertHeader('content-type', 'application/pdf');
+        ->assertOk()->assertHeader('content-type', 'application/pdf')->assertHeader('content-disposition', 'attachment; filename="rapor-angel-rondonuwu-2026-11-20.pdf"');
 
     $this->actingAs($this->teacher)->get(route('teach.report-card', [$this->classroom, $this->b]))
         ->assertOk()->assertSee('menunggu dinilai');

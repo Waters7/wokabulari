@@ -328,3 +328,8 @@ Acuan: DOCKER.md bagian C–D
 ### Tambahan — 21 Nov 2026 (v1.23.0)
 - Perlu Dinilai per soal dengan makro penilaian (pilih semua + nilai massal, nilai dari kata kunci, tombol cepat 0/½/Penuh).
 - Test: 368 lulus. Dicek di 360px: tampilan per soal (kolom nilai sebaris tombol cepat).
+
+### Tambahan — 23 Nov 2026 (v1.24.0)
+- [x] Rekap gabungan beberapa quiz (jumlah poin, peringkat, predikat) + Excel.
+- [x] Rapor peserta: akumulasi semua penilaian, pretest–posttest gabungan, PDF + Excel daftar kelas.
+- Test: 375 lulus. Dicek di 360px: Rekap gabungan, tab Rapor, halaman rapor peserta.

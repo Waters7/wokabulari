@@ -3,6 +3,13 @@
 Versi ditampilkan di halaman login dan menu aplikasi (`config/wokabulari.php` → `version`).
 Aturan penomoran: **patch** (1.0.x) perbaikan, **minor** (1.x.0) fitur baru, **major** (x.0.0) perubahan besar.
 
+## 1.24.0 — 23 November 2026
+
+- **Rekap & Rapor nilai** (menu Mengajar → *Rekap & Rapor*; pimpinan dan admin di Laporan → *Rekap & Rapor Nilai*):
+  - **Gabungan quiz:** centang beberapa quiz (mis. *Pretest PG* + *Pretest Esai*), lalu poinnya dijumlahkan per peserta. Nilai akhir = total poin ÷ poin maksimal × 100, lengkap dengan predikat dan peringkat. Bagian yang tidak dikerjakan bernilai 0, esai yang belum selesai dinilai ditandai *sementara*. Tombol cepat *Pretest · Posttest · Semua*, dan bisa diunduh Excel.
+  - **Rapor peserta:** akumulasi semua penilaian per peserta, yaitu kehadiran harian & sesi, nilai sesi, tugas, quiz, penilaian periodik, nilai akhir + predikat, serta pretest–posttest dan N-Gain (dari gabungan poin semua quiz pretest/posttest). Bisa dilihat di layar, dicetak, atau **diunduh PDF**. Daftar seluruh kelas juga bisa diunduh Excel.
+  - Pengajar hanya melihat kelas yang ia ajar; pimpinan hanya bisa membaca.
+
 ## 1.23.0 — 21 November 2026
 
 - **Perlu Dinilai per soal** (tampilan bawaan): pilih quiz, lalu pilih soal; semua jawaban peserta untuk soal itu tampil berurutan nama, dengan kolom nilai, tombol cepat *0 · ½ · Penuh*, dan umpan balik. Satu tombol *Simpan nilai soal ini*; setelah tersimpan, otomatis lanjut ke soal berikutnya yang masih menunggu. Tampilan *Per peserta* tetap tersedia.

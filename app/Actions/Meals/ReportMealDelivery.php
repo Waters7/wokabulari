@@ -144,7 +144,7 @@ class ReportMealDelivery
     protected function deleteOld(?string $path): void
     {
         if ($path) {
-            Storage::disk('private')->delete($path);
+            Storage::disk('private')->delete([$path, MealDelivery::thumbnailFile($path)]);
         }
     }
 }

@@ -10,6 +10,7 @@ use App\Enums\ReportPeriod;
 use App\Enums\ReportType;
 use App\Enums\SessionStatus;
 use App\Enums\StaffUnit;
+use App\Exports\AllReportsExport;
 use App\Exports\ReportExport;
 use App\Exports\ReportSheet;
 use App\Models\Assessment;
@@ -104,7 +105,7 @@ test('absen harian: siapa saja hadir hari ini dan unduh Excel', function () {
 
 test('rekap absen mingguan per peserta dan per hari', function () {
     reportPage(['jenis' => 'daily_attendance', 'periode' => 'weekly', 'tanggal' => '2026-11-04', 'angkatan' => $this->batch->id])
-        ->assertSee('2 Nov – 8 Nov 2026')
+        ->assertSee('2 – 4 November 2026')
         ->assertSee('55,6%')          // 5 dari 9 kewajiban absen
         ->assertSeeInOrder(['Angel Rondonuwu', '100,0'])
         ->assertSeeInOrder(['Brian Lumowa', '33,3'])
@@ -145,7 +146,7 @@ test('rekap nilai mingguan: rata-rata sesi, tugas, quiz, periodik, dan predikat'
         ->and($rows[$this->c->id]['overall'])->toBeNull();
 
     reportPage(['jenis' => 'scores', 'periode' => 'monthly', 'tanggal' => '2026-11-04', 'angkatan' => $this->batch->id])
-        ->assertSee('November 2026')
+        ->assertSee('1 – 4 November 2026')
         ->assertSeeInOrder(['Angel Rondonuwu', '90,0', '–', '80,0', '79,1', '83,1', 'B'])
         ->assertSee('Per minggu')
         ->assertSeeInOrder(['Di bawah 70', '1']);
@@ -230,7 +231,7 @@ test('absen per sesi: galeri dokumentasi foto per sesi, filter belum lengkap, ko
         ->assertSeeHtml('wire:key="g-'.$this->session->id.'"')
         ->call('export');
 
-    Excel::assertDownloaded('absen-per-sesi-2026-11-02-mingguan.xlsx', function (ReportExport $export) use ($complete) {
+    Excel::assertDownloaded('absen-per-sesi-2026-11-02-sd-2026-11-04.xlsx', function (ReportExport $export) use ($complete) {
         $rows = $export->sheets()[0]->array();
 
         return $rows[5][13] === 'Dok. mulai' && $rows[5][15] === 'Tautan sesi'
@@ -285,4 +286,107 @@ test('lembar Dokumentasi hanya untuk unduhan, tidak tampil sebagai tabel di laya
     reportPage(['jenis' => 'session_attendance', 'periode' => 'weekly', 'tanggal' => '2026-11-04', 'angkatan' => $this->batch->id])
         ->assertSee('Per sesi')
         ->assertDontSee('Foto mulai sesi');
+});
+
+test('periode dipotong sampai tanggal yang dipilih; panah pindah ke akhir periode', function () {
+    [$from, $to] = ReportPeriod::Monthly->until('2026-11-06');
+
+    expect($from->toDateString())->toBe('2026-11-01')
+        ->and($to->toDateString())->toBe('2026-11-06')
+        ->and(ReportPeriod::Monthly->untilLabel('2026-11-06'))->toBe('1 – 6 November 2026')
+        ->and(ReportPeriod::Monthly->untilLabel('2026-10-31'))->toBe('Oktober 2026')
+        ->and(ReportPeriod::Weekly->until('2026-11-04')[0]->toDateString())->toBe('2026-11-02')
+        ->and(ReportPeriod::Range->untilLabel('2026-11-06', '2026-10-28'))->toBe('28 Okt – 6 Nov 2026')
+        ->and(ReportPeriod::Range->until('2026-10-28', '2026-11-06')[1]->toDateString())->toBe('2026-11-06')
+        // Hari ini Rabu 4 Nov: bulan lalu sampai 31 Okt; kembali ke bulan berjalan sampai hari ini.
+        ->and(ReportPeriod::Monthly->shiftUntil('2026-11-04', -1)->toDateString())->toBe('2026-10-31')
+        ->and(ReportPeriod::Monthly->shiftUntil('2026-10-31', 1)->toDateString())->toBe('2026-11-04')
+        ->and(ReportPeriod::Weekly->shiftUntil('2026-11-04', -1)->toDateString())->toBe('2026-11-01');
+
+    // Input konsumsi Rabu 4 Nov tidak ikut bila laporan bulanan diminta sampai 3 Nov.
+    $wednesday = MealSchedule::factory()->create(['date' => '2026-11-04', 'meal_type' => MealType::Dinner, 'vendor_id' => $this->vendor->id, 'portions_ordered' => 3,
+        'starts_at' => '2026-11-04 18:00', 'ends_at' => '2026-11-04 20:00']);
+    MealDelivery::factory()->create(['meal_schedule_id' => $wednesday->id, 'vendor_id' => $this->vendor->id, 'quantity' => 7, 'unit' => DeliveryUnit::Box, 'location' => 'Aula', 'ready_at' => '2026-11-04 18:00']);
+
+    reportPage(['jenis' => 'meal_deliveries', 'periode' => 'monthly', 'tanggal' => '2026-11-03'])
+        ->assertSee('1 – 3 November 2026')
+        ->assertSee('Data diambil sampai 3 Nov 2026')
+        ->assertSee('Sel, 3 Nov 2026')
+        ->assertDontSee('Rab, 4 Nov 2026')
+        ->set('date', '2026-11-04')
+        ->assertSee('Rab, 4 Nov 2026');
+
+    reportPage(['jenis' => 'daily_attendance', 'periode' => 'monthly', 'tanggal' => '2026-11-03', 'angkatan' => $this->batch->id])
+        ->assertSee('Sel, 3 Nov 2026')
+        ->assertDontSee('Rab, 4 Nov 2026');
+});
+
+test('periode rentang bebas: dari–sampai, satu hari menampilkan absen harian', function () {
+    reportPage(['jenis' => 'daily_attendance', 'periode' => 'range', 'dari' => '2026-11-02', 'tanggal' => '2026-11-03', 'angkatan' => $this->batch->id])
+        ->assertSee('2 – 3 November 2026')
+        ->assertSee('Rekap per hari')
+        ->call('shift', 1)
+        ->assertSet('from', '2026-11-04')
+        ->assertSet('date', '2026-11-05')
+        ->set('from', '2026-11-03')->set('date', '2026-11-03')
+        ->assertSee('Selasa, 3 November 2026')
+        ->assertSeeInOrder(['Brian Lumowa', 'Sakit']);
+});
+
+test('unduh semua laporan: satu Excel berisi ringkasan dan lembar tiap laporan sesuai hak akses', function () {
+    Excel::fake();
+
+    reportPage(['jenis' => 'daily_attendance', 'periode' => 'weekly', 'tanggal' => '2026-11-04', 'angkatan' => $this->batch->id])
+        ->assertSee('Unduh semua laporan')
+        ->call('exportAll');
+
+    Excel::assertDownloaded('semua-laporan-2026-11-02-sd-2026-11-04.xlsx', function (AllReportsExport $export) {
+        $sheets = $export->sheets();
+        $titles = array_map(fn (ReportSheet $sheet) => $sheet->title(), $sheets);
+        $summary = $sheets[0]->array();
+
+        return $titles[0] === 'Ringkasan' && in_array(['Absen harian', 'Kehadiran rata-rata', '55,6%'], $summary, true)
+            && in_array('Harian - Rekap per peserta', $titles, true) && in_array('Sesi - Dokumentasi', $titles, true)
+            && in_array('Konsumsi - Rincian tanda terima', $titles, true) && in_array('Input - Foto konsumsi', $titles, true)
+            && in_array('Nilai - Rekap nilai', $titles, true) && in_array('Mengajar - Rincian sesi', $titles, true)
+            && count($titles) === count(array_unique($titles))
+            && str_contains($sheets[1]->array()[1][0], '2 – 4 November 2026');
+    });
+
+    // Tim konsumsi: hanya laporan konsumsi, termasuk foto konsumsi, tanpa dokumentasi kelas.
+    Livewire::actingAs(staff([StaffUnit::Consumption]))->withQueryParams(['jenis' => 'meal_receipts', 'periode' => 'weekly', 'tanggal' => '2026-11-04'])
+        ->test('pages::reports.index')->call('exportAll');
+
+    Excel::assertDownloaded('semua-laporan-2026-11-02-sd-2026-11-04.xlsx', function (AllReportsExport $export) {
+        $titles = array_map(fn (ReportSheet $sheet) => $sheet->title(), $export->sheets());
+
+        return in_array('Input - Foto konsumsi', $titles, true) && ! in_array('Sesi - Dokumentasi', $titles, true)
+            && collect($titles)->every(fn ($t) => $t === 'Ringkasan' || str_starts_with($t, 'Konsumsi') || str_starts_with($t, 'Input'));
+    });
+});
+
+test('foto dokumentasi konsumsi tampil di laporan input konsumsi dan tersemat di Excel', function () {
+    Storage::fake('private');
+    $photo = 'meal-deliveries/2026/11/menu-siang.jpg';
+    Storage::disk('private')->put($photo, UploadedFile::fake()->image('menu.jpg', 1200, 900)->getContent());
+    $this->meal->delivery->update(['menu_photo_path' => $photo]);
+
+    reportPage(['jenis' => 'meal_deliveries', 'periode' => 'weekly', 'tanggal' => '2026-11-04'])
+        ->assertSee('Foto dokumentasi konsumsi')
+        ->assertSee('Foto belum lengkap (1)')
+        ->assertSeeHtml('wire:key="mg-'.$this->meal->id.'"')
+        ->assertSeeInOrder(['Foto menu', 'Foto total', 'Belum ada'])
+        ->assertSeeInOrder(['Input tanpa foto', '0']);
+
+    $report = app(ReportBuilder::class)->between(ReportType::MealDeliveries, CarbonImmutable::parse('2026-11-02'), CarbonImmutable::parse('2026-11-04'), null, null);
+    $path = tempnam(sys_get_temp_dir(), 'lap').'.xlsx';
+    file_put_contents($path, Excel::raw(new AllReportsExport([['type' => ReportType::MealDeliveries, 'report' => $report, 'scope' => []]], $report['period']), Maatwebsite\Excel\Excel::XLSX));
+    $sheet = IOFactory::load($path)->getSheetByName('Input - Foto konsumsi');
+    @unlink($path);
+
+    expect($sheet->getCell('F6')->getValue())->toBe('Foto menu')
+        ->and($sheet->getCell('G7')->getValue())->toBe('Belum ada')
+        ->and(count($sheet->getDrawingCollection()))->toBe(1)
+        ->and($sheet->getDrawingCollection()[0]->getCoordinates())->toBe('F7');
+    Storage::disk('private')->assertExists(MealDelivery::thumbnailFile($photo));
 });

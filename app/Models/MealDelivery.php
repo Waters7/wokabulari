@@ -3,12 +3,14 @@
 namespace App\Models;
 
 use App\Enums\DeliveryUnit;
+use App\Services\ImageService;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\Storage;
 use Spatie\Activitylog\Models\Concerns\LogsActivity;
 use Spatie\Activitylog\Support\LogOptions;
+use Throwable;
 
 /**
  * Input konsumsi oleh tim konsumsi: vendor, jumlah, menu, jam siap diambil, tempat, dan foto dokumentasi.
@@ -63,11 +65,45 @@ class MealDelivery extends Model
         return angka($this->quantity).' '.$this->unit->label();
     }
 
+    /** Path foto dokumentasi: 'menu' atau 'total'. */
+    public function photoPath(string $type): ?string
+    {
+        return $type === 'menu' ? $this->menu_photo_path : $this->total_photo_path;
+    }
+
     /** Tautan sementara foto dokumentasi (disk privat). */
     public function photoUrl(string $type): ?string
     {
-        $path = $type === 'menu' ? $this->menu_photo_path : $this->total_photo_path;
+        $path = $this->photoPath($type);
 
         return $path ? Storage::disk('private')->temporaryUrl($path, now()->addMinutes(30)) : null;
+    }
+
+    /** Lokasi gambar kecil sebuah foto di disk private (dibuat saat pertama dibutuhkan). */
+    public static function thumbnailFile(string $path): string
+    {
+        return dirname($path).'/thumbs/'.pathinfo($path, PATHINFO_FILENAME).'.jpg';
+    }
+
+    /** Path lokal gambar kecil untuk disematkan di Excel; null bila tidak ada foto atau foto tidak bisa dibaca. */
+    public function thumbnailPath(string $type): ?string
+    {
+        $path = $this->photoPath($type);
+        if (! $path) {
+            return null;
+        }
+
+        $disk = Storage::disk('private');
+        $thumb = self::thumbnailFile($path);
+
+        if (! $disk->exists($thumb)) {
+            try {
+                app(ImageService::class)->thumbnail($path, $thumb);
+            } catch (Throwable) {
+                return null;
+            }
+        }
+
+        return $disk->path($thumb);
     }
 }

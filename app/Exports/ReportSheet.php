@@ -22,7 +22,7 @@ class ReportSheet implements FromArray, ShouldAutoSize, WithDrawings, WithEvents
     public const IMAGE_HEIGHT = 90;
 
     /**
-     * @param  array{title: string, headings: list<string>, rows: list<list<mixed>>, links?: list<int>, images?: list<array{row: int, column: int, doc: SessionDocumentation}>}  $sheet
+     * @param  array{title: string, headings: list<string>, rows: list<list<mixed>>, links?: list<int>, images?: list<array{row: int, column: int, doc?: SessionDocumentation, thumbnail?: callable(): ?string}>}  $sheet
      * @param  array<string, mixed>  $report
      * @param  list<string>  $scope
      */
@@ -57,7 +57,7 @@ class ReportSheet implements FromArray, ShouldAutoSize, WithDrawings, WithEvents
         $drawings = [];
 
         foreach ($this->sheet['images'] ?? [] as $image) {
-            $path = $image['doc']->thumbnailPath();
+            $path = isset($image['thumbnail']) ? ($image['thumbnail'])() : $image['doc']->thumbnailPath();
             if (! $path || ! is_file($path)) {
                 continue;
             }

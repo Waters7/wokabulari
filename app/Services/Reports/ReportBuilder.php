@@ -9,6 +9,7 @@ use App\Enums\SessionPhase;
 use App\Enums\SessionStatus;
 use App\Models\Batch;
 use App\Models\LearningSession;
+use App\Models\MealDelivery;
 use App\Models\MealSchedule;
 use App\Models\SessionDocumentation;
 use App\Models\User;
@@ -39,18 +40,29 @@ class ReportBuilder
     public function build(ReportType $type, ReportPeriod $period, CarbonImmutable $date, ?int $batchId, ?int $classroomId, ?int $teacherId = null): array
     {
         [$from, $to] = $period->range($date);
+
+        return $this->between($type, $from, $to, $batchId, $classroomId, $teacherId, $period->periodLabel($date));
+    }
+
+    /**
+     * Laporan untuk rentang tanggal tertentu (Pusat Laporan memotong data sampai tanggal yang dipilih).
+     *
+     * @return Report
+     */
+    public function between(ReportType $type, CarbonImmutable $from, CarbonImmutable $to, ?int $batchId, ?int $classroomId, ?int $teacherId = null, ?string $label = null): array
+    {
         $filter = ReportFilter::make($from, $to, $batchId, $classroomId);
 
         $report = match ($type) {
-            ReportType::DailyAttendance => $period === ReportPeriod::Daily ? $this->attendanceDay($filter) : $this->attendanceRecap($filter),
+            ReportType::DailyAttendance => $filter->from->eq($filter->to) ? $this->attendanceDay($filter) : $this->attendanceRecap($filter),
             ReportType::SessionAttendance => $this->sessionAttendance($filter),
             ReportType::MealReceipts => $this->mealReceipts($filter),
             ReportType::MealDeliveries => $this->mealDeliveries($filter),
-            ReportType::Scores => $this->scoreRecap($filter, $period),
+            ReportType::Scores => $this->scoreRecap($filter),
             ReportType::Teaching => $this->teachingReport($filter, $teacherId),
         };
 
-        return ['title' => $type->label(), 'period' => $period->periodLabel($date)] + $report;
+        return ['title' => $type->label(), 'period' => $label ?? ReportPeriod::rangeLabel($filter->from, $filter->to)] + $report;
     }
 
     protected function attendanceDay(ReportFilter $filter): array
@@ -224,6 +236,8 @@ class ReportBuilder
             'links' => [8],
             'images' => $images,
             'excel_only' => true,
+            // Foto kelas hanya untuk yang boleh melihat dokumentasi semua sesi.
+            'can' => 'session.view-all',
             'rows' => $rows,
         ];
     }
@@ -335,13 +349,17 @@ class ReportBuilder
             (int) $rows->sum('receipts_count'),
         ])->sortBy(fn ($row) => $row[0])->values()->all();
 
+        $noPhoto = $inputs->filter(fn (MealSchedule $s) => ! $s->delivery->menu_photo_path && ! $s->delivery->total_photo_path)->count();
+
         return [
             'summary' => [
                 ['label' => 'Input', 'value' => (string) $inputs->count()],
                 ['label' => 'Jadwal belum diinput', 'value' => (string) ($schedules->count() - $inputs->count())],
                 ['label' => 'Vendor', 'value' => (string) count($vendors)],
                 ['label' => 'Tanda terima', 'value' => angka($inputs->sum('receipts_count'))],
+                ['label' => 'Input tanpa foto', 'value' => (string) $noPhoto],
             ],
+            'meal_gallery' => $inputs->all(),
             'sheets' => [
                 [
                     'title' => 'Input konsumsi',
@@ -357,11 +375,50 @@ class ReportBuilder
                     'headings' => ['Vendor', 'Jumlah input', 'Total pcs', 'Total dos', 'Tanda terima'],
                     'rows' => $vendors,
                 ],
+                $this->mealPhotoSheet($inputs),
             ],
         ];
     }
 
-    protected function scoreRecap(ReportFilter $filter, ReportPeriod $period): array
+    /**
+     * Lembar Excel "Foto konsumsi": foto menu & foto total tiap input disematkan sebagai gambar kecil (kolom F & G).
+     *
+     * @param  Collection<int, MealSchedule>  $inputs  jadwal yang sudah diinput
+     * @return array<string, mixed>
+     */
+    protected function mealPhotoSheet(Collection $inputs): array
+    {
+        $rows = [];
+        $images = [];
+
+        foreach ($inputs->values() as $i => $schedule) {
+            /** @var MealDelivery $delivery */
+            $delivery = $schedule->delivery;
+            $cells = [];
+
+            foreach (['menu', 'total'] as $offset => $kind) {
+                if ($delivery->photoPath($kind)) {
+                    $images[] = ['row' => $i, 'column' => 5 + $offset, 'thumbnail' => fn () => $delivery->thumbnailPath($kind)];
+                }
+                $cells[] = $delivery->photoPath($kind) ? null : 'Belum ada';
+            }
+
+            $rows[] = [
+                tanggal($schedule->date, 'D, j M Y'), $schedule->meal_type->label(), $schedule->vendor?->name, $delivery->quantityLabel(),
+                str_replace("\n", ', ', trim($delivery->menu)), ...$cells, $delivery->reporter?->name,
+            ];
+        }
+
+        return [
+            'title' => 'Foto konsumsi',
+            'headings' => ['Tanggal', 'Waktu makan', 'Vendor', 'Jumlah', 'Menu', 'Foto menu', 'Foto total', 'Diinput oleh'],
+            'images' => $images,
+            'excel_only' => true,
+            'rows' => $rows,
+        ];
+    }
+
+    protected function scoreRecap(ReportFilter $filter): array
     {
         $rows = $this->scores->perParticipant($filter);
         $passing = $this->passingScore($filter);
@@ -376,8 +433,9 @@ class ReportBuilder
             ])->all(),
         ]];
 
-        if ($period === ReportPeriod::Monthly) {
-            $weeks = $filter->weeks();
+        // Rentang lebih dari satu minggu (mis. bulanan): tambah rincian per minggu.
+        $weeks = $filter->weeks();
+        if (count($weeks) > 1) {
             $weekly = collect($weeks)->map(fn (CarbonImmutable $week) => $this->scores->perParticipant($filter->between($week->max($filter->from), $week->endOfWeek()->min($filter->to)))->keyBy(fn ($row) => $row['user']->id));
             $sheets[] = [
                 'title' => 'Per minggu',

@@ -66,8 +66,21 @@ enum ReportType: string
     public function periods(): array
     {
         return $this === self::Scores
-            ? [ReportPeriod::Weekly, ReportPeriod::Monthly]
-            : [ReportPeriod::Daily, ReportPeriod::Weekly, ReportPeriod::Monthly];
+            ? [ReportPeriod::Weekly, ReportPeriod::Monthly, ReportPeriod::Range]
+            : [ReportPeriod::Daily, ReportPeriod::Weekly, ReportPeriod::Monthly, ReportPeriod::Range];
+    }
+
+    /** Awalan nama lembar di unduhan "semua laporan" (nama lembar Excel maks. 31 karakter). */
+    public function shortLabel(): string
+    {
+        return match ($this) {
+            self::DailyAttendance => 'Harian',
+            self::SessionAttendance => 'Sesi',
+            self::MealReceipts => 'Konsumsi',
+            self::MealDeliveries => 'Input',
+            self::Scores => 'Nilai',
+            self::Teaching => 'Mengajar',
+        };
     }
 
     /** Data peserta per kelas: pimpinan & admin program; data konsumsi: juga tim konsumsi. */

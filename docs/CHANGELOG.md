@@ -3,6 +3,12 @@
 Versi ditampilkan di halaman login dan menu aplikasi (`config/wokabulari.php` → `version`).
 Aturan penomoran: **patch** (1.0.x) perbaikan, **minor** (1.x.0) fitur baru, **major** (x.0.0) perubahan besar.
 
+## 1.26.0 — 23 November 2026
+
+- **Hapus banyak peserta sekaligus** (Program → Peserta): centang peserta (atau *Pilih semua hasil*), lalu menu ⋮ di bilah bawah → *Hapus peserta*. Peserta terhapus tidak bisa login dan hilang dari daftar, laporan, absen, dan nilai, tetapi riwayatnya tetap tersimpan. Peserta juga otomatis keluar dari kamar asrama sehingga tempat tidurnya kosong kembali.
+- **Filter *Terhapus* + tombol *Pulihkan*** (satu per satu atau banyak sekaligus). Akun kembali dengan NIS/email/No. HP semula; kamar asrama perlu diatur ulang.
+- **NIS/email peserta terhapus bisa dipakai lagi** untuk peserta baru atau impor. Impor ulang dengan NIS peserta terhapus memulihkan akun lamanya. Pemulihan ditolak bila NIS/email itu sudah dipakai akun lain.
+
 ## 1.25.0 — 23 November 2026
 
 - **Pusat Laporan memotong data sampai tanggal yang dipilih.** Sebelumnya periode mingguan/bulanan selalu mengambil seminggu atau sebulan penuh (mis. tanggal 6 Nov dengan periode bulanan = 1–30 Nov, termasuk jadwal makan dan sesi yang sudah direncanakan). Kini bulanan 6 Nov = **1–6 Nov**; label kolom tanggal menjadi *Sampai tanggal*. Panah ◀ ▶ pindah ke periode sebelum/berikutnya sampai akhir periode itu (atau hari ini).

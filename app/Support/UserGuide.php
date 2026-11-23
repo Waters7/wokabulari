@@ -249,6 +249,7 @@ class UserGuide
                     ['title' => 'Memantau dan melapor', 'steps' => [
                         'Dashboard Eksekutif: grafik kehadiran, nilai, dan konsumsi dengan filter angkatan, kelas, dan rentang tanggal, serta daftar peserta yang perlu perhatian.',
                         'Pusat Laporan: absen harian, absen per sesi, konsumsi, input konsumsi, rekap nilai, dan laporan mengajar tiap pengajar; unduh Excel, atau Unduh semua laporan sekaligus dalam satu berkas.',
+                        'Hapus peserta: centang peserta di Program → Peserta, lalu menu ⋮ di bilah bawah → Hapus peserta. Riwayatnya tetap tersimpan; pilih status Terhapus lalu Pulihkan bila salah hapus. NIS peserta terhapus bisa dipakai lagi.',
                         'Data dipotong sampai tanggal yang dipilih: bulanan dengan tanggal 6 Nov = 1–6 Nov. Butuh rentang lain? Pilih periode Rentang lalu isi Dari dan Sampai.',
                     ]],
                 ],

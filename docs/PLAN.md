@@ -340,3 +340,7 @@ Acuan: DOCKER.md bagian C–D
 - [x] Foto dokumentasi konsumsi di laporan Input konsumsi + Excel.
 - [x] Soal & hasil quiz: cetak (lembar peserta/pengajar/hasil) dan Excel.
 - Test: 382 lulus. Dicek di 360px: Pusat Laporan (periode 4 pilihan, Rentang, galeri foto konsumsi), halaman cetak quiz (lembar peserta, kunci, hasil); unduh semua laporan dari data demo 5 minggu: 17 lembar, 3,2 detik.
+
+### Tambahan — 23 Nov 2026 (v1.26.0)
+- [x] Hapus banyak peserta sekaligus, filter Terhapus + Pulihkan, NIS/email peserta terhapus bisa dipakai lagi.
+- Test: 387 lulus. Dicek di 360px: daftar peserta (bilah aksi massal dengan Hapus peserta, filter Terhapus, Pulihkan); dicoba hapus lalu pulihkan 2 peserta demo lokal.

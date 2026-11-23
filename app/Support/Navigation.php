@@ -206,6 +206,7 @@ class Navigation
                 ['label' => 'Quiz & Ujian', 'icon' => 'pencil-square', 'route' => 'teach.quizzes.index', 'match' => ['teach.quizzes.*'], 'can' => 'quiz.manage'],
                 ['label' => 'Bank Soal', 'icon' => 'rectangle-stack', 'route' => 'teach.questions.index', 'match' => ['teach.questions.*'], 'can' => 'quiz.manage'],
                 ['label' => 'Perlu Dinilai', 'icon' => 'inbox-stack', 'route' => 'teach.grading', 'can' => 'quiz.manage'],
+                ['label' => 'Rekap & Rapor', 'icon' => 'clipboard-document-list', 'route' => 'teach.score-recap', 'match' => ['teach.score-recap', 'teach.report-card'], 'can' => 'quiz.manage'],
                 ['label' => 'Penilaian Periodik', 'icon' => 'document-chart-bar', 'route' => 'teach.assessments.index', 'match' => ['teach.assessments.*'], 'can' => 'assessment.manage'],
                 ['label' => 'Poin Peserta', 'icon' => 'sparkles', 'route' => 'teach.points', 'can' => 'point.award'],
                 ['label' => 'Laporan Mengajar', 'icon' => 'presentation-chart-bar', 'route' => 'teach.report', 'roles' => $teacher],
@@ -255,6 +256,7 @@ class Navigation
             ],
             'Laporan' => [
                 ['label' => 'Pusat Laporan', 'icon' => 'document-arrow-down', 'route' => 'reports.index', 'match' => ['reports.*'], 'can' => ['attendance.view-all', 'meal.monitor']],
+                ['label' => 'Rekap & Rapor Nilai', 'icon' => 'clipboard-document-list', 'route' => 'teach.score-recap', 'match' => ['teach.score-recap', 'teach.report-card'], 'can' => 'session.view-all'],
                 ['label' => 'Rekap Rating Pengajar', 'icon' => 'star', 'route' => 'manage.teacher-ratings', 'can' => 'rating.view-names'],
                 ['label' => 'Profil Peserta 360°', 'icon' => 'identification', 'route' => 'leader.participants', 'match' => ['leader.participants', 'leader.participant'], 'can' => 'dashboard.leader'],
             ],

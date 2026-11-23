@@ -144,6 +144,7 @@ class UserGuide
                         'Unggah materi ke Bank Materi lalu tautkan ke sesi.',
                         'Buat Tugas dengan tenggat dan aturan terlambat, terbitkan, lalu nilai pengumpulan (bisa dengan umpan balik suara).',
                         'Susun soal di Bank Soal (bisa impor templat Excel), buat Quiz & Ujian, dan nilai jawaban esai di Perlu Dinilai.',
+                        'Rekap & Rapor: centang beberapa quiz (mis. pretest pilihan ganda + esai) untuk menjumlahkan poinnya jadi satu nilai akhir dan peringkat; tab Rapor peserta berisi akumulasi semua penilaian dan bisa diunduh PDF.',
                     ]],
                     ['title' => 'Poin peserta', 'steps' => [
                         'Mengajar → Poin Peserta: pilih kelas, komponen yang sudah disetujui, peserta, dan (opsional) tugas/quiz terkait, lalu Beri poin.',
@@ -263,6 +264,7 @@ class UserGuide
                     ['title' => 'Laporan', 'steps' => [
                         'Pusat Laporan: pilih jenis laporan dan periode (harian, mingguan, bulanan), lalu Unduh Excel.',
                         'Rekap Rating Pengajar dan hasil Survei & Evaluasi juga bisa dibuka.',
+                        'Rekap & Rapor Nilai: gabungan beberapa quiz per kelas dan rapor tiap peserta (Excel dan PDF).',
                     ]],
                 ],
             ],

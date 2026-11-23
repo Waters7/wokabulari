@@ -64,6 +64,16 @@ if (! function_exists('angka')) {
     }
 }
 
+if (! function_exists('poin')) {
+    /**
+     * Poin tanpa nol desimal yang tidak perlu: 10 → "10", 7.5 → "7,5", 6.25 → "6,25".
+     */
+    function poin(int|float|null $value): string
+    {
+        return rtrim(rtrim(angka($value, 2), '0'), ',');
+    }
+}
+
 if (! function_exists('durasi')) {
     /**
      * Lama waktu dalam menit menjadi teks singkat: "45 mnt", "3 j 32 mnt".

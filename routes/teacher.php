@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\QuestionTemplateController;
+use App\Http\Controllers\ReportCardPdfController;
 use App\Http\Controllers\VocabularyTemplateController;
 use Illuminate\Support\Facades\Route;
 
@@ -25,6 +26,13 @@ Route::prefix('mengajar')->name('teach.')->group(function () {
         Route::livewire('quiz', 'pages::teach.quizzes')->name('quizzes.index');
         Route::livewire('quiz/{quiz}', 'pages::teach.quiz-show')->name('quizzes.show');
         Route::livewire('perlu-dinilai', 'pages::teach.grading')->name('grading');
+    });
+
+    // Rekap gabungan quiz & rapor peserta: pengajar kelas, admin, dan pimpinan (baca saja)
+    Route::middleware('permission:quiz.manage|session.view-all')->group(function () {
+        Route::livewire('rekap-nilai', 'pages::teach.score-recap')->name('score-recap');
+        Route::livewire('rapor/{classroom}/{user}', 'pages::teach.report-card')->name('report-card');
+        Route::get('rapor/{classroom}/{user}/pdf', ReportCardPdfController::class)->name('report-card.pdf');
     });
 });
 

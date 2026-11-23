@@ -34,6 +34,12 @@ class ClassroomPolicy
         return $user->can('classroom.manage');
     }
 
+    /** Rekap & rapor nilai kelas: pengajar kelas, atau yang boleh melihat semua sesi (admin, pimpinan). */
+    public function viewScores(User $user, Classroom $classroom): bool
+    {
+        return $user->can('session.view-all') || ($user->can('quiz.manage') && $classroom->hasTeacher($user));
+    }
+
     /** Pengajar kelas atau admin boleh mengelola kegiatan belajar kelas ini. */
     public function teach(User $user, Classroom $classroom): bool
     {

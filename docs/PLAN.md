@@ -348,3 +348,7 @@ Acuan: DOCKER.md bagian C–D
 ### Tambahan — 23 Nov 2026 (v1.27.0)
 - [x] PDF berkop (kop Kemenkes Poltekkes Manado) di Pusat Laporan; kop + waktu cetak di rapor PDF dan cetak quiz.
 - Test: 388 lulus. Dicek di 360px: tombol Pusat Laporan, lembar cetak quiz berkop; PDF dicek dari data demo (absen harian 2 halaman, absen sesi 7 halaman, rapor 1 halaman).
+
+### Tambahan — 24 Nov 2026 (v1.28.0)
+- [x] Tanda terima konsumsi + tanda tangan (PDF berkop per jadwal, ZIP per minggu untuk rentang > 7 hari) dan alasan peserta tidak menerima konsumsi.
+- Test: 391 lulus. Dicek di 360px: tombol Tanda terima + TTD dan lembar Tidak menerima; PDF dicek dari data demo (1 hari = 3 jadwal, 6 halaman; 7 hari = 42 halaman, sekitar 4 detik).

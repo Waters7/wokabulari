@@ -3,6 +3,11 @@
 Versi ditampilkan di halaman login dan menu aplikasi (`config/wokabulari.php` → `version`).
 Aturan penomoran: **patch** (1.0.x) perbaikan, **minor** (1.x.0) fitur baru, **major** (x.0.0) perubahan besar.
 
+## 1.28.0 — 24 November 2026
+
+- **Tanda terima konsumsi + tanda tangan (PDF)** di Pusat Laporan → Konsumsi diterima. Setiap jadwal makan dicetak di halaman tersendiri dengan kop Poltekkes: hari/tanggal, waktu makan, vendor, menu, dan porsi, lalu daftar semua penerima dengan **jam terima dan gambar tanda tangan**. Di bawahnya ada ringkasan (berhak, menerima, diwakilkan, tidak menerima) serta kolom tanda tangan penyedia konsumsi dan penanggung jawab konsumsi. Periode lebih dari 7 hari diunduh sebagai ZIP berisi satu PDF per minggu.
+- **Alasan tidak menerima konsumsi**: peserta yang berhak tetapi tidak menerima kini tercantum beserta alasannya, yaitu *Izin*, *Sakit*, *Izin keluar asrama (jenis izin)*, *Alpa di absen harian*, *Belum mengambil (jadwal belum selesai)*, atau *Tidak mengambil (tanpa keterangan)*. Alasan dicocokkan dengan tanggal dan jam jadwal makan, dan tampil di PDF tanda terima, lembar baru **Tidak menerima** (layar, Excel, PDF berkop), dan ringkasan.
+
 ## 1.27.0 — 23 November 2026
 
 - **Unduh PDF berkop** di Pusat Laporan untuk semua jenis laporan. Formatnya PDF A4 mendatar dengan **kop surat Kemenkes Poltekkes Manado** di setiap halaman, judul, periode, cakupan, ringkasan, dan tabel yang judul kolomnya berulang di tiap halaman. Kaki setiap halaman memuat **tanggal & jam cetak, nama pencetak**, dan *Halaman X dari Y*.

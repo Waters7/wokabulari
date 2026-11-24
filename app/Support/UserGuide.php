@@ -185,6 +185,7 @@ class UserGuide
                     ]],
                     ['title' => 'Laporan', 'steps' => [
                         'Laporan → Pusat Laporan: penerimaan konsumsi dan input konsumsi harian, mingguan, bulanan, atau rentang tanggal, lengkap dengan total per vendor; unduh Excel sebagai dasar pembayaran vendor.',
+                        'Konsumsi diterima → Tanda terima + TTD (PDF): satu halaman per jadwal makan berisi tanda tangan tiap penerima dan alasan yang tidak menerima (izin, sakit, keluar asrama, alpa, tanpa keterangan); lebih dari 7 hari diunduh sebagai ZIP per minggu.',
                         'Laporan Input konsumsi menampilkan foto menu & foto total tiap input (filter Foto belum lengkap); di Excel foto ikut tersemat di lembar Foto konsumsi.',
                     ]],
                 ],

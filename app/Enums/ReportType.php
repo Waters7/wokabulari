@@ -33,7 +33,7 @@ enum ReportType: string
         return match ($this) {
             self::DailyAttendance => 'Siapa saja hadir, terlambat, izin, sakit, atau tidak absen.',
             self::SessionAttendance => 'Kehadiran tiap sesi kelas beserta rincian per peserta.',
-            self::MealReceipts => 'Tanda terima konsumsi peserta & tim penerima konsumsi, per jadwal dan per penerima.',
+            self::MealReceipts => 'Tanda terima konsumsi peserta & tim penerima, per jadwal dan per penerima, beserta alasan yang tidak menerima. PDF tanda terima memuat tanda tangan.',
             self::MealDeliveries => 'Makanan yang diinput tim konsumsi per vendor (dasar pembayaran vendor).',
             self::Scores => 'Rata-rata nilai sesi, tugas, quiz, dan penilaian periodik per peserta.',
             self::Teaching => 'Kehadiran & jam mengajar tiap pengajar. Hadir bila pengajar membuat kode sesi dan ada peserta yang hadir.',

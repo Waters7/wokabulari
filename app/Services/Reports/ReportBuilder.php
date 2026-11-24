@@ -30,6 +30,7 @@ class ReportBuilder
         protected AttendanceAnalytics $attendance,
         protected ScoreAnalytics $scores,
         protected MealAnalytics $meals,
+        protected MealReceiptRoll $roll,
         protected TeachingAnalytics $teaching,
         protected SessionDocumentationRule $documentation,
     ) {}
@@ -291,11 +292,25 @@ class ReportBuilder
             }
         }
 
+        // Yang berhak tetapi tidak menerima, beserta alasannya.
+        $missed = [];
+        foreach ($this->roll->build($filter, $data) as $item) {
+            foreach ($item['rows'] as $row) {
+                if ($row['receipt'] === null) {
+                    $missed[] = [
+                        tanggal($item['schedule']->date, 'D, j M Y'), $item['schedule']->meal_type->label(),
+                        $row['user']->name, $row['group'], implode('; ', $row['reasons']),
+                    ];
+                }
+            }
+        }
+
         return [
             'summary' => [
                 ['label' => 'Jadwal', 'value' => (string) $data['schedules']->count()],
                 ['label' => 'Tanda terima', 'value' => angka($data['totals']['received'])],
                 ['label' => 'Diwakilkan', 'value' => angka($data['totals']['proxied'])],
+                ['label' => 'Tidak menerima', 'value' => angka(count($missed))],
                 ['label' => 'Tim penerima', 'value' => angka($data['staff']->count())],
                 ['label' => 'Serapan', 'value' => $this->percent($data['totals']['rate'])],
             ],
@@ -329,6 +344,11 @@ class ReportBuilder
                     'title' => 'Rincian tanda terima',
                     'headings' => ['Tanggal', 'Waktu makan', 'Vendor', 'Nama', 'Jam terima', 'Diwakilkan oleh', 'Catatan'],
                     'rows' => $detail,
+                ],
+                [
+                    'title' => 'Tidak menerima',
+                    'headings' => ['Tanggal', 'Waktu makan', 'Nama', 'Kelas / tim', 'Alasan'],
+                    'rows' => $missed,
                 ],
             ],
         ];

@@ -8,7 +8,9 @@ use App\Models\Batch;
 use App\Enums\Role;
 use App\Models\Classroom;
 use App\Models\User;
+use App\Services\Reports\MealReceiptRoll;
 use App\Services\Reports\ReportBuilder;
+use App\Services\Reports\ReportFilter;
 use App\Support\Letterhead;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\CarbonImmutable;
@@ -190,6 +192,57 @@ new #[Title('Pusat laporan')] class extends Component {
         return response()->streamDownload(fn () => print ($content), Str::slug($report['title']).'-'.$this->fileSuffix().'.pdf', ['Content-Type' => 'application/pdf']);
     }
 
+    /**
+     * Daftar tanda terima konsumsi (A4 tegak): satu bagian per jadwal, tanda tangan penerima, dan alasan yang tidak menerima.
+     * Lebih dari 7 hari dipecah satu PDF per minggu (Senin–Minggu) dalam satu ZIP agar tetap ringan di server.
+     */
+    public function exportReceipts(MealReceiptRoll $roll)
+    {
+        abort_unless(auth()->user()->can('report.export') && ReportType::MealReceipts->allows(auth()->user()), 403);
+        @set_time_limit(300);
+
+        [$from, $to] = $this->window();
+        $period = ReportPeriod::from($this->period)->untilLabel($this->date, $this->from);
+        $scope = $this->scope(ReportType::MealReceipts);
+
+        activity('laporan')->causedBy(auth()->user())
+            ->withProperties(['jenis' => 'Tanda terima konsumsi', 'periode' => $period, 'cakupan' => $scope, 'format' => 'PDF'])
+            ->log('Mengunduh laporan');
+
+        $render = function (CarbonImmutable $start, CarbonImmutable $end, string $label) use ($roll, $scope): string {
+            $pdf = Pdf::loadView('pdf.meal-receipts', [
+                'items' => $roll->build(ReportFilter::make($start, $end, $this->batchId, $this->classroomId)),
+                'period' => $label,
+                'scope' => $scope,
+                'kop' => Letterhead::pdf(),
+                'printedAt' => now(),
+                'printedBy' => auth()->user()->name,
+            ])->setPaper('a4');
+
+            return Letterhead::output($pdf);
+        };
+
+        if ($from->diffInDays($to) < 7) {
+            $content = $render($from, $to, $period);
+
+            return response()->streamDownload(fn () => print ($content), 'tanda-terima-konsumsi-'.$this->fileSuffix().'.pdf', ['Content-Type' => 'application/pdf']);
+        }
+
+        $zipPath = tempnam(sys_get_temp_dir(), 'ttd');
+        $zip = new \ZipArchive;
+        $zip->open($zipPath, \ZipArchive::OVERWRITE);
+        for ($start = $from; $start->lte($to); $start = $end->addDay()) {
+            $end = $start->endOfWeek(CarbonImmutable::SUNDAY)->startOfDay()->min($to);
+            $zip->addFromString('tanda-terima-konsumsi-'.$start->format('Y-m-d').'-sd-'.$end->format('Y-m-d').'.pdf', $render($start, $end, ReportPeriod::rangeLabel($start, $end)));
+            gc_collect_cycles();
+        }
+        $zip->close();
+        $content = (string) file_get_contents($zipPath);
+        @unlink($zipPath);
+
+        return response()->streamDownload(fn () => print ($content), 'tanda-terima-konsumsi-'.$this->fileSuffix().'.zip', ['Content-Type' => 'application/zip']);
+    }
+
     /** Semua jenis laporan yang boleh dilihat pengguna, satu berkas Excel, untuk rentang & cakupan yang sama. */
     public function exportAll(ReportBuilder $builder)
     {
@@ -237,6 +290,12 @@ new #[Title('Pusat laporan')] class extends Component {
                     <span wire:loading.remove wire:target="exportPdf">Unduh PDF berkop</span>
                     <span wire:loading wire:target="exportPdf">Menyiapkan PDF…</span>
                 </flux:button>
+                @if ($current === ReportType::MealReceipts)
+                    <flux:button icon="pencil-square" wire:click="exportReceipts" wire:loading.attr="disabled" wire:target="exportReceipts" data-test="export-receipts">
+                        <span wire:loading.remove wire:target="exportReceipts">Tanda terima + TTD (PDF)</span>
+                        <span wire:loading wire:target="exportReceipts">Menyiapkan tanda terima…</span>
+                    </flux:button>
+                @endif
                 <flux:button icon="archive-box-arrow-down" wire:click="exportAll" wire:loading.attr="disabled" wire:target="exportAll" data-test="export-all">
                     <span wire:loading.remove wire:target="exportAll">Unduh semua laporan</span>
                     <span wire:loading wire:target="exportAll">Menyiapkan…</span>

@@ -5,6 +5,9 @@ use App\Enums\AttemptStatus;
 use App\Enums\AttendanceStatus;
 use App\Enums\DeliveryUnit;
 use App\Enums\DocumentationSource;
+use App\Enums\ExitPermitStatus;
+use App\Enums\ExitPermitType;
+use App\Enums\HealthReportStatus;
 use App\Enums\MealType;
 use App\Enums\ReportPeriod;
 use App\Enums\ReportType;
@@ -17,7 +20,10 @@ use App\Models\Assessment;
 use App\Models\Batch;
 use App\Models\Classroom;
 use App\Models\DailyAttendance;
+use App\Models\DormExitPermit;
+use App\Models\HealthReport;
 use App\Models\LearningSession;
+use App\Models\LeaveRequest;
 use App\Models\MealDelivery;
 use App\Models\MealSchedule;
 use App\Models\Quiz;
@@ -25,6 +31,7 @@ use App\Models\QuizAttempt;
 use App\Models\SessionAssessmentComponent;
 use App\Models\SessionDocumentation;
 use App\Models\Vendor;
+use App\Services\Reports\MealReceiptRoll;
 use App\Services\Reports\ReportBuilder;
 use App\Services\Reports\ReportFilter;
 use App\Services\Reports\ScoreAnalytics;
@@ -181,7 +188,7 @@ test('berkas Excel sungguhan terbentuk dengan satu lembar per tabel', function (
     $book = IOFactory::load($path);
     unlink($path);
 
-    expect($book->getSheetNames())->toBe(['Per jadwal', 'Per penerima', 'Per vendor', 'Rincian tanda terima'])
+    expect($book->getSheetNames())->toBe(['Per jadwal', 'Per penerima', 'Per vendor', 'Rincian tanda terima', 'Tidak menerima'])
         ->and($book->getSheet(0)->getCell('A3')->getValue())->toBe('Cakupan: Angkatan uji')
         ->and($book->getSheet(2)->getCell('A7')->getValue())->toBe('Dapur Woku Tinoor');
 });
@@ -408,4 +415,90 @@ test('unduh PDF berkop: kop Poltekkes, periode, cakupan, dan waktu cetak di seti
         ->toContain('2 – 4 November 2026')
         ->toContain('Angel Rondonuwu')
         ->and(Letterhead::output(Pdf::loadView('pdf.report', $data)->setPaper('a4', 'landscape')))->toStartWith('%PDF');
+});
+
+test('konsumsi diterima: yang tidak menerima dicantumkan beserta alasan sesuai tanggal & jam jadwal', function () {
+    $schedule = fn (string $date, MealType $type, string $start, string $end) => MealSchedule::factory()->create([
+        'date' => $date, 'meal_type' => $type, 'vendor_id' => $this->vendor->id, 'portions_ordered' => 3, 'starts_at' => "$date $start", 'ends_at' => "$date $end",
+    ]);
+    $breakfast = $schedule('2026-11-02', MealType::Breakfast, '06:30', '08:00');
+    $dinner = $schedule('2026-11-03', MealType::Dinner, '18:00', '19:30');
+    $today = $schedule('2026-11-04', MealType::Lunch, '12:00', '14:00');
+
+    // Angel pulang sore Selasa (scan keluar 17.05, kembali 20.50): hanya makan malam yang terlewat.
+    DormExitPermit::factory()->create(['user_id' => $this->a->id, 'type' => ExitPermitType::HomeVisit, 'status' => ExitPermitStatus::Returned,
+        'planned_departure' => '2026-11-03 17:00', 'planned_return' => '2026-11-03 21:00', 'actual_departure' => '2026-11-03 17:05', 'actual_return' => '2026-11-03 20:50']);
+    // Cindy izin kelas Selasa; alpa di absen harian Senin. Laporan sakitnya sudah sembuh sebelum Selasa.
+    LeaveRequest::factory()->approved()->create(['user_id' => $this->c->id, 'date_from' => '2026-11-03', 'date_to' => '2026-11-03']);
+    DailyAttendance::factory()->create(['user_id' => $this->c->id, 'date' => '2026-11-02', 'status' => AttendanceStatus::Absent, 'checked_in_at' => null]);
+    HealthReport::factory()->create(['user_id' => $this->c->id, 'reported_at' => '2026-11-01 08:00', 'status' => HealthReportStatus::Recovered, 'resolved_at' => '2026-11-02 05:00']);
+
+    $items = app(MealReceiptRoll::class)->build(ReportFilter::make('2026-11-02', '2026-11-04', $this->batch->id));
+    $reasons = fn (MealSchedule $s, $user) => collect($items->firstWhere('schedule.id', $s->id)['rows'])->firstWhere('user.id', $user->id)['reasons'];
+
+    expect($reasons($this->meal, $this->a))->toBe([])
+        ->and($reasons($this->meal, $this->c))->toBe(['Izin'])
+        ->and($reasons($dinner, $this->a))->toBe(['Izin keluar asrama (Pulang ke rumah)'])
+        ->and($reasons($dinner, $this->b))->toBe(['Sakit'])
+        ->and($reasons($dinner, $this->c))->toBe(['Izin'])
+        ->and($reasons($breakfast, $this->a))->toBe(['Tidak mengambil (tanpa keterangan)'])
+        ->and($reasons($breakfast, $this->c))->toBe(['Alpa di absen harian'])
+        ->and($reasons($today, $this->a))->toBe(['Belum mengambil (jadwal belum selesai)'])
+        ->and($items->firstWhere('schedule.id', $dinner->id)['missed'])->toBe(3);
+
+    reportPage(['jenis' => 'meal_receipts', 'periode' => 'weekly', 'tanggal' => '2026-11-04', 'angkatan' => $this->batch->id])
+        ->assertSee('Tidak menerima')
+        ->assertSeeInOrder(['Tidak menerima', 'Makan malam', 'Angel Rondonuwu', 'Kelas Inggris A', 'Izin keluar asrama (Pulang ke rumah)']);
+});
+
+test('unduh tanda terima + TTD: PDF per jadwal berkop dengan tanda tangan; lebih dari 7 hari jadi ZIP per minggu', function () {
+    Storage::fake('private');
+    $signature = 'signatures/2026/11/angel.png';
+    Storage::disk('private')->put($signature, UploadedFile::fake()->image('ttd.png', 600, 240)->getContent());
+    $this->meal->receipts()->where('user_id', $this->a->id)->update(['signature_path' => $signature]);
+
+    reportPage(['jenis' => 'meal_receipts', 'periode' => 'weekly', 'tanggal' => '2026-11-04', 'angkatan' => $this->batch->id])
+        ->assertSee('Tanda terima + TTD (PDF)')
+        ->call('exportReceipts')
+        ->assertFileDownloaded('tanda-terima-konsumsi-2026-11-02-sd-2026-11-04.pdf');
+
+    $thumb = 'signatures/2026/11/thumbs/angel.jpg';
+    expect(Storage::disk('private')->exists($thumb))->toBeTrue();
+
+    $items = app(MealReceiptRoll::class)->build(ReportFilter::make('2026-11-03', '2026-11-03', $this->batch->id));
+    $html = view('pdf.meal-receipts', ['items' => $items, 'period' => '3 November 2026', 'scope' => ['Angkatan uji'], 'kop' => Letterhead::pdf(), 'printedAt' => now(), 'printedBy' => 'Admin Program'])->render();
+
+    expect($html)->toContain('DAFTAR TANDA TERIMA KONSUMSI')
+        ->toContain('Selasa, 3 November 2026')->toContain('Makan siang')->toContain('Dapur Woku Tinoor')
+        ->toContain(e(Storage::disk('private')->path($thumb)))
+        ->toContain('Diwakilkan oleh')->toContain('Sakit di kamar')
+        ->toContain('Tidak mengambil (tanpa keterangan)')
+        ->toContain('Penanggung jawab konsumsi')
+        ->toContain('Dicetak: Rabu, 4 November 2026 pukul 10.00 WITA oleh Admin Program');
+
+    // Rentang 10 hari: satu PDF per minggu (26 Okt–1 Nov, 2–4 Nov) dalam satu ZIP.
+    $page = reportPage(['jenis' => 'meal_receipts', 'periode' => 'range', 'dari' => '2026-10-26', 'tanggal' => '2026-11-04', 'angkatan' => $this->batch->id])
+        ->call('exportReceipts')
+        ->assertFileDownloaded('tanda-terima-konsumsi-2026-10-26-sd-2026-11-04.zip');
+
+    $path = tempnam(sys_get_temp_dir(), 'zip');
+    file_put_contents($path, base64_decode($page->effects['download']['content']));
+    $zip = new ZipArchive;
+    $zip->open($path);
+    $names = collect(range(0, $zip->numFiles - 1))->map(fn ($i) => $zip->getNameIndex($i))->all();
+    $first = $zip->getFromIndex(1);
+    $zip->close();
+    unlink($path);
+
+    expect($names)->toBe(['tanda-terima-konsumsi-2026-10-26-sd-2026-11-01.pdf', 'tanda-terima-konsumsi-2026-11-02-sd-2026-11-04.pdf'])
+        ->and($first)->toStartWith('%PDF');
+});
+
+test('tanda terima + TTD juga untuk tim konsumsi; tombol hanya di laporan konsumsi diterima', function () {
+    Livewire::actingAs(staff([StaffUnit::Consumption]))->withQueryParams(['jenis' => 'meal_receipts', 'periode' => 'daily', 'tanggal' => '2026-11-03'])
+        ->test('pages::reports.index')
+        ->call('exportReceipts')
+        ->assertFileDownloaded('tanda-terima-konsumsi-2026-11-03-harian.pdf');
+
+    reportPage(['jenis' => 'daily_attendance'])->assertDontSee('Tanda terima + TTD (PDF)');
 });

@@ -2,9 +2,11 @@
 
 namespace App\Models;
 
+use App\Services\ImageService;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\Storage;
+use Throwable;
 
 class MealReceipt extends Model
 {
@@ -42,5 +44,29 @@ class MealReceipt extends Model
     public function isProxy(): bool
     {
         return $this->proxy_by !== null;
+    }
+
+    /**
+     * Path lokal gambar kecil tanda tangan (JPEG latar putih) untuk PDF tanda terima; dibuat sekali lalu dipakai ulang.
+     * Null bila berkas tanda tangan tidak ada atau tidak bisa dibaca.
+     */
+    public function signatureThumbnail(): ?string
+    {
+        if (! $this->signature_path) {
+            return null;
+        }
+
+        $disk = Storage::disk('private');
+        $thumb = MealDelivery::thumbnailFile($this->signature_path);
+
+        if (! $disk->exists($thumb)) {
+            try {
+                app(ImageService::class)->thumbnail($this->signature_path, $thumb, 240, 75);
+            } catch (Throwable) {
+                return null;
+            }
+        }
+
+        return $disk->path($thumb);
     }
 }

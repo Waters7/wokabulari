@@ -3,6 +3,10 @@
 Versi ditampilkan di halaman login dan menu aplikasi (`config/wokabulari.php` → `version`).
 Aturan penomoran: **patch** (1.0.x) perbaikan, **minor** (1.x.0) fitur baru, **major** (x.0.0) perubahan besar.
 
+## 1.28.1 — 26 November 2026
+
+- **Perbaikan:** menyetujui izin/sakit yang alasannya panjang (lebih dari ±240 karakter) gagal dengan *Server Error 500*, dan pengajuannya tetap menunggu. Penyebabnya: catatan "Izin disetujui: …" yang ditulis ke absen harian dan absen sesi melebihi batas kolom (255 karakter). Catatan itu kini dipotong; alasan lengkap tetap tersimpan di pengajuan izin. Pengajuan yang tadi gagal bisa langsung disetujui ulang.
+
 ## 1.28.0 — 24 November 2026
 
 - **Tanda terima konsumsi + tanda tangan (PDF)** di Pusat Laporan → Konsumsi diterima. Setiap jadwal makan dicetak di halaman tersendiri dengan kop Poltekkes: hari/tanggal, waktu makan, vendor, menu, dan porsi, lalu daftar semua penerima dengan **jam terima dan gambar tanda tangan**. Di bawahnya ada ringkasan (berhak, menerima, diwakilkan, tidak menerima) serta kolom tanda tangan penyedia konsumsi dan penanggung jawab konsumsi. Periode lebih dari 7 hari diunduh sebagai ZIP berisi satu PDF per minggu.

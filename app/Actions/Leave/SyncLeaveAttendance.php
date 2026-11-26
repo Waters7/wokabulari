@@ -7,6 +7,7 @@ use App\Models\LearningSession;
 use App\Models\LeaveRequest;
 use App\Models\SessionAttendance;
 use Carbon\CarbonInterface;
+use Illuminate\Support\Str;
 
 /**
  * Isi status izin/sakit pada absen harian dan kehadiran sesi selama rentang izin yang disetujui.
@@ -14,10 +15,14 @@ use Carbon\CarbonInterface;
  */
 class SyncLeaveAttendance
 {
+    /** Panjang catatan sebelum "..." agar muat di kolom VARCHAR(255) (approval_note & note). */
+    public const NOTE_LIMIT = 250;
+
     public function handle(LeaveRequest $leave): void
     {
         $status = $leave->type->attendanceStatus();
-        $note = 'Izin disetujui: '.$leave->reason;
+        // Kolom catatan absen maks. 255 karakter, alasan izin boleh sampai 1000: dipotong, alasan lengkap tetap di pengajuan izin.
+        $note = Str::limit('Izin disetujui: '.$leave->reason, self::NOTE_LIMIT);
 
         for ($date = $leave->date_from->copy(); $date->lte($leave->date_to); $date = $date->addDay()) {
             $this->syncDaily($leave, $date, $status, $note);

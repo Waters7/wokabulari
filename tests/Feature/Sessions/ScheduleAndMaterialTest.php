@@ -110,6 +110,33 @@ test('izin sakit disetujui mengisi status sakit di absen harian dan sesi', funct
     Carbon::setTestNow();
 });
 
+test('izin dengan alasan panjang (maks. 1000 karakter) tetap bisa disetujui lewat halaman kelola izin', function () {
+    Notification::fake();
+    Carbon::setTestNow('2026-11-26 08:00');
+    $classroom = Classroom::factory()->withParticipants(1)->create();
+    $participant = $classroom->participants->first();
+    $session = LearningSession::factory()->for($classroom)->create(['date' => '2026-11-26']);
+    $reason = 'Ijin setengah hari untuk mengurus transkrip nilai di jurusan. '.str_repeat('Lalu ke dukcapil mengurus dokumen. ', 26);
+    $leave = LeaveRequest::factory()->for($participant)->create(['date_from' => '2026-11-26', 'date_to' => '2026-11-26', 'reason' => mb_substr($reason, 0, 1000)]);
+
+    Livewire::actingAs(programAdmin())->test('pages::manage.leave')
+        ->call('open', $leave->id, true)
+        ->call('review')
+        ->assertHasNoErrors();
+
+    $daily = DailyAttendance::where('user_id', $participant->id)->whereDate('date', '2026-11-26')->first();
+    $sessionNote = SessionAttendance::where('learning_session_id', $session->id)->first()->note;
+
+    // Kolom catatan absen VARCHAR(255): SQLite di test tidak membatasi panjang, jadi diperiksa langsung.
+    expect($leave->fresh()->status)->toBe(ReviewStatus::Approved)
+        ->and($daily->status)->toBe(AttendanceStatus::Excused)
+        ->and(mb_strlen($daily->approval_note))->toBeLessThanOrEqual(255)
+        ->and($daily->approval_note)->toStartWith('Izin disetujui: Ijin setengah hari')->toEndWith('...')
+        ->and(mb_strlen($sessionNote))->toBeLessThanOrEqual(255);
+
+    Carbon::setTestNow();
+});
+
 test('penolakan izin wajib beralasan dan hanya pengajar kelasnya yang bisa meninjau', function () {
     $classroom = Classroom::factory()->withParticipants(1)->create();
     $leave = LeaveRequest::factory()->for($classroom->participants->first())->create();

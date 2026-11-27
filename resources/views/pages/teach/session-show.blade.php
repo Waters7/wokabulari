@@ -317,25 +317,40 @@ new #[Title('Detail sesi')] class extends Component {
                                 <p class="text-sm" x-show="state === 'done'">Foto siap. Periksa pratinjau di bawah.</p>
                                 <p class="text-sm" x-show="state === 'error'" x-text="message"></p>
                             </div>
-                            <div class="absolute inset-0 flex items-center justify-center bg-hutan/50 text-sm font-semibold text-white" x-show="state === 'uploading'">Mengunggah foto…</div>
+                            <div class="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-hutan/60 px-8 text-sm font-semibold text-white" x-show="state === 'uploading'">
+                                <span>Mengunggah foto (<span x-text="sizeText"></span>)… <span x-text="progress + '%'"></span></span>
+                                <span class="h-1.5 w-full overflow-hidden rounded-full bg-white/30"><span class="block h-full bg-kunyit transition-all" :style="`width: ${progress}%`"></span></span>
+                            </div>
                         </div>
                         <div class="mt-2 grid grid-cols-[1fr_auto] gap-2">
-                            <flux:button icon="camera" class="w-full" x-show="state === 'idle' || state === 'error'" x-on:click="open()">Buka kamera</flux:button>
+                            <flux:button variant="primary" icon="arrow-path" class="w-full" x-show="state === 'error' && pending" x-on:click="resend()" data-test="doc-retry">Coba unggah lagi</flux:button>
+                            <flux:button icon="camera" class="w-full" x-show="state === 'idle' || (state === 'error' && ! pending)" x-on:click="open()">Buka kamera</flux:button>
+                            <flux:button variant="ghost" icon="camera" x-show="state === 'error' && pending" x-on:click="open()" aria-label="Ambil foto baru" />
                             <flux:button variant="primary" icon="camera" class="w-full" x-show="state === 'live'" x-on:click="snap()">Ambil foto</flux:button>
                             <flux:button icon="arrow-path" class="w-full" x-show="state === 'done'" x-on:click="retake()">Ambil ulang</flux:button>
                             <flux:button icon="arrows-right-left" x-show="state === 'live'" x-on:click="flip()" aria-label="Ganti kamera depan/belakang" />
                         </div>
                     </div>
                 @elseif ($showDoc)
-                    <label class="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-woka-200 px-4 py-8 text-center hover:bg-woka-50 dark:border-hutan-800 dark:hover:bg-hutan-800">
-                        <flux:icon.arrow-up-tray class="size-8 text-woka dark:text-woka-light" />
-                        <span class="text-sm font-semibold">Pilih foto atau file dokumentasi</span>
-                        <span class="text-xs text-hutan/60 dark:text-santan/60">JPG, PNG, WEBP, HEIC, atau PDF · maks. 10 MB</span>
-                        <input type="file" wire:model="docFile" accept="image/*,application/pdf" class="sr-only">
-                    </label>
+                    <div x-data="docUpload('docFile')" wire:ignore wire:key="upl-{{ $docPhase }}" class="space-y-2">
+                        <label class="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-woka-200 px-4 py-8 text-center hover:bg-woka-50 dark:border-hutan-800 dark:hover:bg-hutan-800"
+                               :class="(state === 'processing' || state === 'uploading') && 'pointer-events-none opacity-60'">
+                            <flux:icon.arrow-up-tray class="size-8 text-woka dark:text-woka-light" />
+                            <span class="text-sm font-semibold">Pilih foto atau file dokumentasi</span>
+                            <span class="text-xs text-hutan/60 dark:text-santan/60">JPG, PNG, WEBP, HEIC, atau PDF · maks. 10 MB · foto diperkecil otomatis</span>
+                            <input type="file" accept="image/*,application/pdf" class="sr-only" x-on:change="pick($event)" data-test="doc-input">
+                        </label>
+                        <p class="text-sm text-woka" x-show="state === 'processing'">Memperkecil foto…</p>
+                        <div x-show="state === 'uploading'" class="space-y-1 text-sm text-woka">
+                            <p>Mengunggah (<span x-text="sizeText"></span>)… <span x-text="progress + '%'"></span></p>
+                            <span class="block h-1.5 overflow-hidden rounded-full bg-woka-100 dark:bg-hutan-800"><span class="block h-full bg-woka transition-all" :style="`width: ${progress}%`"></span></span>
+                        </div>
+                        <div x-show="state === 'error'" class="space-y-2">
+                            <p class="text-sm font-semibold text-rica" x-text="message"></p>
+                            <flux:button variant="primary" icon="arrow-path" class="w-full" x-show="pending" x-on:click="resend()">Coba unggah lagi</flux:button>
+                        </div>
+                    </div>
                 @endif
-
-                <div wire:loading wire:target="docFile" class="text-sm text-woka">Mengunggah…</div>
                 @if ($docFile)
                     <div class="flex items-center gap-3 rounded-xl bg-woka-50 p-2 dark:bg-hutan-800" data-test="doc-preview">
                         @if ($docFile->isPreviewable())

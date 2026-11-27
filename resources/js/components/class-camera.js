@@ -1,10 +1,48 @@
-// Kamera dokumentasi kelas: buka kamera (depan/belakang), ambil foto, unggah ke properti Livewire `model`.
-// Bila kamera tidak bisa dibuka, pengajar diarahkan ke "Unggah file".
+// Dokumentasi kelas: foto kamera (depan/belakang) atau file pilihan, diperkecil dulu lalu diunggah ke properti Livewire `model`.
+// Unggahan menampilkan progres; bila gagal (mis. sinyal lemah) file yang sama bisa dikirim ulang tanpa memotret lagi.
+import { compressImage, drawToJpeg, sizeLabel } from '../modules/compress-image.js';
+
+const FAILED = 'Unggahan gagal, kemungkinan sinyal lemah. Tekan "Coba unggah lagi" (foto tidak perlu diambil ulang) atau pindah ke tempat dengan sinyal lebih baik.';
+
+// Bagian bersama kamera & unggah file.
+const uploader = (model) => ({
+    progress: 0,
+    pending: null,
+    sizeText: '',
+
+    send(file) {
+        this.pending = file;
+        this.sizeText = sizeLabel(file.size);
+        this.progress = 0;
+        this.state = 'uploading';
+        this.$wire.upload(
+            model,
+            file,
+            () => {
+                this.pending = null;
+                this.state = 'done';
+                this.stop();
+            },
+            () => this.fail(FAILED),
+            (event) => {
+                this.progress = event.detail?.progress ?? 0;
+            },
+        );
+    },
+
+    resend() {
+        if (this.pending) {
+            this.send(this.pending);
+        }
+    },
+});
+
 export default (model) => ({
     state: 'idle', // idle | starting | live | uploading | done | error
     message: '',
     facing: 'user',
     stream: null,
+    ...uploader(model),
 
     async open() {
         if (!navigator.mediaDevices?.getUserMedia) {
@@ -13,6 +51,7 @@ export default (model) => ({
         }
 
         this.stop();
+        this.pending = null;
         this.state = 'starting';
 
         try {
@@ -33,25 +72,19 @@ export default (model) => ({
         this.open();
     },
 
-    snap() {
+    async snap() {
         const video = this.$refs.video;
         if (!video.videoWidth) {
             return;
         }
 
-        const canvas = document.createElement('canvas');
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
-        canvas.getContext('2d').drawImage(video, 0, 0);
-        this.state = 'uploading';
+        const file = await drawToJpeg(video, video.videoWidth, video.videoHeight, `dokumentasi-${Date.now()}.jpg`);
+        if (!file) {
+            this.fail('Foto tidak bisa diproses. Ambil ulang.');
+            return;
+        }
 
-        canvas.toBlob((blob) => {
-            const file = new File([blob], `dokumentasi-${Date.now()}.jpg`, { type: 'image/jpeg' });
-            this.$wire.upload(model, file,
-                () => { this.state = 'done'; this.stop(); },
-                () => this.fail('Foto gagal diunggah. Periksa koneksi lalu coba lagi.'),
-            );
-        }, 'image/jpeg', 0.85);
+        this.send(file);
     },
 
     retake() {
@@ -72,4 +105,29 @@ export default (model) => ({
     destroy() {
         this.stop();
     },
+});
+
+/** Pilih foto/file dari galeri: foto diperkecil dulu, PDF/HEIC dikirim apa adanya. */
+export const docUpload = (model) => ({
+    state: 'idle', // idle | processing | uploading | done | error
+    message: '',
+    ...uploader(model),
+
+    async pick(event) {
+        const file = event.target.files?.[0];
+        event.target.value = '';
+        if (!file) {
+            return;
+        }
+
+        this.state = 'processing';
+        this.send(await compressImage(file));
+    },
+
+    fail(message) {
+        this.state = 'error';
+        this.message = message;
+    },
+
+    stop() {},
 });

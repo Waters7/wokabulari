@@ -3,6 +3,12 @@
 Versi ditampilkan di halaman login dan menu aplikasi (`config/wokabulari.php` → `version`).
 Aturan penomoran: **patch** (1.0.x) perbaikan, **minor** (1.x.0) fitur baru, **major** (x.0.0) perubahan besar.
 
+## 1.28.2 — 27 November 2026
+
+- **Perbaikan:** foto akhir sesi gagal terunggah saat sinyal lemah, sehingga sesi tetap *berlangsung*. Server memutus unggahan yang terlalu lambat. Foto dokumentasi kelas (kamera maupun galeri) kini **diperkecil di HP sebelum diunggah** (maks. 1600 px, ±150–300 KB). Unggahan menampilkan **persentase**, dan bila gagal ada tombol **Coba unggah lagi** tanpa perlu memotret ulang.
+- Catatan izin yang ditulis saat sesi diselesaikan dipotong agar muat (masalah yang sama dengan v1.28.1).
+- Perintah admin server `php artisan app:end-session {id} --at="Y-m-d H:i"` untuk menyelesaikan sesi yang macet *berlangsung* pada jam tertentu tanpa menunggu foto akhir. Foto akhir tetap bisa ditambahkan pengajar sesudahnya.
+
 ## 1.28.1 — 26 November 2026
 
 - **Perbaikan:** menyetujui izin/sakit yang alasannya panjang (lebih dari ±240 karakter) gagal dengan *Server Error 500*, dan pengajuannya tetap menunggu. Penyebabnya: catatan "Izin disetujui: …" yang ditulis ke absen harian dan absen sesi melebihi batas kolom (255 karakter). Catatan itu kini dipotong; alasan lengkap tetap tersimpan di pengajuan izin. Pengajuan yang tadi gagal bisa langsung disetujui ulang.
